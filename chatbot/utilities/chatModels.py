@@ -10,7 +10,7 @@ from langchain.chat_models import init_chat_model
 from langchain_core.language_models.chat_models import BaseChatModel
 
 
-REGISTRY_PATH = Path(__file__).with_name("chat_model_registry.json")
+REGISTRY_PATH = Path(__file__).with_name("chatModelRegistry.json")
 
 
 class ResolvedChatModel(TypedDict):

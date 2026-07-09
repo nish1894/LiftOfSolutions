@@ -1,0 +1,15 @@
+{
+  "direct_document": {
+    "max_documents": 1,
+    "max_total_chars": 120000,
+    "description": "Use the uploaded document directly in the prompt/context. Best for one small policy, FAQ, SOP, or rule document."
+  },
+  "vector_db": {
+    "max_documents": 1000,
+    "max_total_chars": 20000000,
+    "description": "Chunk documents, create embeddings, and retrieve relevant chunks. Best for many customer-support documents."
+  },
+  "enterprise": {
+    "description": "Large-scale RAG with ingestion pipeline, permissions, metadata filters, re-ranking, evals, and observability. Not implemented yet."
+  }
+}
