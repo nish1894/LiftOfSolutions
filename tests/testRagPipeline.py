@@ -6,6 +6,7 @@ from chatbot.rag import (
     init_embedding_model,
     load_documents,
     rag_node,
+    query_vectorless_chunks,
 )
 
 
@@ -53,6 +54,21 @@ def testHashEmbeddingsAndVectorIndexReturnRelevantChunk() -> None:
     assert matches[0].document.metadata["source"] == "refunds.txt"
 
 
+def testVectorlessSearchReturnsRelevantChunk() -> None:
+    documents = load_documents(
+        [
+            UploadedDocument(name="refunds.txt", content="Refunds are allowed within thirty days."),
+            UploadedDocument(name="shipping.txt", content="Shipping usually takes five business days."),
+        ]
+    )
+    chunks = chunk_documents(documents, chunk_size=100, chunk_overlap=0)
+
+    result = query_vectorless_chunks(chunks, "How do refunds work?", top_k=1)
+
+    assert result.sources[0].source == "refunds.txt"
+    assert "refund" in result.context.lower()
+
+
 def testRagNodeUsesDirectDocumentForSmallSingleDocument() -> None:
     state = rag_node(
         {
@@ -71,7 +87,7 @@ def testRagNodeUsesDirectDocumentForSmallSingleDocument() -> None:
     assert state["rag_sources"][0]["source"] == "refunds.txt"
 
 
-def testRagNodeUsesVectorSearchForMultipleDocuments() -> None:
+def testRagNodeUsesVectorlessSearchForMultipleSmallDocuments() -> None:
     state = rag_node(
         {
             "query": "When can a customer get a refund?",
@@ -89,6 +105,33 @@ def testRagNodeUsesVectorSearchForMultipleDocuments() -> None:
         }
     )
 
-    assert state["rag_decision"]["strategy"] == "vector_db"
+    assert state["rag_decision"]["strategy"] == "vectorless"
     assert state["rag_sources"][0]["source"] == "refunds.txt"
     assert "refund" in state["rag_context"].lower()
+
+
+def testRagNodeUsesVectorSearchForLargerDocumentCollection() -> None:
+    documents = [
+        {
+            "name": f"manual-{index}.txt",
+            "content": "General support information. " * 2000,
+        }
+        for index in range(20)
+    ]
+    documents.append(
+        {
+            "name": "refunds.txt",
+            "content": "A customer refund is available within 30 days of purchase.",
+        }
+    )
+
+    state = rag_node(
+        {
+            "query": "When can a customer get a refund?",
+            "documents": documents,
+            "top_k": 1,
+        }
+    )
+
+    assert state["rag_decision"]["strategy"] == "vector_db"
+    assert state["rag_sources"]

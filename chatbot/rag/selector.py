@@ -14,6 +14,7 @@ RULES_PATH = Path(__file__).with_name("ragStrategyRules.json")
 
 class RagStrategy(StrEnum):
     DIRECT_DOCUMENT = "direct_document"
+    VECTORLESS = "vectorless"
     VECTOR_DB = "vector_db"
     ENTERPRISE = "enterprise"
 
@@ -67,6 +68,20 @@ def decide_rag_strategy(documents: list[DocumentProfile]) -> RagDecision:
             document_count=document_count,
             total_chars=total_chars,
             next_step="Extract text and attach it as direct context for the model.",
+        )
+
+    vectorless_rules = rules[RagStrategy.VECTORLESS]
+    if (
+        document_count <= vectorless_rules["max_documents"]
+        and total_chars <= vectorless_rules["max_total_chars"]
+    ):
+        return RagDecision(
+            strategy=RagStrategy.VECTORLESS,
+            implemented=True,
+            reason="A small document set can use keyword retrieval without embeddings.",
+            document_count=document_count,
+            total_chars=total_chars,
+            next_step="Chunk documents, score chunks by query terms, then attach the top matching chunks as context.",
         )
 
     vector_rules = rules[RagStrategy.VECTOR_DB]

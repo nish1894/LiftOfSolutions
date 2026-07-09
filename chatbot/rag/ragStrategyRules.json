@@ -4,6 +4,11 @@
     "max_total_chars": 120000,
     "description": "Use the uploaded document directly in the prompt/context. Best for one small policy, FAQ, SOP, or rule document."
   },
+  "vectorless": {
+    "max_documents": 100,
+    "max_total_chars": 1000000,
+    "description": "Chunk documents and retrieve by lexical keyword overlap without embeddings or a vector index. Best for small support collections where exact terms matter."
+  },
   "vector_db": {
     "max_documents": 1000,
     "max_total_chars": 20000000,

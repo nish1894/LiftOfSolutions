@@ -10,6 +10,7 @@ from chatbot.rag.selector import (
     decide_rag_strategy,
     select_rag_strategy_node,
 )
+from chatbot.rag.vectorlessSearch import query_vectorless_chunks
 from chatbot.rag.vectorStore import InMemoryVectorIndex, ScoredDocument
 
 __all__ = [
@@ -28,6 +29,7 @@ __all__ = [
     "load_documents",
     "load_text_file",
     "query_vector_index",
+    "query_vectorless_chunks",
     "rag_node",
     "select_rag_strategy_node",
 ]

@@ -7,6 +7,7 @@ from chatbot.rag.documentProcessor import chunk_documents
 from chatbot.rag.embeddings import init_embedding_model
 from chatbot.rag.query import RagQueryResult, RagSource
 from chatbot.rag.selector import DocumentProfile, RagDecision, RagStrategy, decide_rag_strategy
+from chatbot.rag.vectorlessSearch import query_vectorless_chunks
 from chatbot.rag.vectorStore import InMemoryVectorIndex
 
 
@@ -68,6 +69,14 @@ def rag_node(state: dict[str, Any]) -> dict[str, Any]:
         chunk_size=int(state.get("chunk_size", 1000)),
         chunk_overlap=int(state.get("chunk_overlap", 150)),
     )
+    if decision.strategy == RagStrategy.VECTORLESS:
+        result = query_vectorless_chunks(
+            chunks,
+            query,
+            top_k=int(state.get("top_k", 4)),
+        )
+        return _with_rag_result(state, decision=decision, result=result)
+
     embeddings = init_embedding_model(state.get("embedding_model"))
     index = InMemoryVectorIndex.from_documents(chunks, embeddings)
     matches = index.search(query, embeddings, top_k=int(state.get("top_k", 4)))

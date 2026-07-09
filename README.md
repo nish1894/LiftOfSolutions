@@ -77,6 +77,7 @@ Available strategies:
 
 ```text
 direct_document  One small document, attach directly as model context.
+vectorless       Small document sets, chunk and retrieve by keyword overlap.
 vector_db        Multiple documents or larger content, chunk and retrieve.
 enterprise       Very large document sets. Planned, not implemented yet.
 ```
@@ -127,13 +128,15 @@ Pipeline pieces:
 documentLoader.py      Turns uploaded text payloads into LangChain Documents.
 documentProcessor.py   Chunks documents for retrieval.
 embeddings.py          Creates local hash embeddings or OpenAI embeddings.
+vectorlessSearch.py    Keyword retrieval without embeddings or a vector index.
 vectorStore.py         In-memory vector index for the first version.
 query.py               Queries a vector index and returns context/sources.
 node.py                LangGraph-style RAG node that chooses strategy and runs it.
 ```
 
-The default embedding model is local deterministic `hash`, useful for tests and
-development. For real semantic retrieval, use:
+Small multi-document sets use vectorless keyword retrieval by default. Larger
+sets use the vector path. The default embedding model is local deterministic
+`hash`, useful for tests and development. For real semantic retrieval, use:
 
 ```python
 state = rag_node({

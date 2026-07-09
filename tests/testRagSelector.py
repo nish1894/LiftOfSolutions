@@ -17,7 +17,7 @@ def testDirectDocumentForSingleSmallDocument() -> None:
     assert decision.total_chars == 5000
 
 
-def testVectorDbForMultipleDocuments() -> None:
+def testVectorlessForMultipleSmallDocuments() -> None:
     decision = decide_rag_strategy(
         [
             DocumentProfile(name="refund-policy.pdf", char_count=5000),
@@ -25,16 +25,28 @@ def testVectorDbForMultipleDocuments() -> None:
         ]
     )
 
+    assert decision.strategy == RagStrategy.VECTORLESS
+    assert decision.implemented is True
+
+
+def testVectorDbForLargerDocumentCollection() -> None:
+    decision = decide_rag_strategy(
+        [
+            DocumentProfile(name=f"manual-{index}.pdf", char_count=50000)
+            for index in range(50)
+        ]
+    )
+
     assert decision.strategy == RagStrategy.VECTOR_DB
     assert decision.implemented is True
 
 
-def testVectorDbForOneLargeDocument() -> None:
+def testVectorlessForOneLargeDocument() -> None:
     decision = decide_rag_strategy(
         [DocumentProfile(name="support-manual.pdf", char_count=150000)]
     )
 
-    assert decision.strategy == RagStrategy.VECTOR_DB
+    assert decision.strategy == RagStrategy.VECTORLESS
     assert decision.implemented is True
 
 
