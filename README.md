@@ -74,9 +74,9 @@ decision = decide_rag_strategy([
 Available strategies:
 
 ```text
-direct_document  One small document, attach directly as model context.
-vectorless       Small document sets, chunk and retrieve by keyword overlap.
-vector_db        Multiple documents or larger content, chunk and retrieve.
+direct_document  1 document, attach directly as model context.
+vectorless       2-9 docs, or 10-30 docs when wording is predictable.
+vector_db        10-30 docs with useVectorDbForMediumDocs=true, or 31+ docs.
 enterprise       Very large document sets. Planned, not implemented yet.
 ```
 
@@ -144,9 +144,53 @@ state = rag_node({
 })
 ```
 
+For ingestion, the flow is modular: `documentSource.py` fetches inline documents,
+files, zip contents, or rar contents; `documentProcessor.py` can optionally use
+an LLM to expand sparse documents with supported cases, edge cases, synonyms, and
+decision rules before chunking; `ingestion.py` builds the vector index; and
+`vectorDbStore.py` stores it by `dbName`. The default store is local in-memory for
+one server, but the store interface can be replaced by a remote/vector database
+later.
+
 API:
 
 ```text
+POST /api/rag/ingest
+{
+  "dbName": "supportDocs",
+  "source": {
+    "documents": [
+      {
+        "name": "refunds.txt",
+        "content": "Customers can request refunds within 30 days."
+      }
+    ]
+  },
+  "enhanceDocuments": true,
+  "enhancementModel": "OAI-CHEAP",
+  "chunkSize": 1000,
+  "chunkOverlap": 150
+}
+
+POST /api/rag/query
+{
+  "dbName": "supportDocs",
+  "query": "What is the refund policy?"
+}
+
+Internal stored-DB query API, hidden from generated docs for now:
+
+```text
+POST /api/internal/rag/query
+{
+  "dbName": "supportDocs",
+  "question": "What is the refund policy?"
+}
+```
+
+It returns the top 3 stored chunks by default as `sources` plus combined
+`context`.
+
 POST /api/rag/query
 {
   "query": "What is the refund policy?",

@@ -40,7 +40,11 @@ def _load_rules() -> dict[str, Any]:
         return json.load(file)
 
 
-def decide_rag_strategy(documents: list[DocumentProfile]) -> RagDecision:
+def decide_rag_strategy(
+    documents: list[DocumentProfile],
+    *,
+    use_vector_db_for_medium_docs: bool = False,
+) -> RagDecision:
     """Choose the first RAG approach for a customer-support document set."""
     rules = _load_rules()
     document_count = len(documents)
@@ -71,17 +75,34 @@ def decide_rag_strategy(documents: list[DocumentProfile]) -> RagDecision:
         )
 
     vectorless_rules = rules[RagStrategy.VECTORLESS]
-    if (
-        document_count <= vectorless_rules["max_documents"]
-        and total_chars <= vectorless_rules["max_total_chars"]
-    ):
+    if document_count <= vectorless_rules["max_documents"]:
         return RagDecision(
             strategy=RagStrategy.VECTORLESS,
             implemented=True,
-            reason="A small document set can use keyword retrieval without embeddings.",
+            reason="A few documents can use keyword retrieval without embeddings.",
             document_count=document_count,
             total_chars=total_chars,
             next_step="Chunk documents, score chunks by query terms, then attach the top matching chunks as context.",
+        )
+
+    medium_rules = rules["medium_documents"]
+    if document_count <= medium_rules["max_documents"]:
+        if use_vector_db_for_medium_docs:
+            return RagDecision(
+                strategy=RagStrategy.VECTOR_DB,
+                implemented=True,
+                reason="A medium document set was configured to use semantic vector retrieval.",
+                document_count=document_count,
+                total_chars=total_chars,
+                next_step="Chunk documents, embed chunks, store vectors, then retrieve top matches per question.",
+            )
+        return RagDecision(
+            strategy=RagStrategy.VECTORLESS,
+            implemented=True,
+            reason="A medium document set can stay vectorless when queries are expected to match document wording.",
+            document_count=document_count,
+            total_chars=total_chars,
+            next_step="Use vectorless retrieval, or enable vector DB for fuzzy/natural-language queries.",
         )
 
     vector_rules = rules[RagStrategy.VECTOR_DB]
@@ -111,11 +132,18 @@ def decide_rag_strategy(documents: list[DocumentProfile]) -> RagDecision:
 def select_rag_strategy_node(state: dict[str, Any]) -> dict[str, Any]:
     """LangGraph-style node that appends a RAG decision to graph state."""
     raw_documents = state.get("documents", [])
+    use_vector_db_for_medium_docs = bool(
+        state.get("useVectorDbForMediumDocs")
+        or state.get("use_vector_db_for_medium_docs")
+    )
     documents = [
         document
         if isinstance(document, DocumentProfile)
         else DocumentProfile.model_validate(document)
         for document in raw_documents
     ]
-    decision = decide_rag_strategy(documents)
+    decision = decide_rag_strategy(
+        documents,
+        use_vector_db_for_medium_docs=use_vector_db_for_medium_docs,
+    )
     return {**state, "rag_decision": decision.model_dump(mode="json")}

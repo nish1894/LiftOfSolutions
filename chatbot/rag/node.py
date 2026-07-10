@@ -5,7 +5,7 @@ from typing import Any
 from chatbot.rag.documentLoader import UploadedDocument, load_documents
 from chatbot.rag.documentProcessor import chunk_documents
 from chatbot.rag.embeddings import init_embedding_model
-from chatbot.rag.query import RagQueryResult, RagSource
+from chatbot.rag.query import RagQueryResult, RagSource, queryVectorDb
 from chatbot.rag.selector import DocumentProfile, RagDecision, RagStrategy, decide_rag_strategy
 from chatbot.rag.vectorlessSearch import query_vectorless_chunks
 from chatbot.rag.vectorStore import InMemoryVectorIndex
@@ -16,9 +16,24 @@ def rag_node(state: dict[str, Any]) -> dict[str, Any]:
 
     Expected state:
     - documents: list of {name, content, content_type?, metadata?}
+    - dbName: optional stored vector DB name
     - query or message: user question
     - embedding_model: optional, defaults to local hash embeddings
     """
+    query = state.get("query") or state.get("message") or ""
+    db_name = state.get("dbName") or state.get("db_name")
+    if db_name and not state.get("documents"):
+        result = queryVectorDb(
+            str(db_name),
+            query,
+            topK=int(state.get("top_k", 4)),
+        )
+        return {
+            **state,
+            "rag_context": result.context,
+            "rag_sources": [source.model_dump(mode="json") for source in result.sources],
+        }
+
     raw_documents = state.get("documents", [])
     uploaded_documents = [
         document
@@ -34,7 +49,13 @@ def rag_node(state: dict[str, Any]) -> dict[str, Any]:
         )
         for document in uploaded_documents
     ]
-    decision = decide_rag_strategy(profiles)
+    decision = decide_rag_strategy(
+        profiles,
+        use_vector_db_for_medium_docs=bool(
+            state.get("useVectorDbForMediumDocs")
+            or state.get("use_vector_db_for_medium_docs")
+        ),
+    )
 
     if decision.strategy == RagStrategy.ENTERPRISE:
         return _with_rag_result(
@@ -63,7 +84,6 @@ def rag_node(state: dict[str, Any]) -> dict[str, Any]:
             ),
         )
 
-    query = state.get("query") or state.get("message") or ""
     chunks = chunk_documents(
         documents,
         chunk_size=int(state.get("chunk_size", 1000)),
