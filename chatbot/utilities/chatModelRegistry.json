@@ -1,73 +1,70 @@
 {
-  "default_provider": "openai",
+  "defaultCode": "OAI-FAST",
   "providers": {
-    "openai": {
-      "provider": "openai",
-      "aliases": ["openai", "oai"],
-      "default_model": "gpt-4.1-mini",
+    "OAI": {
+      "company": "openai",
+      "langchainProvider": "openai",
       "env": ["OPENAI_API_KEY"]
     },
-    "gemini": {
-      "provider": "google_genai",
-      "aliases": ["gemini", "google", "genai"],
-      "default_model": "gemini-2.5-flash",
+    "GEM": {
+      "company": "gemini",
+      "langchainProvider": "google_genai",
       "env": ["GOOGLE_API_KEY"]
     },
-    "deepseek": {
-      "provider": "deepseek",
-      "aliases": ["deepseek", "ds"],
-      "default_model": "deepseek-chat",
+    "DS": {
+      "company": "deepseek",
+      "langchainProvider": "deepseek",
       "env": ["DEEPSEEK_API_KEY"]
     }
   },
   "models": {
-    "openai:fast": {
-      "provider": "openai",
-      "model": "gpt-4.1-mini"
+    "OAI-FAST": {
+      "providerCode": "OAI",
+      "modelName": "gpt-4.1-mini"
     },
-    "openai:cheap": {
-      "provider": "openai",
-      "model": "gpt-5.4-nano"
+    "OAI-WEAK": {
+      "providerCode": "OAI",
+      "modelName": "gpt-5.4-nano"
     },
-    "openai:weak": {
-      "provider": "openai",
-      "model": "gpt-5.4-nano"
+    "OAI-CHEAP": {
+      "providerCode": "OAI",
+      "modelName": "gpt-5.4-nano"
     },
-    "openai:smart": {
-      "provider": "openai",
-      "model": "gpt-4.1"
+    "OAI-SMART": {
+      "providerCode": "OAI",
+      "modelName": "gpt-4.1"
     },
-    "gemini:flash": {
-      "provider": "google_genai",
-      "model": "gemini-2.5-flash"
+    "GEM-FAST": {
+      "providerCode": "GEM",
+      "modelName": "gemini-2.5-flash"
     },
-    "gemini:cheap": {
-      "provider": "google_genai",
-      "model": "gemini-2.5-flash-lite"
+    "GEM-WEAK": {
+      "providerCode": "GEM",
+      "modelName": "gemini-2.5-flash-lite"
     },
-    "gemini:weak": {
-      "provider": "google_genai",
-      "model": "gemini-2.5-flash-lite"
+    "GEM-CHEAP": {
+      "providerCode": "GEM",
+      "modelName": "gemini-2.5-flash-lite"
     },
-    "gemini:pro": {
-      "provider": "google_genai",
-      "model": "gemini-2.5-pro"
+    "GEM-SMART": {
+      "providerCode": "GEM",
+      "modelName": "gemini-2.5-pro"
     },
-    "deepseek:chat": {
-      "provider": "deepseek",
-      "model": "deepseek-chat"
+    "DS-FAST": {
+      "providerCode": "DS",
+      "modelName": "deepseek-chat"
     },
-    "deepseek:cheap": {
-      "provider": "deepseek",
-      "model": "deepseek-chat"
+    "DS-WEAK": {
+      "providerCode": "DS",
+      "modelName": "deepseek-chat"
     },
-    "deepseek:weak": {
-      "provider": "deepseek",
-      "model": "deepseek-chat"
+    "DS-CHEAP": {
+      "providerCode": "DS",
+      "modelName": "deepseek-chat"
     },
-    "deepseek:reasoner": {
-      "provider": "deepseek",
-      "model": "deepseek-reasoner"
+    "DS-SMART": {
+      "providerCode": "DS",
+      "modelName": "deepseek-reasoner"
     }
   }
 }

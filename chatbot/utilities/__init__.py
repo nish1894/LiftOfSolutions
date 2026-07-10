@@ -1,10 +1,10 @@
 from chatbot.utilities.apiUsage import ApiUsage, postApiUsage, storeApiUsage
-from chatbot.utilities.chatModels import init_chatmodel, resolve_chatmodel
+from chatbot.utilities.chatModel import chatModel, initChatModel
 
 __all__ = [
     "ApiUsage",
-    "init_chatmodel",
+    "chatModel",
+    "initChatModel",
     "postApiUsage",
-    "resolve_chatmodel",
     "storeApiUsage",
 ]

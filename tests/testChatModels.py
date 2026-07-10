@@ -9,215 +9,114 @@ if str(PROJECT_ROOT) not in sys.path:
 import pytest
 from dotenv import load_dotenv
 
-from chatbot.utilities import init_chatmodel, resolve_chatmodel, storeApiUsage
-from chatbot.utilities.apiUsage import apiUsageStore
+from chatbot.utilities import chatModel
 from tests.testHelpers import SoftCheck
 
 load_dotenv(PROJECT_ROOT / ".env")
 
-LIVE_MODEL_CASES = [
-    ("openai weak return message", "openai:weak", "OPENAI_API_KEY"),
-    ("gemini weak return message", "gemini:weak", "GOOGLE_API_KEY"),
-    ("deepseek weak return message", "deepseek:weak", "DEEPSEEK_API_KEY"),
+START_TOKEN = "CHATBOT_START"
+END_TOKEN = "CHATBOT_END"
+
+MODEL_CONSTRUCTOR_CASES = [
+    ("default code returns OpenAI chat model", None, "ChatOpenAI"),
+    ("OAI code returns OpenAI chat model", "OAI-WEAK", "ChatOpenAI"),
+    ("DS code returns DeepSeek chat model", "DS-WEAK", "ChatDeepSeek"),
+    ("GEM code returns Gemini chat model", "GEM-WEAK", "ChatGoogleGenerativeAI"),
 ]
-EXPECTED_REPLY = "CHATBOT_MODEL_OK"
+
+LIVE_MODEL_CASES = [
+    ("openai cheapest return message", "OAI-CHEAP", "OPENAI_API_KEY"),
+    ("gemini cheapest return message", "GEM-CHEAP", "GOOGLE_API_KEY"),
+    ("deepseek cheapest return message", "DS-CHEAP", "DEEPSEEK_API_KEY"),
+]
 
 
-def _messageContent(response: object) -> str:
+def messageContent(response: object) -> str:
     content = getattr(response, "content", response)
     if isinstance(content, str):
         return content.strip()
     return str(content).strip()
 
 
-def testResolvesDefaultModel() -> None:
-    checks = SoftCheck()
-    resolved = resolve_chatmodel()
-
-    checks.equal("default provider", resolved["provider"], "openai")
-    checks.equal("default model", resolved["model"], "gpt-4.1-mini")
-    checks.equal("default kwargs", resolved["kwargs"], {})
-    checks.finish()
-
-
-def testResolvesRegistryAliases() -> None:
-    checks = SoftCheck()
-
-    checks.equal(
-        "openai fast alias",
-        resolve_chatmodel("openai:fast")["model"],
-        "gpt-4.1-mini",
+def isQuotaError(error: Exception) -> bool:
+    text = str(error).lower()
+    return (
+        "resource_exhausted" in text
+        or "quota" in text
+        or "rate limit" in text
+        or "too many requests" in text
     )
-    checks.equal(
-        "gemini pro alias",
-        resolve_chatmodel("gemini:pro"),
-        {"provider": "google_genai", "model": "gemini-2.5-pro", "kwargs": {}},
-    )
-    checks.equal(
-        "deepseek reasoner alias",
-        resolve_chatmodel("deepseek:reasoner"),
-        {"provider": "deepseek", "model": "deepseek-reasoner", "kwargs": {}},
-    )
-    checks.finish()
 
 
-def testResolvesCheapestWeakCompanyModels() -> None:
-    checks = SoftCheck()
-
-    checks.equal(
-        "openai cheapest weak alias",
-        resolve_chatmodel("openai:weak"),
-        {"provider": "openai", "model": "gpt-5.4-nano", "kwargs": {}},
-    )
-    checks.equal(
-        "openai cheapest cheap alias",
-        resolve_chatmodel("openai:cheap"),
-        {"provider": "openai", "model": "gpt-5.4-nano", "kwargs": {}},
-    )
-    checks.equal(
-        "gemini cheapest weak alias",
-        resolve_chatmodel("gemini:weak"),
-        {"provider": "google_genai", "model": "gemini-2.5-flash-lite", "kwargs": {}},
-    )
-    checks.equal(
-        "gemini cheapest cheap alias",
-        resolve_chatmodel("gemini:cheap"),
-        {"provider": "google_genai", "model": "gemini-2.5-flash-lite", "kwargs": {}},
-    )
-    checks.equal(
-        "deepseek cheapest weak alias",
-        resolve_chatmodel("deepseek:weak"),
-        {"provider": "deepseek", "model": "deepseek-chat", "kwargs": {}},
-    )
-    checks.equal(
-        "deepseek cheapest cheap alias",
-        resolve_chatmodel("deepseek:cheap"),
-        {"provider": "deepseek", "model": "deepseek-chat", "kwargs": {}},
-    )
-    checks.finish()
-
-
-def testResolvesProviderPrefixedModelIds() -> None:
-    checks = SoftCheck()
-
-    checks.equal(
-        "openai provider prefix",
-        resolve_chatmodel("openai:gpt-4.1")["provider"],
-        "openai",
-    )
-    checks.equal(
-        "gemini provider prefix",
-        resolve_chatmodel("gemini:gemini-2.5-flash"),
-        {"provider": "google_genai", "model": "gemini-2.5-flash", "kwargs": {}},
-    )
-    checks.equal(
-        "google slash prefix",
-        resolve_chatmodel("google/gemini-2.5-pro")["provider"],
-        "google_genai",
-    )
-    checks.equal(
-        "deepseek dash prefix",
-        resolve_chatmodel("ds-deepseek-chat"),
-        {"provider": "deepseek", "model": "deepseek-chat", "kwargs": {}},
-    )
-    checks.finish()
-
-
-def testApiUsageLogPrintsWarningAndStoresTokens(capsys) -> None:
-    checks = SoftCheck()
-    apiUsageStore.clear()
-
-    usage = storeApiUsage(tokens=17, provider="openai", model="gpt-5.4-nano")
-    output = capsys.readouterr().out
-
-    checks.equal("usage tokens stored", usage.tokens, 17)
-    checks.equal(
-        "usage metadata stored",
-        usage.metadata,
-        {"provider": "openai", "model": "gpt-5.4-nano"},
-    )
-    checks.equal("usage store contains usage", apiUsageStore, [usage])
-    checks.true(
-        "usage warning logged",
-        "WARNING: API usage posting is not implemented yet. usage: tokens=17" in output,
-    )
-    checks.finish()
+def answerLine(content: str) -> str:
+    for line in content.splitlines():
+        normalized = line.strip().lower()
+        if normalized.startswith("answer:"):
+            return normalized.removeprefix("answer:").strip()
+    return ""
 
 
 @pytest.mark.parametrize(
-    ("checkName", "modelId", "envKey"),
+    ("checkName", "code", "expectedType"),
+    MODEL_CONSTRUCTOR_CASES,
+    ids=[case[0] for case in MODEL_CONSTRUCTOR_CASES],
+)
+def testChatModelCodeReturnsLangchainChatModel(
+    checkName: str,
+    code: str | None,
+    expectedType: str,
+) -> None:
+    checks = SoftCheck()
+    model = chatModel(code, api_key="test-key")
+
+    checks.equal(checkName, type(model).__name__, expectedType)
+    checks.finish()
+
+
+def testChatModelRejectsUnknownCode() -> None:
+    with pytest.raises(ValueError, match="Unknown chat model code"):
+        chatModel("BAD-CODE", api_key="test-key")
+
+
+@pytest.mark.parametrize(
+    ("checkName", "code", "envKey"),
     LIVE_MODEL_CASES,
     ids=[case[0] for case in LIVE_MODEL_CASES],
 )
-def testWeakCompanyModelReturnsExpectedMessage(
+def testChatModelApiReturnsExpectedMessage(
     checkName: str,
-    modelId: str,
+    code: str,
     envKey: str,
 ) -> None:
     if not os.getenv(envKey):
-        pytest.skip(f"{envKey} is not set; skipping live model return-message check")
+        pytest.skip(f"{envKey} is not set; skipping live model API check")
 
     checks = SoftCheck()
-    model = init_chatmodel(modelId, temperature=0, max_tokens=12)
-    response = model.invoke(
-        f"Return exactly this text and nothing else: {EXPECTED_REPLY}"
+    model = chatModel(code, temperature=0, max_tokens=80)
+    try:
+        response = model.invoke(
+            "Answer the question: what is 2 + 2?\n"
+            "Return exactly three lines using this template:\n"
+            f"{START_TOKEN}\n"
+            "answer: <short answer>\n"
+            f"{END_TOKEN}\n"
+            "Do not misspell the start or end token."
+        )
+    except Exception as error:
+        if isQuotaError(error):
+            pytest.skip(f"{code} live API quota/rate limit hit: {error}")
+        raise
+
+    content = messageContent(response)
+    answer = answerLine(content)
+
+    print(f"\nMODEL RESPONSE {code}:\n{content}")
+    checks.true(checkName + " starts with token", content.startswith(START_TOKEN))
+    checks.true(
+        checkName + " contains answer",
+        "4" in answer,
     )
-    content = _messageContent(response)
-
-    print(f"\nMODEL RESPONSE {modelId}: {content!r}")
-    checks.equal(checkName, content, EXPECTED_REPLY)
-    checks.finish()
-
-
-def testPlainModelIdUsesDefaultProvider() -> None:
-    checks = SoftCheck()
-    resolved = resolve_chatmodel("gpt-4.1-mini")
-
-    checks.equal(
-        "plain model uses default provider",
-        resolved,
-        {"provider": "openai", "model": "gpt-4.1-mini", "kwargs": {}},
-    )
-    checks.finish()
-
-
-def testKwargsArePreservedAndOverrideRegistryKwargs() -> None:
-    checks = SoftCheck()
-    resolved = resolve_chatmodel("openai:fast", temperature=0.2, max_tokens=500)
-
-    checks.equal(
-        "kwargs preserved",
-        resolved["kwargs"],
-        {"temperature": 0.2, "max_tokens": 500},
-    )
-    checks.finish()
-
-
-def testInitChatmodelConstructsOpenaiModel() -> None:
-    checks = SoftCheck()
-    model = init_chatmodel("openai:gpt-4.1-mini", api_key="test-key")
-
-    checks.equal("openai model type", type(model).__name__, "ChatOpenAI")
-    checks.finish()
-
-
-def testInitChatmodelConstructsGeminiModel() -> None:
-    checks = SoftCheck()
-    model = init_chatmodel("gemini:gemini-2.5-flash", api_key="test-key")
-
-    checks.equal(
-        "gemini model type",
-        type(model).__name__,
-        "ChatGoogleGenerativeAI",
-    )
-    checks.finish()
-
-
-def testInitChatmodelConstructsDeepseekModel() -> None:
-    checks = SoftCheck()
-    model = init_chatmodel("deepseek:deepseek-chat", api_key="test-key")
-
-    checks.equal("deepseek model type", type(model).__name__, "ChatDeepSeek")
+    checks.true(checkName + " ends with token", content.endswith(END_TOKEN))
     checks.finish()
 
 

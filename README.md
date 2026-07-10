@@ -43,23 +43,21 @@ storeApiUsage(tokens=42, route="/api/chat")
 Create LangChain chat models with one utility:
 
 ```python
-from chatbot.utilities import init_chatmodel
+from chatbot.utilities import chatModel
 
-model = init_chatmodel("openai:gpt-4.1-mini")
-model = init_chatmodel("gemini:gemini-2.5-flash")
-model = init_chatmodel("deepseek:deepseek-chat")
+model = chatModel("OAI-FAST")
+model = chatModel("GEM-FAST")
+model = chatModel("DS-FAST")
 ```
 
-Short aliases live in `chatbot/utilities/chatModelRegistry.json`:
+Codes live in `chatbot/utilities/chatModelRegistry.json`. The format is
+`AAA-XXX`, where `AAA` is the company code and `XXX` is the model code:
 
 ```python
-model = init_chatmodel("openai:fast")
-model = init_chatmodel("gemini:pro")
-model = init_chatmodel("deepseek:reasoner")
+model = chatModel("OAI-WEAK")
+model = chatModel("GEM-WEAK")
+model = chatModel("DS-WEAK")
 ```
-
-The preferred format is `provider:model-name`. Dash format also works for known
-provider aliases, for example `ds-deepseek-chat`.
 
 ### RAG Strategy Selection
 
