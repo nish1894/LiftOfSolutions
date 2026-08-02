@@ -5,7 +5,7 @@ from typing import Protocol
 
 from langchain_core.documents import Document
 
-from chatbot.rag.vectorStore import InMemoryVectorIndex
+from llm.rag.vectorStore import InMemoryVectorIndex
 
 
 @dataclass(frozen=True)

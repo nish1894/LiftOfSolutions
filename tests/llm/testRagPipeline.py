@@ -2,11 +2,11 @@ from pathlib import Path
 import sys
 import zipfile
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from chatbot.rag import (
+from llm.rag import (
     DocumentSource,
     InMemoryVectorIndex,
     LocalVectorDbStore,
@@ -23,10 +23,8 @@ from chatbot.rag import (
     rag_node,
     query_vectorless_chunks,
 )
-from chatbot.main import app
 
 from langchain_core.documents import Document
-from fastapi.testclient import TestClient
 
 
 def testLoadDocumentsCreatesLangchainDocuments() -> None:
@@ -349,45 +347,6 @@ def testRagNodeQueriesStoredVectorDbByName() -> None:
 
     assert state["rag_sources"][0]["source"] == "refunds.txt"
     assert "refund" in state["rag_context"].lower()
-
-
-def testInternalRagQueryApiReturnsTopThreeInfo() -> None:
-    defaultVectorDbStore.clear()
-    ingestVectorDb(
-        {
-            "dbName": "supportDocs",
-            "source": {
-                "documents": [
-                    {
-                        "name": "refunds.txt",
-                        "content": "Refunds are allowed within thirty days.",
-                    },
-                    {
-                        "name": "shipping.txt",
-                        "content": "Shipping usually takes five business days.",
-                    },
-                    {
-                        "name": "warranty.txt",
-                        "content": "Warranty claims cover manufacturing defects.",
-                    },
-                ]
-            },
-            "chunkSize": 100,
-            "chunkOverlap": 0,
-        }
-    )
-    client = TestClient(app)
-
-    response = client.post(
-        "/api/internal/rag/query",
-        json={"dbName": "supportDocs", "question": "How do refunds work?"},
-    )
-    payload = response.json()
-
-    assert response.status_code == 200
-    assert len(payload["sources"]) == 3
-    assert payload["sources"][0]["source"] == "refunds.txt"
-    assert "refund" in payload["context"].lower()
 
 
 def testSampleSolarSystemRarIngestsAndAnswersFiveQuestions() -> None:

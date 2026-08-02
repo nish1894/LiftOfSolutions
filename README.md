@@ -2,16 +2,54 @@
 
 Minimal FastAPI chatbot starter managed by `uv`.
 
+### Project structure
+
+```text
+llm/        LLM logic (Python): chat models, tools, usage, RAG pipeline.
+backend/    FastAPI API layer: app wiring, request/response schemas, routes.
+frontend/   Vite + vanilla JS chat UI.
+tests/
+  llm/          Tests for the LLM layer.
+  backend/      Tests for the API layer.
+  testHelpers.py  Shared assertion helpers.
+```
+
+Run one layer at a time with `pytest tests/llm` or `pytest tests/backend`.
+
+`backend/` imports from the `llm` package only, never from `llm.rag.*` or other
+submodules, so retrieval and model internals stay free to change without
+touching the API layer.
+
 ### Run locally
 
+Build the frontend once (the API serves `frontend/dist`):
+
 ```powershell
-C:\Users\hites\AppData\Roaming\Python\Python314\Scripts\uv.exe run uvicorn chatbot.main:app --reload
+cd frontend
+npm install
+npm run build
+cd ..
+```
+
+Then run the API:
+
+```powershell
+C:\Users\hites\AppData\Roaming\Python\Python314\Scripts\uv.exe run uvicorn backend.app:app --reload
 ```
 
 Then open:
 
 ```text
 http://127.0.0.1:8000
+```
+
+While working on the UI, run the Vite dev server instead. It serves on port
+5173 with hot reload and proxies `/api` to the API on port 8000, so keep both
+running:
+
+```powershell
+cd frontend
+npm run dev
 ```
 
 ### API
@@ -29,11 +67,21 @@ POST /api/chat
 { "message": "hello" }
 ```
 
+### Pending Integrations
+
+```text
+WhatsApp  pending
+LINE      pending
+WeChat    pending
+Telnyx    pending
+Gmail     pending
+```
+
 The chat endpoint records temporary API usage with `tokens` and prints a
 console warning because posting usage is not implemented yet.
 
 ```python
-from chatbot.utilities import storeApiUsage
+from llm import storeApiUsage
 
 storeApiUsage(tokens=42, route="/api/chat")
 ```
@@ -43,14 +91,14 @@ storeApiUsage(tokens=42, route="/api/chat")
 Create LangChain chat models with one utility:
 
 ```python
-from chatbot.utilities import chatModel
+from llm import chatModel
 
 model = chatModel("OAI-FAST")
 model = chatModel("GEM-FAST")
 model = chatModel("DS-FAST")
 ```
 
-Codes live in `chatbot/utilities/chatModelRegistry.json`. The format is
+Codes live in `llm/chatModelRegistry.json`. The format is
 `AAA-XXX`, where `AAA` is the company code and `XXX` is the model code:
 
 ```python
@@ -64,7 +112,7 @@ model = chatModel("DS-WEAK")
 The first RAG step chooses how customer-support documents should be used:
 
 ```python
-from chatbot.rag import DocumentProfile, decide_rag_strategy
+from llm.rag import DocumentProfile, decide_rag_strategy
 
 decision = decide_rag_strategy([
     DocumentProfile(name="refund-policy.pdf", char_count=5000),
@@ -83,7 +131,7 @@ enterprise       Very large document sets. Planned, not implemented yet.
 There is also a LangGraph-style node:
 
 ```python
-from chatbot.rag import select_rag_strategy_node
+from llm.rag import select_rag_strategy_node
 
 state = select_rag_strategy_node({
     "documents": [{"name": "faq.md", "char_count": 3000}],
@@ -104,7 +152,7 @@ POST /api/rag/strategy
 Full local RAG node:
 
 ```python
-from chatbot.rag import rag_node
+from llm.rag import rag_node
 
 state = rag_node({
     "query": "What is the refund policy?",
@@ -120,7 +168,7 @@ print(state["rag_context"])
 print(state["rag_sources"])
 ```
 
-Pipeline pieces:
+Pipeline pieces, all under `llm/rag/`:
 
 ```text
 documentLoader.py      Turns uploaded text payloads into LangChain Documents.

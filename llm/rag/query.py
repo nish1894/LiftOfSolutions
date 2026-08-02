@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
-from chatbot.rag.embeddings import init_embedding_model
-from chatbot.rag.vectorDbStore import VectorDbStore, loadVectorDb
-from chatbot.rag.vectorStore import InMemoryVectorIndex
+from llm.rag.embeddings import init_embedding_model
+from llm.rag.vectorDbStore import VectorDbStore, loadVectorDb
+from llm.rag.vectorStore import InMemoryVectorIndex
 
 
 class RagSource(BaseModel):

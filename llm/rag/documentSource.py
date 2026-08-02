@@ -9,7 +9,7 @@ from typing import Any
 from langchain_core.documents import Document
 from pydantic import BaseModel, Field
 
-from chatbot.rag.documentLoader import UploadedDocument, load_documents, load_text_file
+from llm.rag.documentLoader import UploadedDocument, load_documents, load_text_file
 
 
 class DocumentSource(BaseModel):

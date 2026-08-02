@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from typing import Any
 
-from chatbot.rag.documentLoader import UploadedDocument, load_documents
-from chatbot.rag.documentProcessor import chunk_documents
-from chatbot.rag.embeddings import init_embedding_model
-from chatbot.rag.query import RagQueryResult, RagSource, queryVectorDb
-from chatbot.rag.selector import DocumentProfile, RagDecision, RagStrategy, decide_rag_strategy
-from chatbot.rag.vectorlessSearch import query_vectorless_chunks
-from chatbot.rag.vectorStore import InMemoryVectorIndex
+from llm.rag.documentLoader import UploadedDocument, load_documents
+from llm.rag.documentProcessor import chunk_documents
+from llm.rag.embeddings import init_embedding_model
+from llm.rag.query import RagQueryResult, RagSource, queryVectorDb
+from llm.rag.selector import DocumentProfile, RagDecision, RagStrategy, decide_rag_strategy
+from llm.rag.vectorlessSearch import query_vectorless_chunks
+from llm.rag.vectorStore import InMemoryVectorIndex
 
 
 def rag_node(state: dict[str, Any]) -> dict[str, Any]:

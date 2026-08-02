@@ -2,14 +2,14 @@ from pathlib import Path
 import os
 import sys
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 import pytest
 from dotenv import load_dotenv
 
-from chatbot.utilities import chatModel
+from llm import chatModel
 from tests.testHelpers import SoftCheck
 
 load_dotenv(PROJECT_ROOT / ".env")

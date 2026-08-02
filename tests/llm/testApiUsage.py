@@ -1,5 +1,5 @@
-from chatbot.utilities import storeApiUsage
-from chatbot.utilities.apiUsage import apiUsageStore
+from llm import storeApiUsage
+from llm.usage import apiUsageStore
 
 
 def testStoreApiUsageRecordsTokensAndWarns(capsys) -> None:

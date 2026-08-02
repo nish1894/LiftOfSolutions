@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 from langchain_core.documents import Document
 
-from chatbot.utilities import chatModel
+from llm.chatModel import chatModel
 
 
 DocumentEnhancer = Callable[[list[Document]], list[Document]]

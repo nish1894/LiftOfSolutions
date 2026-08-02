@@ -4,19 +4,19 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from chatbot.rag.documentProcessor import (
+from llm.rag.documentProcessor import (
     DocumentEnhancer,
     enhanceDocumentsWithLlm,
     processDocumentsForRag,
 )
-from chatbot.rag.documentSource import DocumentSource, fetchDocuments
-from chatbot.rag.embeddings import init_embedding_model
-from chatbot.rag.vectorDbStore import (
+from llm.rag.documentSource import DocumentSource, fetchDocuments
+from llm.rag.embeddings import init_embedding_model
+from llm.rag.vectorDbStore import (
     VectorDbRecord,
     VectorDbStore,
     storeVectorDb,
 )
-from chatbot.rag.vectorStore import InMemoryVectorIndex
+from llm.rag.vectorStore import InMemoryVectorIndex
 
 
 class RagIngestionRequest(BaseModel):

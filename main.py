@@ -1,5 +1,5 @@
 def main() -> None:
-    print("Run the API with: uv run uvicorn chatbot.main:app --reload")
+    print("Run the API with: uv run uvicorn backend.app:app --reload")
 
 
 if __name__ == "__main__":

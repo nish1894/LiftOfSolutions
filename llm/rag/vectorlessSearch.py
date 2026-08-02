@@ -5,7 +5,7 @@ from collections import Counter
 
 from langchain_core.documents import Document
 
-from chatbot.rag.query import RagQueryResult, RagSource
+from llm.rag.query import RagQueryResult, RagSource
 
 
 TOKEN_PATTERN = re.compile(r"[a-zA-Z0-9]+")

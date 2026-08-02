@@ -1,4 +1,4 @@
-from chatbot.rag import (
+from llm.rag import (
     DocumentProfile,
     RagStrategy,
     decide_rag_strategy,
