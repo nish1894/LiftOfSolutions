@@ -108,3 +108,103 @@ button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+/* ---- account strip ---- */
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.email {
+  font-size: 13px;
+  color: #5c6678;
+}
+
+.link {
+  height: auto;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: #1f6feb;
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.loading {
+  color: #5c6678;
+}
+
+/* ---- sign-in screen ----
+   The base `main` is a full-height three-row chat shell; the auth card is a
+   short centred stack, so both the sizing and the form layout are overridden. */
+
+main.auth {
+  width: min(380px, calc(100vw - 32px));
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 28px;
+  background: #ffffff;
+  border: 1px solid #d8dde7;
+  border-radius: 12px;
+}
+
+.auth header {
+  justify-content: center;
+}
+
+.providers {
+  display: grid;
+  gap: 10px;
+}
+
+.provider {
+  background: #ffffff;
+  border: 1px solid #c8cfda;
+  color: #1d2433;
+}
+
+.divider {
+  margin: 0;
+  text-align: center;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8a93a5;
+}
+
+.auth form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+.auth label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.auth form button {
+  margin-top: 10px;
+}
+
+.status {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.status.error {
+  background: #fdeced;
+  color: #8c1c24;
+}
+
+.status.info {
+  background: #eaf3ff;
+  color: #1a4f9c;
+}

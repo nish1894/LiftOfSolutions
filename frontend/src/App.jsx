@@ -1,8 +1,10 @@
 import { useState } from "react";
 
 import { sendChatMessage } from "./api.js";
+import { useAuth } from "./auth/AuthProvider.jsx";
 import MessageInput from "./components/MessageInput.jsx";
 import MessageList from "./components/MessageList.jsx";
+import SignIn from "./components/SignIn.jsx";
 
 let nextMessageId = 0;
 
@@ -11,6 +13,7 @@ function createMessage(role, text, isError = false) {
 }
 
 export default function App() {
+  const { user, loading, signOut } = useAuth();
   const [messages, setMessages] = useState(() => [createMessage("bot", "Ready.")]);
   const [pending, setPending] = useState(false);
 
@@ -31,10 +34,30 @@ export default function App() {
     }
   }
 
+  // Restoring a persisted session is async, so render nothing decisive until it
+  // settles — otherwise a signed-in user sees the login screen flash on reload.
+  if (loading) {
+    return (
+      <main>
+        <p className="loading">Loading…</p>
+      </main>
+    );
+  }
+
+  if (!user) {
+    return <SignIn />;
+  }
+
   return (
     <main>
       <header>
         <h1>Chatbot</h1>
+        <div className="account">
+          <span className="email">{user.email}</span>
+          <button type="button" className="link" onClick={signOut}>
+            Sign out
+          </button>
+        </div>
       </header>
 
       <MessageList messages={messages} pending={pending} />

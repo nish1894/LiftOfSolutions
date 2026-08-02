@@ -1,7 +1,18 @@
+import { supabase } from "./lib/supabase.js";
+
 export async function sendChatMessage(message) {
+  // getSession() refreshes the access token when it is close to expiry, so this
+  // is preferred over holding a token from render state.
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
   const response = await fetch("/api/chat", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
+    },
     body: JSON.stringify({ message }),
   });
 
