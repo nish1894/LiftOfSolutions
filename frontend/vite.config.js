@@ -3,9 +3,9 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [react()],
-  // The API serves index.html at "/" and mounts the build output at "/static",
-  // so built asset URLs have to be prefixed to match.
-  base: "/static/",
+  // No `base` override: the app is served from the origin root in both dev and
+  // production. The API mounts only dist/assets (at "/assets"), so the default
+  // asset URLs already line up.
   build: {
     outDir: "dist",
     emptyOutDir: true,

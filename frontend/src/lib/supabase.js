@@ -1,5 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 
+import { cookieStorage } from "./cookieStorage.js";
+
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
@@ -12,7 +14,17 @@ if (!supabaseUrl || !supabaseKey) {
   );
 }
 
-// persistSession and detectSessionInUrl are on by default: the session lives in
-// localStorage, and the OAuth redirect back to the app is consumed automatically,
-// which is why no dedicated /callback route is needed.
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export const SESSION_COOKIE_KEY = "chatbot-auth";
+
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    // Cookies rather than the default localStorage, so the session is attached
+    // to same-origin API requests and is readable by the backend later.
+    storage: cookieStorage,
+    storageKey: SESSION_COOKIE_KEY,
+    persistSession: true,
+    autoRefreshToken: true,
+    // Consumes the OAuth redirect back into the app; no callback route needed.
+    detectSessionInUrl: true,
+  },
+});

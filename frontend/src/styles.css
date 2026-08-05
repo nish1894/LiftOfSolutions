@@ -1,8 +1,112 @@
+/* Every colour in this file goes through a token so the dark theme is a single
+   block of overrides rather than a parallel set of rules. Layout, spacing, and
+   sizing are theme-independent and are declared once. */
 :root {
-  color-scheme: light;
+  /* Tells the browser to render native UI -- scrollbars, autofill, focus rings
+     on controls we do not style -- in whichever scheme is active. */
+  color-scheme: light dark;
+
+  --bg: #f6f7f9;
+  --bg-tint: #dce8fb;
+  --surface: #ffffff;
+  --surface-sunken: #fbfcfe;
+  --surface-muted: #eef1f6;
+  --surface-hover: #f7f9fc;
+  --band-alt: #edf1f7;
+  --nav-bg: rgba(246, 247, 249, 0.85);
+
+  /* --border is decorative (card edges, hairlines) and exempt from contrast
+     rules. --border-strong outlines actual controls, so WCAG 1.4.11 puts a
+     3:1 floor on it against the surface behind. */
+  --border: #e3e7ee;
+  --border-strong: #8a93a5;
+  --border-hover: #6b7484;
+  --hairline: #eef1f6;
+
+  --text: #1d2433;
+  --text-strong: #3a445a;
+  --text-muted: #5c6678;
+  /* Darker than it looks like it needs to be: these sit on --bg (#f6f7f9) on
+     the landing page, not on white, which costs about 0.2 of a ratio point. */
+  --text-faint: #656e7d;
+  --text-placeholder: #656e7d;
+
+  /* Split deliberately: --accent sits behind white text and must stay dark
+     enough for 4.5:1, while --accent-text sits on a surface and must stay
+     light enough. One token cannot satisfy both in dark mode. */
+  --accent: #1f6feb;
+  --accent-hover: #1a5fcc;
+  --accent-text: #1a63d8;
+  --on-accent: #ffffff;
+  --accent-ring: rgba(31, 111, 235, 0.16);
+
+  --neutral-btn: #202938;
+  --neutral-btn-text: #ffffff;
+
+  --error-bg: #fdeced;
+  --error-text: #8c1c24;
+  --info-bg: #eaf3ff;
+  --info-text: #1a4f9c;
+
+  --shadow:
+    0 1px 2px rgba(24, 33, 51, 0.04),
+    0 12px 32px rgba(24, 33, 51, 0.08);
+
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #f6f7f9;
-  color: #1d2433;
+  background: var(--bg);
+  color: var(--text);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1319;
+    --bg-tint: #1b2d4d;
+    --surface: #171c24;
+    --surface-sunken: #12161d;
+    --surface-muted: #232a35;
+    --surface-hover: #1e242e;
+    --band-alt: #12161d;
+    --nav-bg: rgba(15, 19, 25, 0.85);
+
+    --border: #2a323f;
+    --border-strong: #666f7f;
+    --border-hover: #7d8798;
+    --hairline: #232a35;
+
+    --text: #e6e9ef;
+    --text-strong: #c7cedb;
+    --text-muted: #9aa4b5;
+    --text-faint: #7d8798;
+    --text-placeholder: #7d8798;
+
+    /* Deeper than the light accent so white label text still clears 4.5:1. */
+    --accent: #2f6fe0;
+    --accent-hover: #4380ea;
+    /* Lighter than the light accent so links clear 4.5:1 against --surface. */
+    --accent-text: #6aa5ff;
+    --accent-ring: rgba(106, 165, 255, 0.22);
+
+    /* Inverted: a near-white button reads as primary on a dark surface. */
+    --neutral-btn: #e6e9ef;
+    --neutral-btn-text: #171c24;
+
+    --error-bg: #3a1d20;
+    --error-text: #ffb4b4;
+    --info-bg: #16283f;
+    --info-text: #a9cbff;
+
+    --shadow:
+      0 1px 2px rgba(0, 0, 0, 0.4),
+      0 12px 32px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Border-box everywhere: several rules below pair width:100% with padding, and
+   the content-box default makes those overflow their container. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 body {
@@ -14,7 +118,12 @@ body {
 #root {
   min-height: 100vh;
   display: grid;
-  place-items: center;
+  justify-items: center;
+  align-items: center;
+  /* Plain centring clips the top of anything taller than the viewport, since
+     the overflow lands above the scroll origin. `safe` degrades to start in
+     exactly that case; browsers without it ignore this line. */
+  align-items: safe center;
 }
 
 main {
@@ -27,8 +136,10 @@ main {
 
 header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  gap: 8px 12px;
 }
 
 h1 {
@@ -40,8 +151,8 @@ h1 {
 #messages {
   overflow: auto;
   padding: 16px;
-  background: #ffffff;
-  border: 1px solid #d8dde7;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -58,22 +169,22 @@ h1 {
 
 .user {
   align-self: flex-end;
-  background: #1f6feb;
-  color: #ffffff;
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .bot {
   align-self: flex-start;
-  background: #eef1f6;
+  background: var(--surface-muted);
 }
 
 .bot.error {
-  background: #fdeced;
-  color: #8c1c24;
+  background: var(--error-bg);
+  color: var(--error-text);
 }
 
 .pending {
-  color: #5c6678;
+  color: var(--text-muted);
   font-style: italic;
 }
 
@@ -91,15 +202,17 @@ button {
 }
 
 input {
-  border: 1px solid #c8cfda;
+  border: 1px solid var(--border-strong);
   padding: 0 12px;
+  background: var(--surface);
+  color: var(--text);
 }
 
 button {
   border: 0;
   padding: 0 18px;
-  background: #202938;
-  color: #ffffff;
+  background: var(--neutral-btn);
+  color: var(--neutral-btn-text);
   cursor: pointer;
 }
 
@@ -115,11 +228,17 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 12px;
+  /* Without this the flex item refuses to shrink and the email overflows
+     instead of ellipsing. */
+  min-width: 0;
 }
 
 .email {
   font-size: 13px;
-  color: #5c6678;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .link {
@@ -127,35 +246,75 @@ button:disabled {
   padding: 0;
   background: none;
   border: 0;
-  color: #1f6feb;
+  color: var(--accent-text);
   font-size: 13px;
   text-decoration: underline;
   cursor: pointer;
 }
 
 .loading {
-  color: #5c6678;
+  color: var(--text-muted);
 }
 
 /* ---- sign-in screen ----
    The base `main` is a full-height three-row chat shell; the auth card is a
    short centred stack, so both the sizing and the form layout are overridden. */
 
+/* Tint the page behind the card only on the auth screen. Browsers without
+   :has() simply keep the flat background -- nothing else depends on this. */
+body:has(main.auth),
+body:has(main.home) {
+  background:
+    radial-gradient(60rem 32rem at 50% -12%, var(--bg-tint) 0%, transparent 62%),
+    var(--bg);
+  background-attachment: fixed;
+}
+
 main.auth {
-  width: min(380px, calc(100vw - 32px));
+  width: min(400px, calc(100vw - 32px));
   height: auto;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 28px;
-  background: #ffffff;
-  border: 1px solid #d8dde7;
-  border-radius: 12px;
+  gap: 18px;
+  padding: 36px 32px 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
 }
 
-.auth header {
-  justify-content: center;
+/* ---- brand ---- */
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
 }
+
+/* The mark is a transparent PNG with its own margins, so it sits directly on
+   the surface -- no tile, border, or radius. `contain` keeps it square if the
+   width and height attributes are ever overridden. */
+.brand-mark {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 8px;
+  object-fit: contain;
+}
+
+.auth h1 {
+  font-size: 24px;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* ---- provider buttons ---- */
 
 .providers {
   display: grid;
@@ -163,34 +322,104 @@ main.auth {
 }
 
 .provider {
-  background: #ffffff;
-  border: 1px solid #c8cfda;
-  color: #1d2433;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 14px;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
+.provider:hover:not(:disabled) {
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
+}
+
+.provider-icon {
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+
+.provider-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- divider ---- */
+
 .divider {
-  margin: 0;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-faint);
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #8a93a5;
 }
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ---- form ---- */
 
 .auth form {
   display: grid;
   grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.field {
+  display: grid;
   gap: 6px;
 }
 
 .auth label {
   font-size: 13px;
   font-weight: 600;
+  color: var(--text-strong);
 }
 
-.auth form button {
-  margin-top: 10px;
+.auth input {
+  width: 100%;
+  background: var(--surface-sunken);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
+
+.auth input::placeholder {
+  color: var(--text-placeholder);
+}
+
+.auth input:focus-visible {
+  outline: none;
+  background: var(--surface);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.submit {
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+  transition: background 0.15s ease;
+}
+
+.submit:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+/* ---- status + footer ---- */
 
 .status {
   margin: 0;
@@ -200,11 +429,442 @@ main.auth {
 }
 
 .status.error {
-  background: #fdeced;
-  color: #8c1c24;
+  background: var(--error-bg);
+  color: var(--error-text);
 }
 
 .status.info {
-  background: #eaf3ff;
-  color: #1a4f9c;
+  background: var(--info-bg);
+  color: var(--info-text);
+}
+
+.switch {
+  margin: 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--hairline);
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.switch .link {
+  font-weight: 600;
+}
+
+.back {
+  align-self: center;
+  text-decoration: none;
+  color: var(--text-muted);
+}
+
+.back:hover:not(:disabled) {
+  color: var(--accent-text);
+}
+
+/* ---- home / landing ----
+   The chat and auth screens are fixed-size cards centred in #root. The landing
+   page is the opposite: it spans the full viewport at any width and stacks
+   from the top, so it opts out of both the width cap and the centring. */
+
+main.home {
+  width: 100%;
+  max-width: none;
+  height: auto;
+  display: block;
+  padding: 0;
+  /* #root centres its child on both axes; a full-page layout must stretch. */
+  justify-self: stretch;
+  align-self: stretch;
+}
+
+/* Single place where page width is decided. Sections are full-bleed so their
+   backgrounds reach the viewport edge; their contents sit in here. */
+.container {
+  width: 100%;
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-inline: clamp(16px, 4vw, 32px);
+}
+
+/* ---- nav ---- */
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--nav-bg);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 64px;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.brand-mark.small {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 0;
+}
+
+.wordmark {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.nav-links {
+  display: flex;
+  gap: 24px;
+  font-size: 14px;
+}
+
+.nav-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.nav-links a:hover {
+  color: var(--text);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Below this the three nav groups stop fitting on one line. */
+@media (max-width: 720px) {
+  .nav-links {
+    display: none;
+  }
+}
+
+/* ---- shared buttons ---- */
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+  font-size: 14px;
+  transition: background 0.15s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-ghost:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
+}
+
+.btn-lg {
+  height: 50px;
+  padding: 0 28px;
+  font-size: 15px;
+}
+
+/* ---- hero ---- */
+
+.hero {
+  padding-block: clamp(56px, 9vw, 112px) clamp(36px, 6vw, 72px);
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0 0 16px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+
+.hero h1 {
+  max-width: 17ch;
+  margin-inline: auto;
+  font-size: clamp(32px, 5.6vw, 58px);
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+}
+
+.lede {
+  max-width: 62ch;
+  margin: 20px auto 0;
+  font-size: clamp(16px, 1.6vw, 19px);
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.cta-note {
+  margin: 18px 0 0;
+  font-size: 13px;
+  color: var(--text-faint);
+}
+
+/* ---- customer strip ---- */
+
+.proof {
+  padding-block: 28px;
+  border-block: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.proof-label {
+  margin: 0 0 14px;
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.proof-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px 28px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.proof-list li {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-faint);
+}
+
+/* ---- content bands ---- */
+
+.band {
+  padding-block: clamp(48px, 7vw, 96px);
+}
+
+.band.alt {
+  background: var(--band-alt);
+}
+
+.band-head {
+  max-width: 60ch;
+  margin: 0 auto clamp(28px, 4vw, 48px);
+  text-align: center;
+}
+
+.band-head h2 {
+  margin: 0;
+  font-size: clamp(24px, 3.2vw, 36px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.band-head p {
+  margin: 12px 0 0;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+/* auto-fit collapses these to fewer columns as the viewport narrows, so no
+   per-breakpoint column counts are needed. */
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  gap: 20px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  gap: 20px;
+}
+
+.card {
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.card h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.card p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+.card.compact {
+  padding: 20px;
+}
+
+.steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+
+.step-number {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent-text);
+}
+
+/* ---- testimonial ---- */
+
+.quote {
+  max-width: 70ch;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.quote blockquote {
+  margin: 0;
+  font-size: clamp(19px, 2.4vw, 26px);
+  line-height: 1.45;
+  letter-spacing: -0.015em;
+}
+
+.quote figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.quote-name {
+  font-weight: 700;
+}
+
+.quote-org {
+  color: var(--text-muted);
+}
+
+/* ---- closing call to action ---- */
+
+.final-cta {
+  padding-block: clamp(48px, 7vw, 88px);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.final-inner {
+  text-align: center;
+}
+
+.final-cta h2 {
+  margin: 0;
+  font-size: clamp(24px, 3.2vw, 36px);
+  letter-spacing: -0.02em;
+}
+
+/* No opacity here: fading text over the accent band drops it under the 4.5:1
+   floor that --on-accent was chosen to clear. */
+.final-cta p {
+  margin: 12px 0 28px;
+  font-size: 16px;
+}
+
+/* Inverted against the accent band so the button stays the brightest thing. */
+.final-cta .btn-primary {
+  background: var(--on-accent);
+  color: var(--accent);
+}
+
+.final-cta .btn-primary:hover:not(:disabled) {
+  background: var(--surface-muted);
+}
+
+/* ---- footer ---- */
+
+.site-footer {
+  padding-block: 36px;
+  border-top: 1px solid var(--border);
+}
+
+.footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  font-size: 14px;
+}
+
+.footer-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  color: var(--text);
+}
+
+.footer-note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-faint);
 }

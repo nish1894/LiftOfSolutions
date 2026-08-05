@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { sendChatMessage } from "./api.js";
 import { useAuth } from "./auth/AuthProvider.jsx";
+import Home from "./components/Home.jsx";
 import MessageInput from "./components/MessageInput.jsx";
 import MessageList from "./components/MessageList.jsx";
 import SignIn from "./components/SignIn.jsx";
@@ -16,6 +17,9 @@ export default function App() {
   const { user, loading, signOut } = useAuth();
   const [messages, setMessages] = useState(() => [createMessage("bot", "Ready.")]);
   const [pending, setPending] = useState(false);
+  // Which screen a signed-out visitor sees. There is no router yet, so this
+  // stands in for the "/" vs "/signin" split.
+  const [view, setView] = useState("home");
 
   async function handleSend(text) {
     setMessages((current) => [...current, createMessage("user", text)]);
@@ -45,13 +49,17 @@ export default function App() {
   }
 
   if (!user) {
-    return <SignIn />;
+    return view === "signIn" ? (
+      <SignIn onBack={() => setView("home")} />
+    ) : (
+      <Home onGetStarted={() => setView("signIn")} />
+    );
   }
 
   return (
     <main>
       <header>
-        <h1>Chatbot</h1>
+        <h1>Lift Off Solutions</h1>
         <div className="account">
           <span className="email">{user.email}</span>
           <button type="button" className="link" onClick={signOut}>

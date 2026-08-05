@@ -1,13 +1,15 @@
 import { useState } from "react";
 
 import { supabase } from "../lib/supabase.js";
+import BrandMark from "./BrandMark.jsx";
+import ProviderIcon from "./ProviderIcon.jsx";
 
 const PROVIDERS = [
   { id: "google", label: "Continue with Google" },
   { id: "github", label: "Continue with GitHub" },
 ];
 
-export default function SignIn() {
+export default function SignIn({ onBack }) {
   const [mode, setMode] = useState("signIn");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -65,9 +67,14 @@ export default function SignIn() {
 
   return (
     <main className="auth">
-      <header>
-        <h1>{isSignUp ? "Create an account" : "Sign in"}</h1>
-      </header>
+      <div className="brand">
+        <BrandMark size={56} />
+
+        <h1>{isSignUp ? "Create your account" : "Welcome back"}</h1>
+        <p className="subtitle">
+          {isSignUp ? "Sign up to start chatting." : "Sign in to continue to Lift Off Solutions."}
+        </p>
+      </div>
 
       <div className="providers">
         {PROVIDERS.map((provider) => (
@@ -78,47 +85,71 @@ export default function SignIn() {
             onClick={() => handleOAuth(provider.id)}
             disabled={busy}
           >
-            {provider.label}
+            <span className="provider-icon">
+              <ProviderIcon provider={provider.id} />
+            </span>
+            <span>{provider.label}</span>
           </button>
         ))}
       </div>
 
-      <p className="divider">or</p>
+      <div className="divider">
+        <span>or</span>
+      </div>
 
       <form onSubmit={handleSubmit}>
-        <label htmlFor="email">Email</label>
-        <input
-          id="email"
-          type="email"
-          autoComplete="email"
-          required
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          disabled={busy}
-        />
+        <div className="field">
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@example.com"
+            required
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            disabled={busy}
+          />
+        </div>
 
-        <label htmlFor="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          autoComplete={isSignUp ? "new-password" : "current-password"}
-          required
-          minLength={6}
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          disabled={busy}
-        />
+        <div className="field">
+          <label htmlFor="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            autoComplete={isSignUp ? "new-password" : "current-password"}
+            placeholder={isSignUp ? "At least 6 characters" : "••••••••"}
+            required
+            minLength={6}
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            disabled={busy}
+          />
+        </div>
 
-        <button type="submit" disabled={busy}>
-          {isSignUp ? "Sign up" : "Sign in"}
+        <button type="submit" className="submit" disabled={busy}>
+          {busy ? "Working…" : isSignUp ? "Create account" : "Sign in"}
         </button>
       </form>
 
-      {status && <p className={`status ${status.type}`}>{status.text}</p>}
+      {status && (
+        <p className={`status ${status.type}`} role="status">
+          {status.text}
+        </p>
+      )}
 
-      <button type="button" className="link" onClick={toggleMode} disabled={busy}>
-        {isSignUp ? "Already have an account? Sign in" : "No account? Sign up"}
-      </button>
+      <p className="switch">
+        {isSignUp ? "Already have an account?" : "New here?"}{" "}
+        <button type="button" className="link" onClick={toggleMode} disabled={busy}>
+          {isSignUp ? "Sign in" : "Create one"}
+        </button>
+      </p>
+
+      {onBack && (
+        <button type="button" className="link back" onClick={onBack} disabled={busy}>
+          ← Back to home
+        </button>
+      )}
     </main>
   );
 }
