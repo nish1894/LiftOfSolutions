@@ -1,0 +1,340 @@
+/* Notifications, approvals, and the error boundary. */
+
+/* ---- Notifications -------------------------------------------------------
+   The bell is an anchor for an absolutely positioned panel, so the wrapper
+   establishes the containing block. Everything inside goes through the same
+   tokens as the rest of the shell and needs no dark-mode rules of its own. */
+
+.notification-bell {
+  position: relative;
+  display: inline-flex;
+}
+
+.notification-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1;
+}
+
+.notification-trigger:hover {
+  background: var(--surface-hover);
+}
+
+/* Sits over the bell's top-right corner; --on-accent on --accent is the one
+   pairing in the palette guaranteed to clear 4.5:1 in both themes. */
+.notification-count {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.notification-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  width: min(360px, calc(100vw - 32px));
+  max-height: min(460px, 70vh);
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-lg);
+  text-align: left;
+}
+
+.notification-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px 10px;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 13px;
+}
+
+.notification-empty {
+  margin: 0;
+  padding: 18px 10px;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.notification-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notification-list li {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.notification-list li:last-child {
+  border-bottom: none;
+}
+
+/* Unread state is carried by the tinted surface AND the accent rail, never by
+   colour alone, so it survives a greyscale or colour-blind reading. */
+.notification-list li.is-unread {
+  background: var(--info-bg);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.notification-glyph {
+  flex: none;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.notification-list strong {
+  display: block;
+  font-size: 13px;
+}
+
+.notification-list p {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.notification-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  color: var(--text-faint);
+  font-size: 11.5px;
+}
+
+.link-button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent-text);
+  font: inherit;
+  font-size: inherit;
+  font-weight: 650;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.link-button:hover {
+  color: var(--accent-hover);
+}
+
+.workspace-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* ---- Homepage / platform hand-off ---------------------------------------
+   The homepage is the landing screen for everyone, so it carries an entry
+   point into the app and the sidebar brand carries the way back out. */
+
+.nav-user {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+/* The brand is a router link back to the homepage; it must not pick up the
+   default link colour or underline. */
+a.platform-brand {
+  color: inherit;
+  text-decoration: none;
+}
+
+a.platform-brand:hover {
+  opacity: 0.75;
+}
+
+/* ---- Approvals ----------------------------------------------------------- */
+
+.nav-badge {
+  margin-left: auto;
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.approval-list {
+  display: grid;
+  gap: 10px;
+}
+
+.approval-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 15px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+}
+
+.approval-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.approval-identity strong {
+  display: block;
+  font-size: 14px;
+}
+
+.approval-identity span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 12.5px;
+}
+
+.approval-identity small {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-faint);
+  font-size: 11.5px;
+}
+
+.approval-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.approval-role {
+  display: grid;
+  gap: 3px;
+}
+
+.approval-role span {
+  color: var(--text-faint);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.approval-role select {
+  height: 36px;
+  padding: 0 28px 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.approval-error {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 12.5px;
+}
+
+.resource-status.is-approved {
+  color: var(--info-text);
+  background: var(--info-bg);
+}
+
+.resource-status.is-rejected {
+  color: var(--error-text);
+  background: var(--error-bg);
+}
+
+@media (max-width: 720px) {
+  .approval-row,
+  .approval-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+/* ---- Error boundary ------------------------------------------------------ */
+
+.error-screen {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 24px;
+  background: var(--bg);
+}
+
+.error-screen-card {
+  width: min(560px, 100%);
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-lg);
+}
+
+.error-screen-card h1 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.error-screen-card p {
+  margin: 0 0 14px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.error-screen-card pre {
+  margin: 0 0 18px;
+  padding: 12px;
+  overflow-x: auto;
+  border-radius: 8px;
+  background: var(--error-bg);
+  color: var(--error-text);
+  font-size: 12.5px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.error-screen-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}

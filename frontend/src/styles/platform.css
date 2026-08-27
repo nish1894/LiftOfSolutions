@@ -1,0 +1,961 @@
+/* Authenticated platform shell: sidebar, topbar, panels, resources. */
+
+/* ---- authenticated platform ---- */
+
+body:has(main.platform),
+body:has(main.workspace-setup) {
+  background: var(--bg);
+}
+
+main.platform {
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  height: auto;
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  gap: 0;
+  align-self: stretch;
+  justify-self: stretch;
+}
+
+.platform-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 22px 14px 16px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+
+.platform-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px 22px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.platform-sidebar nav {
+  display: grid;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+/* Eleven flat links read as a wall. Grouping them into four labelled sets is
+   the single biggest legibility win in the shell. */
+.nav-group {
+  display: grid;
+  gap: 2px;
+}
+
+.nav-group-label {
+  margin: 0 0 6px;
+  padding-left: 12px;
+  color: var(--text-faint);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.platform-sidebar nav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  text-align: left;
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 550;
+  transition:
+    background 120ms ease,
+    color 120ms ease;
+}
+
+.platform-sidebar nav a > span:first-of-type {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-icon {
+  flex: none;
+  opacity: 0.75;
+}
+
+.platform-sidebar nav a:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+/* The active item is the one place in the shell that carries brand colour, so
+   it is unmistakable without a second visual device. */
+.platform-sidebar nav a.active {
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: var(--shadow-sm);
+}
+
+.platform-sidebar nav a.active .nav-icon {
+  opacity: 1;
+}
+
+.sidebar-account {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding: 14px 10px 2px;
+  border-top: 1px solid var(--border);
+}
+
+.sidebar-account div {
+  min-width: 0;
+}
+
+.sidebar-account strong,
+.sidebar-account small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-account strong {
+  font-size: 13px;
+}
+
+.sidebar-account small {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.account-avatar {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.platform-main {
+  min-width: 0;
+}
+
+.platform-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px clamp(20px, 4vw, 48px);
+  background: var(--nav-bg);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.platform-topbar h1 {
+  margin-top: 3px;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+
+.topbar-heading {
+  min-width: 0;
+}
+
+.platform-kicker {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.platform-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.platform-actions select,
+.platform-create select {
+  height: 36px;
+  padding: 0 30px 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.signed-in-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 30px;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.signed-in-badge > span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #20a464;
+  box-shadow: 0 0 0 3px rgba(32, 164, 100, 0.14);
+}
+
+.btn-quiet {
+  height: 36px;
+  padding: 0 12px;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.btn-quiet:hover {
+  background: var(--surface-hover);
+}
+
+.platform-content {
+  width: min(1180px, 100%);
+  margin-inline: auto;
+  padding: clamp(22px, 4vw, 48px);
+}
+
+.welcome-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(24px, 4vw, 34px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  /* The one gradient in the shell. It marks the overview as the landing screen
+     without turning every panel into a decorated surface. */
+  background:
+    radial-gradient(46rem 20rem at 100% 0%, var(--bg-tint), transparent 64%), var(--surface);
+  box-shadow: var(--shadow-md);
+}
+
+.welcome-panel h2,
+.platform-panel h2 {
+  margin: 5px 0 0;
+  font-size: clamp(21px, 2.5vw, 28px);
+  letter-spacing: -0.02em;
+}
+
+.welcome-panel p:not(.platform-kicker),
+.panel-heading p {
+  max-width: 64ch;
+  margin: 9px 0 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.welcome-panel .btn-primary {
+  flex: none;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.metric-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 0;
+}
+
+/* Stat tile: tinted icon chip, then the number, then the label. The number is
+   the largest thing on the card because it is what the card is for. */
+.metric-card {
+  position: relative;
+  text-decoration: none;
+  height: auto;
+  min-height: 148px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 18px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  color: var(--text);
+  text-align: left;
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease,
+    border-color 140ms ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
+}
+
+.metric-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  margin-bottom: auto;
+  border-radius: var(--radius-md);
+  background: var(--tint-blue-bg);
+  color: var(--tint-blue-fg);
+}
+
+.metric-card[data-tint="mint"] .metric-chip {
+  background: var(--tint-mint-bg);
+  color: var(--tint-mint-fg);
+}
+
+.metric-card[data-tint="violet"] .metric-chip {
+  background: var(--tint-violet-bg);
+  color: var(--tint-violet-fg);
+}
+
+.metric-card[data-tint="amber"] .metric-chip {
+  background: var(--tint-amber-bg);
+  color: var(--tint-amber-fg);
+}
+
+.metric-value {
+  margin-top: 16px;
+  color: var(--text);
+  font-size: 30px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.metric-card strong {
+  margin-top: 6px;
+  font-size: 13.5px;
+}
+
+.metric-card small {
+  margin-top: 2px;
+  color: var(--text-faint);
+  font-size: 12px;
+}
+
+.platform-panel {
+  margin-top: 18px;
+  padding: clamp(20px, 3vw, 28px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.platform-panel:first-child {
+  margin-top: 0;
+}
+
+.panel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 18px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.detail-grid div {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+}
+
+.detail-grid span,
+.detail-grid strong {
+  display: block;
+}
+
+.detail-grid span {
+  margin-bottom: 6px;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detail-grid strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+}
+
+.success-text {
+  color: #158653;
+}
+
+.platform-create {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+  margin-bottom: 22px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+}
+
+.platform-create label {
+  min-width: min(220px, 100%);
+  flex: 1;
+  display: grid;
+  gap: 6px;
+}
+
+.platform-create label > span {
+  color: var(--text-strong);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.platform-create input,
+.platform-create select {
+  width: 100%;
+  height: 40px;
+}
+
+.platform-create .status {
+  width: 100%;
+}
+
+.resource-list {
+  display: grid;
+  gap: 8px;
+}
+
+.resource-row {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 13px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  transition:
+    border-color 120ms ease,
+    background 120ms ease;
+}
+
+.resource-row:hover {
+  border-color: var(--border-hover);
+  background: var(--surface-hover);
+}
+
+.resource-row > div {
+  min-width: 0;
+}
+
+.resource-row strong,
+.resource-row div > span {
+  display: block;
+}
+
+.resource-row strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px;
+}
+
+.resource-row div > span {
+  margin-top: 4px;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+}
+
+/* Status pill. Sized to sit on one line beside a row title without competing
+   with it -- the row title is the thing being scanned, the pill qualifies it. */
+.resource-status {
+  flex: none;
+  padding: 5px 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.platform-empty {
+  padding: 34px 18px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  text-align: center;
+  font-size: 13px;
+}
+
+.platform-chat {
+  height: calc(100vh - 172px);
+  min-height: 480px;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 14px;
+}
+
+.platform-chat #messages {
+  min-height: 0;
+}
+
+main.workspace-setup {
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  height: auto;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.workspace-card {
+  width: min(500px, 100%);
+  padding: 36px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.workspace-card .brand-mark {
+  margin-bottom: 14px;
+}
+
+.workspace-card h1 {
+  margin-top: 18px;
+  font-size: 27px;
+}
+
+.workspace-account {
+  margin-top: 14px;
+}
+
+.workspace-account strong,
+.workspace-account span {
+  display: block;
+}
+
+.workspace-account strong {
+  font-size: 13px;
+}
+
+.workspace-account span {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.workspace-card > p:not(.status) {
+  margin: 10px 0 24px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.workspace-card form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 9px;
+}
+
+.workspace-card label {
+  color: var(--text-strong);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.workspace-card input {
+  width: 100%;
+}
+
+.workspace-card .status {
+  margin-top: 12px;
+}
+
+.workspace-signout {
+  display: block;
+  margin: 20px auto 0;
+}
+
+.workspace-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 22px 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.workspace-divider::before,
+.workspace-divider::after {
+  height: 1px;
+  flex: 1;
+  background: var(--border);
+  content: "";
+}
+
+.pending-request {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 14px 0 0;
+  padding: 11px 12px;
+  border-radius: 9px;
+  background: var(--surface-sunken);
+  font-size: 12px;
+}
+
+.pending-request span {
+  color: var(--text-muted);
+}
+
+.refresh-request {
+  margin-top: 10px;
+}
+
+.settings-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.settings-stack > .platform-panel {
+  margin-top: 0;
+}
+
+.settings-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.settings-form label,
+.member-controls label {
+  display: grid;
+  gap: 6px;
+}
+
+.settings-form label > span,
+.member-controls label > span {
+  color: var(--text-strong);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.settings-form input,
+.settings-form select,
+.settings-form textarea,
+.member-controls select,
+.inline-controls select {
+  width: 100%;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.settings-form input,
+.settings-form select,
+.member-controls select,
+.inline-controls select {
+  height: 40px;
+}
+
+.settings-form textarea {
+  min-height: 100px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.settings-form .full-field,
+.settings-form .form-actions {
+  grid-column: 1 / -1;
+}
+
+.settings-form .check-field {
+  display: flex;
+  grid-column: span 1;
+  align-items: center;
+  gap: 9px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+}
+
+.settings-form .check-field input,
+.permission-grid input {
+  width: 16px;
+  height: 16px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.security-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.security-actions > div {
+  min-width: 220px;
+  flex: 1;
+}
+
+.security-actions strong,
+.security-actions span {
+  display: block;
+}
+
+.security-actions span {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.btn-danger {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid #dc5a5a;
+  background: transparent;
+  color: #b93434;
+  font-size: 13px;
+}
+
+.member-list {
+  display: grid;
+  gap: 10px;
+}
+
+.member-card {
+  padding: 15px 16px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface);
+}
+
+.member-summary,
+.member-controls,
+.inline-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.member-summary {
+  justify-content: space-between;
+}
+
+.member-summary strong,
+.member-summary span {
+  display: block;
+}
+
+.member-summary div > span {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.member-controls {
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.member-controls label {
+  min-width: 150px;
+}
+
+.member-controls small {
+  color: var(--text-muted);
+}
+
+.member-row .inline-controls {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.permission-editor {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.permission-editor summary {
+  cursor: pointer;
+  color: var(--text-strong);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.permission-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  max-height: 290px;
+  margin-top: 12px;
+  overflow-y: auto;
+}
+
+.permission-grid label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px;
+  border-radius: 7px;
+  background: var(--surface-sunken);
+  font-size: 11px;
+}
+
+@media (max-width: 900px) {
+  main.platform {
+    grid-template-columns: 1fr;
+  }
+
+  .platform-sidebar {
+    position: static;
+    height: auto;
+    padding: 12px 16px;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .platform-brand,
+  .sidebar-account {
+    display: none;
+  }
+
+  .platform-sidebar nav {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+  }
+
+  .platform-sidebar nav button {
+    width: auto;
+    flex: none;
+    white-space: nowrap;
+  }
+
+  .platform-sidebar nav button.active {
+    box-shadow: inset 0 -3px 0 var(--accent);
+  }
+
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .platform-topbar,
+  .welcome-panel {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .platform-actions {
+    justify-content: flex-start;
+  }
+
+  .platform-content {
+    padding: 18px;
+  }
+
+  .metric-grid,
+  .detail-grid,
+  .settings-form,
+  .permission-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-form .check-field {
+    grid-column: 1;
+  }
+
+  .member-row,
+  .member-summary,
+  .inline-controls {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .metric-card {
+    min-height: 112px;
+  }
+
+  .platform-chat {
+    height: calc(100vh - 230px);
+  }
+
+  .workspace-card {
+    padding: 28px 22px;
+  }
+}

@@ -1,0 +1,14 @@
+/* Entry point for the stylesheet. The rules were one 2,000-line file; they are
+   split by concern here so a feature's styles can be found and removed with it.
+   Order matters: tokens define the custom properties everything else reads.
+
+   These remain global rather than CSS Modules. Converting 2,000 lines of
+   hand-tuned selectors wholesale risks silent visual regressions that no test
+   in this repo can catch; new features should co-locate a *.module.css instead
+   and this file will shrink as they do. */
+
+@import "./tokens.css";
+@import "./auth.css";
+@import "./home.css";
+@import "./platform.css";
+@import "./features.css";

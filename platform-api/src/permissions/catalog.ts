@@ -1,0 +1,77 @@
+export const ALL_PERMISSIONS = [
+  "organization.view",
+  "organization.update",
+  "organization.delete",
+  "organization.members.view",
+  "organization.members.manage",
+  "organization.permissions.manage",
+  "agents.view",
+  "agents.create",
+  "agents.update",
+  "agents.publish",
+  "agents.test",
+  "agents.archive",
+  "customers.view",
+  "customers.manage",
+  "conversations.view",
+  "conversations.reply",
+  "conversations.assign",
+  "conversations.manage",
+  "channels.view",
+  "channels.manage",
+  "knowledge.view",
+  "knowledge.manage",
+  "integrations.view",
+  "integrations.manage",
+  "tools.view",
+  "tools.manage",
+  "tools.approve",
+  "analytics.view",
+  "usage.view",
+  "billing.view",
+  "billing.manage",
+  "audit.view",
+] as const;
+export type Permission = (typeof ALL_PERMISSIONS)[number];
+
+const rolePermissions: Record<string, readonly Permission[]> = {
+  PRIME: ALL_PERMISSIONS,
+  OWNER: ALL_PERMISSIONS,
+  ADMIN: ALL_PERMISSIONS.filter(
+    (permission) =>
+      !["organization.delete", "billing.manage"].includes(permission),
+  ),
+  AGENT: [
+    "organization.view",
+    "agents.view",
+    "customers.view",
+    "customers.manage",
+    "conversations.view",
+    "conversations.reply",
+    "conversations.assign",
+    "channels.view",
+    "knowledge.view",
+    "tools.view",
+    "analytics.view",
+    "usage.view",
+  ],
+  VIEWER: [
+    "organization.view",
+    "organization.members.view",
+    "agents.view",
+    "customers.view",
+    "conversations.view",
+    "channels.view",
+    "knowledge.view",
+    "integrations.view",
+    "tools.view",
+    "analytics.view",
+    "usage.view",
+    "billing.view",
+    "audit.view",
+  ],
+};
+
+export function permissionsFor(role: string): Set<Permission> {
+  return new Set(rolePermissions[role] ?? []);
+}

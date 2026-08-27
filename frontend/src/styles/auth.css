@@ -1,0 +1,243 @@
+/* Sign-in screen: account strip, provider buttons, form, and status. */
+
+/* ---- account strip ---- */
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  /* Without this the flex item refuses to shrink and the email overflows
+     instead of ellipsing. */
+  min-width: 0;
+}
+
+.email {
+  font-size: 13px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.link {
+  height: auto;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--accent-text);
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.loading {
+  color: var(--text-muted);
+}
+
+/* ---- sign-in screen ----
+   The base `main` is a full-height three-row chat shell; the auth card is a
+   short centred stack, so both the sizing and the form layout are overridden. */
+
+/* Tint the page behind the card only on the auth screen. Browsers without
+   :has() simply keep the flat background -- nothing else depends on this. */
+body:has(main.auth),
+body:has(main.home) {
+  background:
+    radial-gradient(60rem 32rem at 50% -12%, var(--bg-tint) 0%, transparent 62%), var(--bg);
+  background-attachment: fixed;
+}
+
+main.auth {
+  width: min(400px, calc(100vw - 32px));
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 36px 32px 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+/* ---- brand ---- */
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+}
+
+/* The mark is a transparent PNG with its own margins, so it sits directly on
+   the surface -- no tile, border, or radius. `contain` keeps it square if the
+   width and height attributes are ever overridden. */
+.brand-mark {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 8px;
+  object-fit: contain;
+}
+
+.auth h1 {
+  font-size: 24px;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* ---- provider buttons ---- */
+
+.providers {
+  display: grid;
+  gap: 10px;
+}
+
+.provider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 14px;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.provider:hover:not(:disabled) {
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
+}
+
+.provider-icon {
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+
+.provider-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- divider ---- */
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-faint);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ---- form ---- */
+
+.auth form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.auth label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.auth input {
+  width: 100%;
+  background: var(--surface-sunken);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.auth input::placeholder {
+  color: var(--text-placeholder);
+}
+
+.auth input:focus-visible {
+  outline: none;
+  background: var(--surface);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.submit {
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+  transition: background 0.15s ease;
+}
+
+.submit:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+/* ---- status + footer ---- */
+
+.status {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.status.error {
+  background: var(--error-bg);
+  color: var(--error-text);
+}
+
+.status.info {
+  background: var(--info-bg);
+  color: var(--info-text);
+}
+
+.switch {
+  margin: 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--hairline);
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.switch .link {
+  font-weight: 600;
+}
+
+.back {
+  align-self: center;
+  text-decoration: none;
+  color: var(--text-muted);
+}
+
+.back:hover:not(:disabled) {
+  color: var(--accent-text);
+}

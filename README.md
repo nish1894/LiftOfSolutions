@@ -1,252 +1,59 @@
-## Chatbot
+# ERP-CHATBOT
 
-Minimal FastAPI chatbot starter managed by `uv`.
+Multi-tenant AI customer-service platform using React/Vite, Node.js/Fastify, Firebase Authentication, and Cloud Firestore.
 
-### Project structure
+Node owns organization permissions, business logic, persistence, usage, billing metadata, audit, and the external Python AI/RAG boundary. The browser uses Firebase only to authenticate.
 
-```text
-llm/        LLM logic (Python): chat models, tools, usage, RAG pipeline.
-backend/    FastAPI API layer: app wiring, request/response schemas, routes.
-frontend/   Vite + vanilla JS chat UI.
-tests/
-  llm/          Tests for the LLM layer.
-  backend/      Tests for the API layer.
-  testHelpers.py  Shared assertion helpers.
+## Run with Docker
+
+Start Docker Desktop, then run:
+
+```bash
+cp .env.example .env
+docker compose up --build
 ```
 
-Run one layer at a time with `pytest tests/llm` or `pytest tests/backend`.
+Open:
 
-`backend/` imports from the `llm` package only, never from `llm.rag.*` or other
-submodules, so retrieval and model internals stay free to change without
-touching the API layer.
+- Platform: `http://localhost:5173`
+- API health: `http://localhost:8000/health`
+- Firebase Emulator UI: `http://localhost:4000`
 
-### Run locally
+The Docker setup uses local Firebase Auth and Firestore emulators. Create an email/password account in the app. The default AI adapter is deterministic and requires no Python service.
 
-Build the frontend once (the API serves `frontend/dist`):
+## Local development
 
-```powershell
-cd frontend
-npm install
-npm run build
-cd ..
+Node 18 is too old for this project. Use Node 24:
+
+```bash
+nvm install 24
+nvm use 24
+docker compose up -d firebase-emulator redis
 ```
 
-Then run the API:
+Run the API:
 
-```powershell
-C:\Users\hites\AppData\Roaming\Python\Python314\Scripts\uv.exe run uvicorn backend.app:app --reload
-```
-
-Then open:
-
-```text
-http://127.0.0.1:8000
-```
-
-While working on the UI, run the Vite dev server instead. It serves on port
-5173 with hot reload and proxies `/api` to the API on port 8000, so keep both
-running:
-
-```powershell
-cd frontend
+```bash
+cd platform-api
+npm ci
+FIREBASE_PROJECT_ID=liftofsolutions-123 \
+FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 \
+FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 \
 npm run dev
 ```
 
-### API
+Run the frontend in another terminal:
 
-Health check:
-
-```text
-GET /health
+```bash
+cd frontend
+cp .env.example .env
+npm ci
+npm run dev
 ```
 
-Chat:
+See [the original platform design](./AI_Customer_Service_Platform_System_Design_Updated.md)
+for the product and system design this implements.
 
-```text
-POST /api/chat
-{ "message": "hello" }
-```
-
-### Pending Integrations
-
-```text
-WhatsApp  pending
-LINE      pending
-WeChat    pending
-Telnyx    pending
-Gmail     pending
-```
-
-The chat endpoint records temporary API usage with `tokens` and prints a
-console warning because posting usage is not implemented yet.
-
-```python
-from llm import storeApiUsage
-
-storeApiUsage(tokens=42, route="/api/chat")
-```
-
-### Chat Models
-
-Create LangChain chat models with one utility:
-
-```python
-from llm import chatModel
-
-model = chatModel("OAI-FAST")
-model = chatModel("GEM-FAST")
-model = chatModel("DS-FAST")
-```
-
-Codes live in `llm/chatModelRegistry.json`. The format is
-`AAA-XXX`, where `AAA` is the company code and `XXX` is the model code:
-
-```python
-model = chatModel("OAI-WEAK")
-model = chatModel("GEM-WEAK")
-model = chatModel("DS-WEAK")
-```
-
-### RAG Strategy Selection
-
-The first RAG step chooses how customer-support documents should be used:
-
-```python
-from llm.rag import DocumentProfile, decide_rag_strategy
-
-decision = decide_rag_strategy([
-    DocumentProfile(name="refund-policy.pdf", char_count=5000),
-])
-```
-
-Available strategies:
-
-```text
-direct_document  1 document, attach directly as model context.
-vectorless       2-9 docs, or 10-30 docs when wording is predictable.
-vector_db        10-30 docs with useVectorDbForMediumDocs=true, or 31+ docs.
-enterprise       Very large document sets. Planned, not implemented yet.
-```
-
-There is also a LangGraph-style node:
-
-```python
-from llm.rag import select_rag_strategy_node
-
-state = select_rag_strategy_node({
-    "documents": [{"name": "faq.md", "char_count": 3000}],
-})
-```
-
-And a test endpoint:
-
-```text
-POST /api/rag/strategy
-{
-  "documents": [
-    { "name": "faq.md", "char_count": 3000 }
-  ]
-}
-```
-
-Full local RAG node:
-
-```python
-from llm.rag import rag_node
-
-state = rag_node({
-    "query": "What is the refund policy?",
-    "documents": [
-        {
-            "name": "refunds.txt",
-            "content": "Customers can request refunds within 30 days."
-        }
-    ]
-})
-
-print(state["rag_context"])
-print(state["rag_sources"])
-```
-
-Pipeline pieces, all under `llm/rag/`:
-
-```text
-documentLoader.py      Turns uploaded text payloads into LangChain Documents.
-documentProcessor.py   Chunks documents for retrieval.
-embeddings.py          Creates local hash embeddings or OpenAI embeddings.
-vectorlessSearch.py    Keyword retrieval without embeddings or a vector index.
-vectorStore.py         In-memory vector index for the first version.
-query.py               Queries a vector index and returns context/sources.
-node.py                LangGraph-style RAG node that chooses strategy and runs it.
-```
-
-Small multi-document sets use vectorless keyword retrieval by default. Larger
-sets use the vector path. The default embedding model is local deterministic
-`hash`, useful for tests and development. For real semantic retrieval, use:
-
-```python
-state = rag_node({
-    "query": "What is the refund policy?",
-    "embedding_model": "openai:text-embedding-3-small",
-    "documents": [...]
-})
-```
-
-For ingestion, the flow is modular: `documentSource.py` fetches inline documents,
-files, zip contents, or rar contents; `documentProcessor.py` can optionally use
-an LLM to expand sparse documents with supported cases, edge cases, synonyms, and
-decision rules before chunking; `ingestion.py` builds the vector index; and
-`vectorDbStore.py` stores it by `dbName`. The default store is local in-memory for
-one server, but the store interface can be replaced by a remote/vector database
-later.
-
-API:
-
-```text
-POST /api/rag/ingest
-{
-  "dbName": "supportDocs",
-  "source": {
-    "documents": [
-      {
-        "name": "refunds.txt",
-        "content": "Customers can request refunds within 30 days."
-      }
-    ]
-  },
-  "enhanceDocuments": true,
-  "enhancementModel": "OAI-CHEAP",
-  "chunkSize": 1000,
-  "chunkOverlap": 150
-}
-
-POST /api/rag/query
-{
-  "dbName": "supportDocs",
-  "query": "What is the refund policy?"
-}
-
-Internal stored-DB query API, hidden from generated docs for now:
-
-```text
-POST /api/internal/rag/query
-{
-  "dbName": "supportDocs",
-  "question": "What is the refund policy?"
-}
-```
-
-It returns the top 3 stored chunks by default as `sources` plus combined
-`context`.
-
-POST /api/rag/query
-{
-  "query": "What is the refund policy?",
-  "documents": [
-    {
-      "name": "refunds.txt",
-      "content": "Customers can request refunds within 30 days."
-    }
-  ]
-}
-```
+Detailed setup notes, the Firestore schema, the migration map, and the current
+project status live in `untracked/`, which is git-ignored and local to each
+machine.

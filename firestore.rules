@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Browser code never accesses Firestore directly. The Node API verifies
+    // Firebase ID tokens and enforces organization permissions with Admin SDK.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

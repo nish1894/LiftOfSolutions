@@ -1,0 +1,19 @@
+{
+  "indexes": [
+    { "collectionGroup": "conversations", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "lastMessageAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "conversations", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "agentId", "order": "ASCENDING" }, { "fieldPath": "lastMessageAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "conversations", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "customerId", "order": "ASCENDING" }, { "fieldPath": "lastMessageAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "conversations", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "channelId", "order": "ASCENDING" }, { "fieldPath": "lastMessageAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "conversations", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "assignedUserId", "order": "ASCENDING" }, { "fieldPath": "lastMessageAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "conversations", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "channelId", "order": "ASCENDING" }, { "fieldPath": "externalThreadId", "order": "ASCENDING" }] },
+    { "collectionGroup": "agentVersions", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "agentId", "order": "ASCENDING" }, { "fieldPath": "versionNumber", "order": "DESCENDING" }] },
+    { "collectionGroup": "handoffs", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "conversationId", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "usage", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "agentId", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "usage", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "model", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "usage", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "provider", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "knowledgeSources", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "invitations", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "organizationId", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "notifications", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "userId", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] }
+  ],
+  "fieldOverrides": []
+}
