@@ -1,31 +1,36 @@
 import { useState } from "react";
+import { LockIcon, UserCheckIcon } from "lucide-react";
 
-import NavIcon from "../../shared/ui/NavIcon.tsx";
-import type { JoinRequest, Membership, Role } from "../../shared/types.ts";
+import { EmptyState, Stat } from "@/components/app/page.tsx";
+import { StatusPill } from "@/components/app/status-pill.tsx";
+import { Avatar } from "@/components/ui/avatar.tsx";
+import { Button } from "@/components/ui/button.tsx";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card.tsx";
+import { NativeSelect } from "@/components/ui/input.tsx";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table.tsx";
+import { timeAgo } from "@/lib/utils.ts";
+import { ROLE_LABELS } from "@/shared/permissions.ts";
+import { RECORD_STATUS } from "@/shared/statuses.ts";
+import type { JoinRequest, Membership, Role } from "@/shared/types.ts";
 
 export type Decision = "APPROVED" | "REJECTED";
 export type ReviewHandler = (requestId: string, decision: Decision, role: Role) => Promise<void>;
 
 const ROLES: Role[] = ["OWNER", "ADMIN", "AGENT", "VIEWER", "CUSTOM"];
 const DEFAULT_ROLE: Role = "AGENT";
-
-const title = (value: string | null | undefined) =>
-  String(value || "").charAt(0) +
-  String(value || "")
-    .slice(1)
-    .toLowerCase();
-
-function when(value: string | null | undefined) {
-  if (!value) return "";
-  const then = new Date(value).getTime();
-  if (Number.isNaN(then)) return "";
-  const minutes = Math.round((Date.now() - then) / 60000);
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.round(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return new Date(then).toLocaleDateString();
-}
 
 interface PendingRequestProps {
   request: JoinRequest;
@@ -55,57 +60,50 @@ function PendingRequest({ request, isPrime, onReview }: PendingRequestProps) {
   const roles = isPrime ? ROLES : ROLES.filter((item) => item !== "OWNER");
 
   return (
-    <article className="approval-row">
-      <div className="approval-identity">
-        <span className="account-avatar" aria-hidden="true">
-          {(request.display_name || request.email || "?").slice(0, 1).toUpperCase()}
-        </span>
-        <div>
-          <strong>{request.display_name || request.email}</strong>
-          <span>{request.email}</span>
-          <small>Requested {when(request.requested_at)}</small>
+    <li className="grid gap-2 px-5 py-3">
+      <div className="flex flex-wrap items-center gap-3">
+        <Avatar name={request.display_name || request.email} />
+        <div className="grid min-w-0 flex-1">
+          <span className="truncate font-medium">{request.display_name || request.email}</span>
+          <span className="truncate text-sm text-muted-foreground">
+            {request.email} · Requested {timeAgo(request.requested_at)}
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>Role</span>
+            <NativeSelect
+              className="h-8 w-28"
+              value={role}
+              onChange={(event) => setRole(event.target.value as Role)}
+              disabled={Boolean(busy)}
+            >
+              {roles.map((item) => (
+                <option key={item} value={item}>
+                  {ROLE_LABELS[item]}
+                </option>
+              ))}
+            </NativeSelect>
+          </label>
+          <Button size="sm" disabled={Boolean(busy)} onClick={() => review("APPROVED")}>
+            {busy === "APPROVED" ? "Approving…" : "Approve"}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={Boolean(busy)}
+            onClick={() => review("REJECTED")}
+          >
+            {busy === "REJECTED" ? "Rejecting…" : "Reject"}
+          </Button>
         </div>
       </div>
-
-      <div className="approval-actions">
-        <label className="approval-role">
-          <span>Role</span>
-          <select
-            value={role}
-            onChange={(event) => setRole(event.target.value as Role)}
-            disabled={Boolean(busy)}
-          >
-            {roles.map((item) => (
-              <option key={item} value={item}>
-                {title(item)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button
-          type="button"
-          className="btn-primary"
-          disabled={Boolean(busy)}
-          onClick={() => review("APPROVED")}
-        >
-          {busy === "APPROVED" ? "Approving…" : "Approve"}
-        </button>
-        <button
-          type="button"
-          className="btn-quiet"
-          disabled={Boolean(busy)}
-          onClick={() => review("REJECTED")}
-        >
-          {busy === "REJECTED" ? "Rejecting…" : "Reject"}
-        </button>
-      </div>
-
       {error && (
-        <p className="approval-error error-text" role="alert">
+        <p className="text-sm text-danger" role="alert">
           {error}
         </p>
       )}
-    </article>
+    </li>
   );
 }
 
@@ -122,108 +120,100 @@ export default function ApprovalsDashboard({
   canManage,
   onReview,
 }: ApprovalsDashboardProps) {
+  if (!canManage) {
+    return (
+      <EmptyState
+        icon={LockIcon}
+        title="You can't review access requests"
+        description="Only Prime and delegated managers can review access requests."
+      />
+    );
+  }
+
   const pending = joinRequests.filter((item) => item.status === "PENDING");
   const decided = joinRequests.filter((item) => item.status !== "PENDING").slice(0, 10);
+  const countOf = (status: string) => joinRequests.filter((item) => item.status === status).length;
   const isPrime = membership.role === "PRIME";
 
-  if (!canManage)
-    return (
-      <section className="platform-panel">
-        <div className="platform-empty">
-          Only Prime and delegated managers can review access requests.
-        </div>
-      </section>
-    );
-
   return (
-    <div className="settings-stack">
-      <section className="metric-grid metric-grid-3">
-        {[
-          {
-            label: "Awaiting your decision",
-            tint: "amber",
-            icon: "approvals",
-            value: pending.length,
-          },
-          {
-            label: "Approved",
-            tint: "mint",
-            icon: "team",
-            value: joinRequests.filter((item) => item.status === "APPROVED").length,
-          },
-          {
-            label: "Rejected",
-            tint: "blue",
-            icon: "customers",
-            value: joinRequests.filter((item) => item.status === "REJECTED").length,
-          },
-        ].map((tile) => (
-          <article className="metric-card" key={tile.label} data-tint={tile.tint}>
-            <span className="metric-chip" aria-hidden="true">
-              <NavIcon name={tile.icon} size={19} />
-            </span>
-            <span className="metric-value">{tile.value}</span>
-            <strong>{tile.label}</strong>
-          </article>
-        ))}
-      </section>
+    <div className="grid gap-6">
+      <dl className="grid gap-3 sm:grid-cols-3">
+        <Stat label="Waiting for a decision" value={pending.length} />
+        <Stat label="Approved" value={countOf("APPROVED")} />
+        <Stat label="Rejected" value={countOf("REJECTED")} />
+      </dl>
 
-      <section className="platform-panel">
-        <div className="panel-heading">
-          <div>
-            <h2>Access requests</h2>
-            <p>
-              People who entered this organization&apos;s join code. Approving adds them as an
-              active member straight away — the role defaults to Agent, so approving is one click
-              unless you want to change it.
-            </p>
+      <Card>
+        <CardHeader>
+          <div className="grid gap-1">
+            <CardTitle>Waiting for a decision</CardTitle>
+            <CardDescription>
+              Approving adds the person as an active member straight away. The role defaults to
+              Agent, so approving is one click unless you want to change it.
+            </CardDescription>
           </div>
-          {pending.length > 0 && <span className="resource-status">{pending.length} pending</span>}
-        </div>
-
-        {pending.length === 0 ? (
-          <div className="platform-empty">
-            No one is waiting for access. Share the join code from the Organization section to
-            invite someone.
-          </div>
-        ) : (
-          <div className="approval-list">
-            {pending.map((request) => (
-              <PendingRequest
-                key={request.id}
-                request={request}
-                isPrime={isPrime}
-                onReview={onReview}
-              />
-            ))}
-          </div>
-        )}
-      </section>
+        </CardHeader>
+        <CardContent className="p-0 pt-4">
+          {pending.length === 0 ? (
+            <EmptyState
+              className="m-5 mt-0"
+              icon={UserCheckIcon}
+              title="No one is waiting for access"
+              description="Share the join code from Settings to invite someone."
+            />
+          ) : (
+            <ul className="divide-y border-t">
+              {pending.map((request) => (
+                <PendingRequest
+                  key={request.id}
+                  request={request}
+                  isPrime={isPrime}
+                  onReview={onReview}
+                />
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
 
       {decided.length > 0 && (
-        <section className="platform-panel">
-          <div className="panel-heading">
-            <div>
-              <h2>Recent decisions</h2>
-              <p>The last requests you and other managers reviewed.</p>
+        <Card>
+          <CardHeader>
+            <div className="grid gap-1">
+              <CardTitle>Recent decisions</CardTitle>
+              <CardDescription>The last requests you and other managers reviewed.</CardDescription>
             </div>
-          </div>
-          <div className="resource-list">
-            {decided.map((request) => (
-              <article className="resource-row" key={request.id}>
-                <div>
-                  <strong>{request.display_name || request.email}</strong>
-                  <span>{request.email}</span>
-                </div>
-                <span
-                  className={`resource-status ${request.status === "APPROVED" ? "is-approved" : "is-rejected"}`}
-                >
-                  {title(request.status)} {when(request.reviewed_at)}
-                </span>
-              </article>
-            ))}
-          </div>
-        </section>
+          </CardHeader>
+          <CardContent className="p-0 pt-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Person</TableHead>
+                  <TableHead>Decision</TableHead>
+                  <TableHead>Reviewed</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {decided.map((request) => (
+                  <TableRow key={request.id}>
+                    <TableCell>
+                      <span className="block font-medium">
+                        {request.display_name || request.email}
+                      </span>
+                      <span className="text-xs text-muted-foreground">{request.email}</span>
+                    </TableCell>
+                    <TableCell>
+                      <StatusPill map={RECORD_STATUS} value={request.status} />
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {timeAgo(request.reviewed_at)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

@@ -9,6 +9,7 @@ export interface AgentConfiguration {
   tone: string | null;
   languages: string[];
   knowledgeEnabled: boolean;
+  knowledgeSourceIds: string[];
 }
 export interface GenerateRequest {
   organizationId: string;

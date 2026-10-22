@@ -90,6 +90,7 @@ export function aiAgent(
     tone: agent.tone,
     languages: agent.languages,
     knowledgeEnabled: agent.knowledgeEnabled,
+    knowledgeSourceIds: agent.knowledgeSourceIds,
   };
 }
 

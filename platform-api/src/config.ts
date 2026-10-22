@@ -32,10 +32,15 @@ const schema = z.object({
     .string()
     .default("http://localhost:5173,http://localhost:3000"),
   FRONTEND_URL: z.string().url().default("http://localhost:5173"),
-  AI_SERVICE_MODE: z.enum(["mock", "http"]).default("mock"),
+  AI_SERVICE_MODE: z.enum(["mock", "http", "rag"]).default("mock"),
   AI_SERVICE_URL: z.string().url().default("http://rag-service:8010"),
+  AI_SERVICE_SERVER_ID: z.string().min(1).max(128).default("chatbot-platform"),
   AI_SERVICE_API_KEY: z.string().optional(),
   AI_SERVICE_TIMEOUT_MS: z.coerce.number().int().positive().default(30_000),
+  AI_SERVICE_DOCUMENT_BASE_URL: z
+    .string()
+    .url()
+    .default("http://rag-files"),
   STORAGE_BACKEND: z.enum(["local", "s3"]).default("local"),
   LOCAL_STORAGE_PATH: z.string().default("./data/uploads"),
   MAX_UPLOAD_BYTES: z.coerce

@@ -17,9 +17,16 @@ Open:
 
 - Platform: `http://localhost:5173`
 - API health: `http://localhost:8000/health`
+- RAG health: `http://localhost:8010/health`
 - Firebase Emulator UI: `http://localhost:4000`
 
-The Docker setup uses local Firebase Auth and Firestore emulators. Create an email/password account in the app. The default AI adapter is deterministic and requires no Python service.
+The Docker setup uses local Firebase Auth and Firestore emulators. It builds the
+sibling `../LiftOff-Sol-Rag` repository as a read-only source dependency and
+connects Node to its FastAPI service. Local RAG data uses the RAG service's test
+chunk store; no Pinecone key is required for this mode.
+
+The backend owns the integration adapter. The RAG repository is not modified by
+this project.
 
 ## Local development
 
@@ -28,7 +35,7 @@ Node 18 is too old for this project. Use Node 24:
 ```bash
 nvm install 24
 nvm use 24
-docker compose up -d firebase-emulator redis
+docker compose up -d firebase-emulator redis rag-service rag-files
 ```
 
 Run the API:
@@ -39,6 +46,11 @@ npm ci
 FIREBASE_PROJECT_ID=liftofsolutions-123 \
 FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 \
 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 \
+AI_SERVICE_MODE=rag \
+AI_SERVICE_URL=http://127.0.0.1:8010 \
+AI_SERVICE_SERVER_ID=chatbot-platform \
+AI_SERVICE_API_KEY=replace-with-the-rag-server-secret \
+AI_SERVICE_DOCUMENT_BASE_URL=http://127.0.0.1:8081 \
 npm run dev
 ```
 

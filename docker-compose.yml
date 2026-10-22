@@ -41,6 +41,41 @@ services:
       timeout: 3s
       retries: 10
 
+  rag-service:
+    build:
+      context: ../LiftOff-Sol-Rag
+      dockerfile_inline: |
+        FROM python:3.12-slim
+        ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+        WORKDIR /app
+        COPY . .
+        RUN pip install --no-cache-dir -r requirements.txt "uvicorn[standard]>=0.52.2"
+        EXPOSE 8010
+        CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8010"]
+    environment:
+      RAG_SERVER_CREDENTIALS: '{"chatbot-platform":{"secret":"${AI_SERVICE_API_KEY:-local-rag-secret-change-me}"}}'
+      RAG_TEST_MODE: "1"
+      RAG_LOCAL_STORE_DIR: /app/data/chunks
+    ports: ["8010:8010"]
+    volumes:
+      - rag_data:/app/data/chunks
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8010/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  rag-files:
+    image: nginx:1.29-alpine
+    ports: ["8081:80"]
+    volumes:
+      - upload_data:/usr/share/nginx/html:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   api:
     build:
       context: ./platform-api
@@ -55,9 +90,11 @@ services:
       FIREBASE_SERVICE_ACCOUNT_JSON: ${FIREBASE_SERVICE_ACCOUNT_JSON:-}
       FIRESTORE_EMULATOR_HOST: ${FIRESTORE_EMULATOR_HOST-firebase-emulator:8080}
       FIREBASE_AUTH_EMULATOR_HOST: ${FIREBASE_AUTH_EMULATOR_HOST-firebase-emulator:9099}
-      AI_SERVICE_MODE: ${AI_SERVICE_MODE:-mock}
+      AI_SERVICE_MODE: ${AI_SERVICE_MODE:-rag}
       AI_SERVICE_URL: ${AI_SERVICE_URL:-http://rag-service:8010}
-      AI_SERVICE_API_KEY: ${AI_SERVICE_API_KEY:-}
+      AI_SERVICE_SERVER_ID: ${AI_SERVICE_SERVER_ID:-chatbot-platform}
+      AI_SERVICE_API_KEY: ${AI_SERVICE_API_KEY:-local-rag-secret-change-me}
+      AI_SERVICE_DOCUMENT_BASE_URL: ${AI_SERVICE_DOCUMENT_BASE_URL:-http://rag-files}
       STORAGE_BACKEND: local
       LOCAL_STORAGE_PATH: /app/data/uploads
       S3_ENDPOINT_URL: ${S3_ENDPOINT_URL:-}
@@ -71,6 +108,10 @@ services:
       firebase-emulator:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      rag-service:
+        condition: service_healthy
+      rag-files:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8000/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
@@ -99,3 +140,4 @@ volumes:
   firebase_data:
   redis_data:
   upload_data:
+  rag_data:

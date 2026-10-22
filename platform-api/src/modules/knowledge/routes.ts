@@ -320,6 +320,9 @@ export function knowledgeRoutes(ai: AiService, storage: ObjectStorage) {
           data,
           part.mimetype,
         );
+        const sourceUri = storage.signedReadUrl
+          ? await storage.signedReadUrl(stored.key)
+          : undefined;
         const documentRef = app.store.resource(
           request.organization!.id,
           "knowledgeDocuments",
@@ -329,6 +332,7 @@ export function knowledgeRoutes(ai: AiService, storage: ObjectStorage) {
           sourceId,
           documentId: documentRef.id,
           storageKey: stored.key,
+          ...(sourceUri ? { sourceUri } : {}),
           metadata: {
             title: part.filename,
             mimeType: part.mimetype,
@@ -407,11 +411,15 @@ export function knowledgeRoutes(ai: AiService, storage: ObjectStorage) {
         );
         const value = document<KnowledgeDocument>(await ref.get());
         if (!value) throw notFound("knowledge_document");
+        const sourceUri = storage.signedReadUrl
+          ? await storage.signedReadUrl(value.storageKey)
+          : undefined;
         const submitted = await ai.submitKnowledge({
           organizationId: request.organization!.id,
           sourceId: value.sourceId,
           documentId,
           storageKey: value.storageKey,
+          ...(sourceUri ? { sourceUri } : {}),
           metadata: value.metadata,
         });
         const jobRef = app.store.resource(request.organization!.id, "jobs");

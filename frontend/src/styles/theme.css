@@ -1,0 +1,175 @@
+/* Lift Off design tokens.
+   Palette follows the redesign brief: cool grays with an indigo brand used
+   only for actions and state. Variable names follow shadcn/ui, so components
+   from the free ShadcnStore / shadcn-admin templates need no edits.
+   Values are hex on purpose: easy to read and to tweak by hand. */
+
+:root {
+  --radius: 0.625rem;
+
+  --background: #ffffff;
+  --foreground: #101828;
+  --card: #ffffff;
+  --card-foreground: #101828;
+  --popover: #ffffff;
+  --popover-foreground: #101828;
+  --primary: #4f46e5;
+  --primary-foreground: #ffffff;
+  --secondary: #f2f4f7;
+  --secondary-foreground: #344054;
+  --muted: #f2f4f7;
+  --muted-foreground: #475467;
+  --accent: #eef2ff; /* brand wash: selected rows, active nav */
+  --accent-foreground: #3730a3;
+  --destructive: #d92d20;
+  --destructive-foreground: #ffffff;
+  --border: #eaecf0;
+  --input: #d0d5dd;
+  --ring: #4f46e5;
+
+  --sidebar: #f9fafb;
+  --sidebar-foreground: #344054;
+  --sidebar-accent: #eef2ff;
+  --sidebar-accent-foreground: #3730a3;
+  --sidebar-border: #eaecf0;
+
+  --chart-1: #4f46e5;
+  --chart-2: #36bffa;
+
+  /* Semantic states. Text uses the 700 step so it stays readable on its wash. */
+  --success: #067647;
+  --success-bg: #ecfdf3;
+  --warning: #b54708;
+  --warning-bg: #fffaeb;
+  --danger: #b42318;
+  --danger-bg: #fef3f2;
+  --info: #175cd3;
+  --info-bg: #eff8ff;
+  --neutral: #475467;
+  --neutral-bg: #f2f4f7;
+  --violet: #5925dc;
+  --violet-bg: #f4f3ff;
+  --orange: #c4320a;
+  --orange-bg: #fff6ed;
+
+  /* Grounding */
+  --citation-fg: #3538cd;
+  --citation-bg: #eef4ff;
+  --citation-border: #c7d7fe;
+}
+
+.dark {
+  --background: #0c111d;
+  --foreground: #f5f5f6;
+  --card: #161b26;
+  --card-foreground: #f5f5f6;
+  --popover: #161b26;
+  --popover-foreground: #f5f5f6;
+  --primary: #5e5ce6; /* a touch deeper than #6366f1 so white text stays AA */
+  --primary-foreground: #ffffff;
+  --secondary: #1f242f;
+  --secondary-foreground: #cecfd2;
+  --muted: #1f242f;
+  --muted-foreground: #94969c;
+  --accent: #2d3282;
+  --accent-foreground: #e0eaff;
+  --destructive: #d92d20;
+  --destructive-foreground: #ffffff;
+  --border: #333741;
+  --input: #333741;
+  --ring: #6366f1;
+
+  --sidebar: #0a0d14;
+  --sidebar-foreground: #cecfd2;
+  --sidebar-accent: #2d3282;
+  --sidebar-accent-foreground: #e0eaff;
+  --sidebar-border: #1f242f;
+
+  --chart-1: #6366f1;
+  --chart-2: #36bffa;
+
+  --success: #47cd89;
+  --success-bg: #053321;
+  --warning: #fdb022;
+  --warning-bg: #4e1d09;
+  --danger: #f97066;
+  --danger-bg: #55160c;
+  --info: #53b1fd;
+  --info-bg: #102a56;
+  --neutral: #94969c;
+  --neutral-bg: #1f242f;
+  --violet: #9b8afb;
+  --violet-bg: #27115f;
+  --orange: #f38744;
+  --orange-bg: #511c10;
+
+  --citation-fg: #a4bcfd;
+  --citation-bg: #1f235b;
+  --citation-border: #2d3282;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-citation: var(--citation-fg);
+  --color-citation-bg: var(--citation-bg);
+  --color-citation-border: var(--citation-border);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* Type scale: seven sizes. Hierarchy comes from weight and colour first. */
+@theme {
+  --text-xs: 0.75rem; /* 12 / 18  metadata, timestamps */
+  --text-xs--line-height: 1.125rem;
+  --text-sm: 0.875rem; /* 14 / 20  labels, table cells */
+  --text-sm--line-height: 1.25rem;
+  --text-base: 0.875rem; /* 14 / 20  body */
+  --text-base--line-height: 1.25rem;
+  --text-md: 1rem; /* 16 / 24  card titles */
+  --text-md--line-height: 1.5rem;
+  --text-lg: 1.125rem; /* 18 / 28  section headings */
+  --text-lg--line-height: 1.75rem;
+  --text-xl: 1.5rem; /* 24 / 32  page titles */
+  --text-xl--line-height: 2rem;
+  --text-2xl: 1.875rem; /* 30 / 38  metric values */
+  --text-2xl--line-height: 2.375rem;
+  --text-display: 3rem; /* 48 / 56  marketing hero only */
+  --text-display--line-height: 3.5rem;
+}

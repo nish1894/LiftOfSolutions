@@ -1,30 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { BellIcon } from "lucide-react";
 
-import { apiRequest } from "../../shared/api/client.ts";
-import type { Notification, NotificationType } from "../../shared/types.ts";
-import { useNotifications, workspaceKeys } from "../platform/queries.ts";
+import { Button } from "@/components/ui/button.tsx";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/menu.tsx";
+import { cn, timeAgo } from "@/lib/utils.ts";
+import { apiRequest } from "@/shared/api/client.ts";
+import { notificationsKey, useNotifications } from "@/shared/queries.ts";
+import type { Notification } from "@/shared/types.ts";
 
-/* Each notification type carries the section its "View" action should open.
-   The backend sends `section`; these are the labels and glyphs for it. */
-const TYPE_META: Record<NotificationType, { glyph: string; action: string | null }> = {
-  "join_request.created": { glyph: "\u{1F464}", action: "Review request" },
-  "join_request.approved": { glyph: "\u2705", action: "Open workspace" },
-  "join_request.rejected": { glyph: "\u{1F6AB}", action: null },
+/* The label of each notification type's action; null means no action. */
+const ACTIONS: Record<string, string | null> = {
+  "join_request.created": "Review request",
+  "join_request.approved": "Open workspace",
+  "join_request.rejected": null,
 };
-
-function relativeTime(value: string | null | undefined) {
-  if (!value) return "";
-  const then = new Date(value).getTime();
-  if (Number.isNaN(then)) return "";
-  const seconds = Math.round((Date.now() - then) / 1000);
-  if (seconds < 60) return "just now";
-  const minutes = Math.round(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.round(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.round(hours / 24)}d ago`;
-}
 
 interface NotificationBellProps {
   onOpenSection?: (section: string, organizationId: string | null) => void;
@@ -32,33 +22,13 @@ interface NotificationBellProps {
 }
 
 export default function NotificationBell({ onOpenSection, onChanged }: NotificationBellProps) {
-  // Polling, refetch-on-focus and cache invalidation all come from the query
-  // layer now; this component only owns the popover.
   const { data, error, refetch } = useNotifications();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const items = data?.items ?? [];
   const unread = data?.unread_count ?? 0;
-  const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: workspaceKeys.notifications() });
-
-  useEffect(() => {
-    if (!open) return undefined;
-    const onPointerDown = (event: MouseEvent) => {
-      if (!containerRef.current?.contains(event.target as Node)) setOpen(false);
-    };
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("mousedown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open]);
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: notificationsKey });
 
   async function markRead(notification: Notification) {
     if (notification.read) return;
@@ -81,83 +51,86 @@ export default function NotificationBell({ onOpenSection, onChanged }: Notificat
     await markRead(notification);
     setOpen(false);
     if (notification.section) onOpenSection?.(notification.section, notification.organization_id);
-    // An approval changes the viewer's own memberships, so the shell needs to
-    // refetch before the new workspace can be selected.
+    // An approval changes the viewer's own memberships, so the account needs
+    // to refetch before the new workspace can be selected.
     if (notification.type === "join_request.approved") await onChanged?.();
   }
 
+  function handleOpenChange(next: boolean) {
+    setOpen(next);
+    if (next) void refetch();
+  }
+
   return (
-    <div className="notification-bell" ref={containerRef}>
-      <button
-        type="button"
-        className="notification-trigger"
-        aria-haspopup="true"
-        aria-expanded={open}
-        aria-label={unread ? `Notifications, ${unread} unread` : "Notifications"}
-        onClick={() => {
-          setOpen((current) => !current);
-          if (!open) refetch();
-        }}
-      >
-        <span aria-hidden="true">🔔</span>
-        {unread > 0 && <span className="notification-count">{unread > 9 ? "9+" : unread}</span>}
-      </button>
-
-      {open && (
-        <div className="notification-panel" role="dialog" aria-label="Notifications">
-          <div className="notification-panel-head">
-            <strong>Notifications</strong>
-            {unread > 0 && (
-              <button type="button" className="link-button" onClick={markAllRead}>
-                Mark all read
-              </button>
-            )}
-          </div>
-
-          {error && <p className="notification-empty error-text">{error.message}</p>}
-          {!error && items.length === 0 && (
-            <p className="notification-empty">You are all caught up.</p>
+    <Popover open={open} onOpenChange={handleOpenChange}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="relative"
+          aria-label={unread ? `Notifications, ${unread} unread` : "Notifications"}
+        >
+          <BellIcon />
+          {unread > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 rounded-full bg-primary px-1 text-xs leading-4 font-semibold text-primary-foreground">
+              {unread > 9 ? "9+" : unread}
+            </span>
           )}
-
-          <ul className="notification-list">
-            {items.map((notification) => {
-              const meta = TYPE_META[notification.type] ?? { glyph: "\u2022", action: null };
-              return (
-                <li key={notification.id} className={notification.read ? "" : "is-unread"}>
-                  <span className="notification-glyph" aria-hidden="true">
-                    {meta.glyph || "•"}
-                  </span>
-                  <div>
-                    <strong>{notification.title}</strong>
-                    <p>{notification.body}</p>
-                    <div className="notification-meta">
-                      <span>{relativeTime(notification.created_at)}</span>
-                      {notification.section && meta.action && (
-                        <button
-                          type="button"
-                          className="link-button"
-                          onClick={() => activate(notification)}
-                        >
-                          {meta.action}
-                        </button>
-                      )}
-                      {!notification.read && (
-                        <button
-                          type="button"
-                          className="link-button"
-                          onClick={() => markRead(notification)}
-                        >
-                          Mark read
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent aria-label="Notifications">
+        <div className="flex items-center justify-between border-b px-4 py-3">
+          <p className="text-sm font-semibold">Notifications</p>
+          {unread > 0 && (
+            <Button variant="link" className="text-xs" onClick={markAllRead}>
+              Mark all read
+            </Button>
+          )}
         </div>
-      )}
-    </div>
+
+        {error && <p className="px-4 py-6 text-sm text-danger">{error.message}</p>}
+        {!error && items.length === 0 && (
+          <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+            You're all caught up.
+          </p>
+        )}
+
+        <ul className="max-h-96 divide-y overflow-y-auto">
+          {items.map((notification) => {
+            const action = ACTIONS[notification.type] ?? null;
+            return (
+              <li
+                key={notification.id}
+                className={cn("grid gap-1 px-4 py-3", !notification.read && "bg-accent/40")}
+              >
+                <p className="text-sm font-medium">{notification.title}</p>
+                <p className="text-sm text-muted-foreground">{notification.body}</p>
+                <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                  <span>{timeAgo(notification.created_at)}</span>
+                  {notification.section && action && (
+                    <Button
+                      variant="link"
+                      className="text-xs"
+                      onClick={() => activate(notification)}
+                    >
+                      {action}
+                    </Button>
+                  )}
+                  {!notification.read && (
+                    <Button
+                      variant="link"
+                      className="text-xs"
+                      onClick={() => markRead(notification)}
+                    >
+                      Mark read
+                    </Button>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </PopoverContent>
+    </Popover>
   );
 }

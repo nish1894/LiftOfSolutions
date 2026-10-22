@@ -1,14 +1,58 @@
-/* Entry point for the stylesheet. The rules were one 2,000-line file; they are
-   split by concern here so a feature's styles can be found and removed with it.
-   Order matters: tokens define the custom properties everything else reads.
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "./theme.css";
 
-   These remain global rather than CSS Modules. Converting 2,000 lines of
-   hand-tuned selectors wholesale risks silent visual regressions that no test
-   in this repo can catch; new features should co-locate a *.module.css instead
-   and this file will shrink as they do. */
+/* Dark mode follows a class on <html>, set before first paint by index.html
+   and afterwards by src/shared/theme.ts. */
+@custom-variant dark (&:where(.dark, .dark *));
 
-@import "./tokens.css";
-@import "./auth.css";
-@import "./home.css";
-@import "./platform.css";
-@import "./features.css";
+@layer base {
+  /* Pseudo-elements too: dividers drawn with ::after otherwise fall back to currentColor. */
+  *,
+  ::before,
+  ::after {
+    border-color: var(--border);
+    outline-color: color-mix(in srgb, var(--ring) 50%, transparent);
+  }
+
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+    /* Inter's single-storey "a" and open digits. */
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  /* Controls draw their own focus ring; this covers links and everything else. */
+  :focus-visible {
+    outline-width: 2px;
+    outline-style: solid;
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

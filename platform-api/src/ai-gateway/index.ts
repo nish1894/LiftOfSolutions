@@ -1,6 +1,7 @@
 import type { Config } from "../config.js";
 import { HttpAiService } from "./http.js";
 import { MockAiService } from "./mock.js";
+import { RagAiService } from "./rag.js";
 import type { AiService } from "./types.js";
 export type {
   AiService,
@@ -9,6 +10,8 @@ export type {
   GenerateResult,
 } from "./types.js";
 export const createAiService = (config: Config): AiService =>
-  config.AI_SERVICE_MODE === "http"
-    ? new HttpAiService(config)
-    : new MockAiService();
+  config.AI_SERVICE_MODE === "rag"
+    ? new RagAiService(config)
+    : config.AI_SERVICE_MODE === "http"
+      ? new HttpAiService(config)
+      : new MockAiService();

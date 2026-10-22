@@ -19,6 +19,7 @@ describe("mock AI boundary", () => {
         tone: null,
         languages: ["en"],
         knowledgeEnabled: false,
+        knowledgeSourceIds: [],
       },
     });
     expect(result.content).toBe("[Support] hello world");
