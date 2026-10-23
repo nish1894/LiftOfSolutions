@@ -35,7 +35,7 @@
         <text class="er-f link" x="38" y="110">membership.org_id</text><text class="er-ty" x="310" y="110" text-anchor="end">uuid FK</text>
 
         <!-- invitations (collection) -->
-        <rect class="er-box" x="24" y="368" width="300" height="320" rx="8"/>
+        <rect class="er-box" x="24" y="368" width="300" height="348" rx="8"/>
         <rect class="er-linkrow" x="25" y="436" width="298" height="28"/>
         <path class="er-head-main" d="M24 376 Q24 368 32 368 H316 Q324 368 324 376 V408 H24 Z"/>
         <text class="er-title-main" x="38" y="393">invitations</text>
@@ -49,16 +49,18 @@
         <line class="er-sep" x1="24" y1="604" x2="324" y2="604"/>
         <line class="er-sep" x1="24" y1="632" x2="324" y2="632"/>
         <line class="er-sep" x1="24" y1="660" x2="324" y2="660"/>
+        <line class="er-sep" x1="24" y1="688" x2="324" y2="688"/>
         <text class="er-f" x="38" y="426">_id</text><text class="er-ty" x="310" y="426" text-anchor="end">uuid <tspan class="er-pk">PK</tspan></text>
         <text class="er-f link" x="38" y="454">org_id</text><text class="er-ty" x="310" y="454" text-anchor="end">uuid FK</text>
         <text class="er-f" x="38" y="482">email</text><text class="er-ty" x="310" y="482" text-anchor="end">string</text>
         <text class="er-f" x="38" y="510">role</text><text class="er-ty" x="310" y="510" text-anchor="end">owner | admin | member</text>
         <text class="er-f" x="38" y="538">token_hash</text><text class="er-ty" x="310" y="538" text-anchor="end">string <tspan class="er-pk">UK</tspan></text>
-        <text class="er-f" x="38" y="566">invited_by</text><text class="er-ty" x="310" y="566" text-anchor="end">uuid FK → users</text>
-        <text class="er-f" x="38" y="594">status</text><text class="er-ty" x="310" y="594" text-anchor="end">enum</text>
-        <text class="er-f" x="38" y="622">expires_at</text><text class="er-ty" x="310" y="622" text-anchor="end">date</text>
-        <text class="er-f" x="38" y="650">created_at</text><text class="er-ty" x="310" y="650" text-anchor="end">date</text>
-        <text class="er-f" x="38" y="678">updated_at</text><text class="er-ty" x="310" y="678" text-anchor="end">date</text>
+        <text class="er-f" x="38" y="566">pending_key?</text><text class="er-ty" x="310" y="566" text-anchor="end">string <tspan class="er-pk">UK</tspan></text>
+        <text class="er-f" x="38" y="594">invited_by</text><text class="er-ty" x="310" y="594" text-anchor="end">uuid FK → users</text>
+        <text class="er-f" x="38" y="622">status</text><text class="er-ty" x="310" y="622" text-anchor="end">enum</text>
+        <text class="er-f" x="38" y="650">expires_at</text><text class="er-ty" x="310" y="650" text-anchor="end">date</text>
+        <text class="er-f" x="38" y="678">created_at</text><text class="er-ty" x="310" y="678" text-anchor="end">date</text>
+        <text class="er-f" x="38" y="706">updated_at</text><text class="er-ty" x="310" y="706" text-anchor="end">date</text>
 
         <!-- plans (reference) -->
         <rect class="er-box-ref" x="536" y="24" width="300" height="68" rx="8"/>
@@ -98,16 +100,14 @@
         <text class="er-f link" x="550" y="478">settings</text><text class="er-ty" x="822" y="478" text-anchor="end">object</text>
 
         <!-- settings (embedded in organizations) -->
-        <rect class="er-box" x="536" y="536" width="300" height="124" rx="8"/>
+        <rect class="er-box" x="536" y="536" width="300" height="96" rx="8"/>
         <path class="er-head" d="M536.5 544 Q536.5 536.5 544 536.5 H828 Q835.5 536.5 835.5 544 V576 H536.5 Z"/>
         <text class="er-title" x="550" y="561">settings</text>
         <text class="er-tag" x="822" y="561" text-anchor="end">embedded</text>
         <line class="er-sep" x1="536" y1="576" x2="836" y2="576"/>
         <line class="er-sep" x1="536" y1="604" x2="836" y2="604"/>
-        <line class="er-sep" x1="536" y1="632" x2="836" y2="632"/>
         <text class="er-f" x="550" y="594">default_role</text><text class="er-ty" x="822" y="594" text-anchor="end">admin | member</text>
-        <text class="er-f" x="550" y="622">invite_only</text><text class="er-ty" x="822" y="622" text-anchor="end">bool</text>
-        <text class="er-f" x="550" y="650">allowed_providers</text><text class="er-ty" x="822" y="650" text-anchor="end">provider[]</text>
+        <text class="er-f" x="550" y="622">allowed_providers</text><text class="er-ty" x="822" y="622" text-anchor="end">provider[]</text>
 
         <!-- organizations to users: one to one-or-more (through membership.org_id) -->
         <path class="er-line" d="M324 106 H400 V194 H536"/>

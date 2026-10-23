@@ -8,7 +8,6 @@
     "created_by": "8f3c2a1e-5b7d-4c9a-a1f2-3e6b9d0c7a41",
     "settings": {
       "default_role": "member",
-      "invite_only": true,
       "allowed_providers": [
         "google",
         "email",
@@ -24,6 +23,7 @@
     "email": "ravi@acmerobotics.com",
     "role": "member",
     "token_hash": "9f2c4e7a1b3d5f6081a2c3e4f5061728394a5b6c7d8e9f0a1b2c3d4e5f607182",
+    "pending_key": "3b9e7c12-4f6a-4d8e-9a21-7c5b0e8f1d34:ravi@acmerobotics.com",
     "invited_by": "8f3c2a1e-5b7d-4c9a-a1f2-3e6b9d0c7a41",
     "status": "pending",
     "expires_at": "2026-10-05T12:15:00Z",

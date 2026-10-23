@@ -2,10 +2,13 @@
 // plan_id points to plans in the Billing schema; that collection is set up there.
 // Run with mongosh:  mongosh "<connection string>/<db>" organizations.mongo.js
 // Safe to re-run. Extra fields are allowed, so the schema stays flexible.
+// Firestore with MongoDB compatibility doesn't run validators ($jsonSchema, collMod):
+// there, skip the validator part and let the API check the same rules. The indexes work on both.
+// If an earlier version of this file was run, drop invitations.pending_invite_unique first.
 
 const uuid = {
   bsonType: "string",
-  pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+  pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$", // v4
 };
 const timestamps = {
   created_at: { bsonType: "date" },
@@ -29,10 +32,9 @@ const organizationsValidator = {
       deleted_at: { bsonType: "date" },
       settings: {
         bsonType: "object",
-        required: ["default_role", "invite_only", "allowed_providers"],
+        required: ["default_role", "allowed_providers"],
         properties: {
           default_role: { enum: ["admin", "member"] },
-          invite_only: { bsonType: "bool" },
           allowed_providers: {
             bsonType: "array",
             minItems: 1,
@@ -61,10 +63,15 @@ const invitationsValidator = {
       email: { bsonType: "string", pattern: "^[^@\\sA-Z]+@[^@\\sA-Z]+$" },
       role,
       token_hash: { bsonType: "string", pattern: "^[0-9a-f]{64}$" },
+      pending_key: { bsonType: "string", minLength: 1 }, // "{org_id}:{email}" while pending
       invited_by: uuid,
       status: { enum: ["pending", "accepted", "revoked", "expired"] },
       expires_at: { bsonType: "date" },
       ...timestamps,
+    },
+    // pending_key exists only on a pending invite. "Pending needs pending_key" is checked in code.
+    dependencies: {
+      pending_key: { properties: { status: { enum: ["pending"] } } },
     },
   },
 };
@@ -87,10 +94,11 @@ db.organizations.createIndex({ slug: 1 }, { name: "slug_unique", unique: true })
 // organizations: find every org on a plan (e.g. before retiring it).
 db.organizations.createIndex({ plan_id: 1 }, { name: "plan_id" });
 
-// UNIQUE together: invitations.org_id + email, only while status is "pending".
+// UNIQUE: invitations.pending_key, so one open invite per person per org. Sparse, because the
+// field exists only while pending (Firestore with MongoDB compatibility has no partial indexes).
 db.invitations.createIndex(
-  { org_id: 1, email: 1 },
-  { name: "pending_invite_unique", unique: true, partialFilterExpression: { status: "pending" } },
+  { pending_key: 1 },
+  { name: "pending_key_unique", unique: true, sparse: true },
 );
 
 // UNIQUE: invitations.token_hash. Finds the invite when someone opens the link.

@@ -331,6 +331,13 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     { preHandler: authenticate },
     async (request) => {
       const body = parse(z.object({ token: z.string().min(20) }), request.body);
+      // The invite is matched by email, so the person must have proved they own that address.
+      if (!request.auth!.user.email_verified)
+        throw new AppError(
+          "EMAIL_NOT_VERIFIED",
+          "Verify your email address before accepting an invitation.",
+          403,
+        );
       const invitationRef = app.store.db
         .collection("invitations")
         .doc(body.token);
