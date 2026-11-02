@@ -9,8 +9,8 @@ interface PillProps {
   className?: string;
 }
 
-/* Badge look from the template. Each tone reads a fg/bg token pair from
-   theme.css, so both themes work. */
+/* Status badge: compact corners, tinted wash and matching border.
+   Each tone reads text/wash/border tokens from theme.css, so both themes work. */
 export function Pill({ tone = "neutral", children, className }: PillProps) {
   return (
     <span
@@ -21,7 +21,7 @@ export function Pill({ tone = "neutral", children, className }: PillProps) {
       style={{
         color: `var(--${tone})`,
         background: `var(--${tone}-bg)`,
-        borderColor: `color-mix(in srgb, var(--${tone}) 25%, transparent)`,
+        borderColor: `var(--${tone}-border)`,
       }}
     >
       {children}
@@ -36,7 +36,10 @@ interface StatusPillProps {
 }
 
 export function StatusPill({ map, value, className }: StatusPillProps) {
-  const meta = map[value ?? ""] ?? { label: sentenceCase(value) || "Unknown", tone: "neutral" };
+  const meta = map[value ?? ""] ?? {
+    label: sentenceCase(value) || "Unknown",
+    tone: "neutral",
+  };
   const Icon = meta.icon;
   return (
     <Pill tone={meta.tone} className={className}>

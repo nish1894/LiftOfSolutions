@@ -6,6 +6,7 @@ import { Toaster } from "sonner";
 
 // Self-hosted variable font: one file, no third-party request.
 import "@fontsource-variable/inter";
+import "@fontsource-variable/jetbrains-mono";
 import "./styles/index.css";
 
 import App from "./App.tsx";
@@ -27,6 +28,9 @@ const queryClient = new QueryClient({
       retry: (failureCount: number, error: unknown) =>
         failureCount < 2 &&
         ![400, 401, 403, 404, 409, 422].includes((error as { status?: number })?.status ?? 0),
+      // Otherwise every page that shares a failed list (e.g. knowledge in the sidebar badge and
+      // on Overview) asks again on arrival. Window focus and "Try again" still refetch.
+      retryOnMount: false,
     },
   },
 });

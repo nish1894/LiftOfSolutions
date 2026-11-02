@@ -5,10 +5,10 @@ import { toast } from "sonner";
 import {
   EmptyState,
   Field,
+  LoadError,
   LoadingRows,
   Notice,
   PageContainer,
-  PageHeader,
 } from "@/components/app/page.tsx";
 import { Pill } from "@/components/app/status-pill.tsx";
 import { Button } from "@/components/ui/button.tsx";
@@ -28,13 +28,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table.tsx";
+import SettingsHeader from "@/features/settings/SettingsHeader.tsx";
 import { NoAccess } from "@/features/shell/NotFound.tsx";
 import { useOrgMutation, useOrgQuery, useWorkspace } from "@/features/workspace/workspace.ts";
-import { formatNumber, formatUsd, pickText, sentenceCase, toDate } from "@/lib/utils.ts";
-import type { AnalyticsSummary, BillingProfile, Subscription } from "@/shared/types.ts";
+import { formatNumber, pickText, sentenceCase, toDate } from "@/lib/utils.ts";
+import type { BillingProfile, Subscription } from "@/shared/types.ts";
 import { useAction } from "@/shared/useAction.ts";
 
 type Invoice = Record<string, unknown>;
+
+/** GET /billing/account: the credit balances and the plan they come from. */
+interface CreditAccount {
+  included_credits_left: number;
+  purchased_credits_left: number;
+  credits_reset_at: string;
+  plan: { monthly_credits: number };
+}
 
 /* Card layout from the template's Plans & Billing page (MIT): current plan,
    then details and billing history side by side. */
@@ -56,11 +65,13 @@ export default function BillingPage() {
   const invoices = useOrgQuery<Invoice[]>(["billing", "invoices"], "/billing/invoices", [], {
     enabled: allowed,
   });
-  const summary = useOrgQuery<AnalyticsSummary | null>(
-    ["analytics", "summary"],
-    "/analytics/summary",
+  const account = useOrgQuery<CreditAccount | null>(
+    ["billing", "account"],
+    "/billing/account",
     null,
-    { enabled: can("analytics.view") },
+    {
+      enabled: allowed,
+    },
   );
 
   if (!allowed) return <NoAccess what="billing" />;
@@ -68,21 +79,10 @@ export default function BillingPage() {
   const plan =
     sentenceCase(subscription.data?.plan_code ?? subscription.data?.planCode) || "No plan";
   const notConfigured = !subscription.data || subscription.data.status === "NOT_CONFIGURED";
-  const usage = summary.data
-    ? [
-        { label: "Conversations", value: formatNumber(summary.data.conversations) },
-        { label: "Messages", value: formatNumber(summary.data.messages) },
-        { label: "AI replies", value: formatNumber(summary.data.model_runs) },
-        { label: "Estimated AI cost", value: formatUsd(summary.data.estimated_cost_usd) },
-      ]
-    : [];
 
   return (
     <PageContainer>
-      <PageHeader
-        title="Billing"
-        description="Your plan, what the organization has used, and billing details."
-      />
+      <SettingsHeader description="Your plan, your credits, and billing details." />
 
       <div className="mb-6 grid gap-6 lg:grid-cols-2">
         <Card>
@@ -95,6 +95,8 @@ export default function BillingPage() {
           <CardContent className="grid gap-4">
             {subscription.isLoading ? (
               <LoadingRows />
+            ) : subscription.isError ? (
+              <LoadError what="the plan" query={subscription} />
             ) : (
               <div className="flex flex-wrap items-center gap-2">
                 <SparklesIcon className="size-5 text-primary" aria-hidden="true" />
@@ -104,7 +106,7 @@ export default function BillingPage() {
                 </Pill>
               </div>
             )}
-            {notConfigured && (
+            {notConfigured && !subscription.isError && (
               <div className="flex items-start gap-3 rounded-lg border bg-muted/50 p-4">
                 <InfoIcon className="mt-0.5 size-5 text-muted-foreground" aria-hidden="true" />
                 <div className="grid gap-1">
@@ -118,31 +120,62 @@ export default function BillingPage() {
           </CardContent>
         </Card>
 
-        {usage.length > 0 && (
-          <Card>
-            <CardHeader>
-              <div className="grid gap-1">
-                <CardTitle>Usage</CardTitle>
-                <CardDescription>Totals for this organization so far</CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
+        <Card>
+          <CardHeader>
+            <div className="grid gap-1">
+              <CardTitle>Credits</CardTitle>
+              <CardDescription>
+                {account.data
+                  ? `Included credits renew on ${toDate(account.data.credits_reset_at)?.toLocaleDateString() ?? "—"}.`
+                  : "Each AI reply uses credits."}
+              </CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {account.isLoading ? (
+              <LoadingRows />
+            ) : account.isError || !account.data ? (
+              <LoadError what="credits" query={account} />
+            ) : (
               <dl className="grid grid-cols-2 gap-4">
-                {usage.map((item) => (
-                  <div key={item.label} className="grid gap-1 rounded-lg border p-4">
-                    <dt className="text-sm text-muted-foreground">{item.label}</dt>
-                    <dd className="text-xl font-semibold tabular-nums">{item.value}</dd>
-                  </div>
-                ))}
+                <div className="grid gap-1 rounded-lg border p-4">
+                  <dt className="text-sm text-muted-foreground">Included left</dt>
+                  <dd className="text-xl font-semibold tabular-nums">
+                    {formatNumber(account.data.included_credits_left)}
+                    <span className="text-sm font-normal text-muted-foreground">
+                      {" "}
+                      of {formatNumber(account.data.plan.monthly_credits)}
+                    </span>
+                  </dd>
+                </div>
+                <div className="grid gap-1 rounded-lg border p-4">
+                  <dt className="text-sm text-muted-foreground">Used this period</dt>
+                  <dd className="text-xl font-semibold tabular-nums">
+                    {formatNumber(
+                      Math.max(
+                        0,
+                        account.data.plan.monthly_credits - account.data.included_credits_left,
+                      ),
+                    )}
+                  </dd>
+                </div>
+                <div className="grid gap-1 rounded-lg border p-4">
+                  <dt className="text-sm text-muted-foreground">Purchased left</dt>
+                  <dd className="text-xl font-semibold tabular-nums">
+                    {formatNumber(account.data.purchased_credits_left)}
+                  </dd>
+                </div>
               </dl>
-            </CardContent>
-          </Card>
-        )}
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         {profile.isLoading ? (
           <LoadingRows />
+        ) : profile.isError ? (
+          <LoadError what="billing details" query={profile} />
         ) : (
           <BillingProfileForm
             key={profile.dataUpdatedAt}
@@ -161,6 +194,8 @@ export default function BillingPage() {
           <CardContent className="p-0 pt-4">
             {invoices.isLoading ? (
               <LoadingRows />
+            ) : invoices.isError ? (
+              <LoadError what="invoices" query={invoices} />
             ) : (invoices.data ?? []).length === 0 ? (
               <EmptyState className="m-6 mt-0" icon={ReceiptIcon} title="No invoices yet" />
             ) : (
@@ -207,13 +242,13 @@ function BillingProfileForm({
   editable: boolean;
 }) {
   const { request, invalidate } = useOrgMutation();
-  const [legalName, setLegalName] = useState(profile?.legalName ?? "");
-  const [billingEmail, setBillingEmail] = useState(profile?.billingEmail ?? "");
+  const [legalName, setLegalName] = useState(profile?.legal_name ?? "");
+  const [billingEmail, setBillingEmail] = useState(profile?.email ?? "");
 
   const save = useAction(async () => {
     await request("/billing/profile", {
-      method: "PUT",
-      body: { legal_name: legalName.trim() || null, billing_email: billingEmail.trim() || null },
+      method: "PATCH",
+      body: { legal_name: legalName.trim() || null, email: billingEmail.trim() || null },
     });
     await invalidate("billing", "profile");
     toast.success("Billing details saved");

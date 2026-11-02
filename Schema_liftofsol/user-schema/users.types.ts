@@ -21,9 +21,8 @@
 // - display_name falls back to the part of the email before "@" when sign-in gives no name.
 // - dob and gender are optional, never required to sign up, and cleared when the account is deleted.
 // - A user belongs to exactly one organization.
-// - Joining another organization moves the user's membership there, and their projects move
-//   with them (projects.org_id changes). The emptied organization is closed. Only offered
-//   while they are its only member.
+// - Joining another organization moves the user's membership there. Their projects stay behind
+//   in the old organization, which is closed. Only offered while they are its only member.
 // - Becoming a company updates their own organization in place (name, slug, plan); nothing moves.
 // - terms_accepted_at and terms_version are set together. Missing = not accepted yet;
 //   ask before they use the app.

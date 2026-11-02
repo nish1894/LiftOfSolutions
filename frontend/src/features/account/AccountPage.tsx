@@ -11,11 +11,15 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { Field, Notice, PageContainer, PageHeader } from "@/components/app/page.tsx";
-import { SETTINGS_NAV, SETTINGS_TABS, SETTINGS_TRIGGER } from "@/components/app/settings-tabs.ts";
+import { Field, Notice, PageContainer } from "@/components/app/page.tsx";
+import {
+  SETTINGS_NAV,
+  SETTINGS_TABS,
+  SETTINGS_TRIGGER,
+  useTabParam,
+} from "@/components/app/settings-tabs.ts";
 import { Pill } from "@/components/app/status-pill.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { Separator } from "@/components/ui/separator.tsx";
 import {
   Card,
   CardContent,
@@ -33,8 +37,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog.tsx";
-import { Checkbox, Input, NativeSelect, Textarea } from "@/components/ui/input.tsx";
+import { Checkbox, Input, NativeSelect } from "@/components/ui/input.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs.tsx";
+import SettingsHeader from "@/features/settings/SettingsHeader.tsx";
 import { useAuth } from "@/features/auth/AuthContext.ts";
 import { useWorkspace } from "@/features/workspace/workspace.ts";
 import { cn } from "@/lib/utils.ts";
@@ -43,17 +48,40 @@ import type { User } from "@/shared/types.ts";
 import { useAction } from "@/shared/useAction.ts";
 
 /** Personal settings. They follow the person, not the organization. */
+const ACCOUNT_TABS = ["profile", "preferences", "security", "appearance"] as const;
+
+// The API accepts an IANA time zone and a language tag; picking from a list avoids typos.
+// Chrome still lists some zones under their old names; show the current IANA name instead.
+const ZONE_RENAMES: Record<string, string> = {
+  "Asia/Calcutta": "Asia/Kolkata",
+  "Asia/Katmandu": "Asia/Kathmandu",
+  "Asia/Rangoon": "Asia/Yangon",
+  "Asia/Saigon": "Asia/Ho_Chi_Minh",
+  "Europe/Kiev": "Europe/Kyiv",
+};
+const canonicalZone = (zone: string) => ZONE_RENAMES[zone] ?? zone;
+// Browsers leave "UTC" out of their own list, and the saved value is kept even if unusual.
+const timeZones = (current: string) => [
+  "UTC",
+  ...[...new Set([...Intl.supportedValuesOf("timeZone").map(canonicalZone), current])]
+    .filter((zone) => zone !== "UTC")
+    .sort(),
+];
+const LANGUAGES = ["en", "en-IN", "en-US", "en-GB", "ja", "hi"];
+// "standard" gives "English (United States)" rather than "American English".
+const languageName = new Intl.DisplayNames(["en"], {
+  type: "language",
+  languageDisplay: "standard",
+});
+
 export default function AccountPage() {
   const { user } = useWorkspace();
+  const [tab, setTab] = useTabParam(ACCOUNT_TABS);
 
   return (
     <PageContainer>
-      <PageHeader
-        title="Account"
-        description="Your personal settings. They apply in every organization you belong to."
-      />
-      <Separator className="mb-6" />
-      <Tabs defaultValue="profile" orientation="vertical" className={SETTINGS_TABS}>
+      <SettingsHeader description="Your personal profile and settings." />
+      <Tabs value={tab} onValueChange={setTab} className={SETTINGS_TABS}>
         <TabsList className={SETTINGS_NAV}>
           <TabsTrigger value="profile" className={SETTINGS_TRIGGER}>
             <UserRoundIcon aria-hidden="true" />
@@ -93,19 +121,15 @@ function ProfileForm({ user }: { user: User }) {
   const { saveProfile } = useAuth();
   const [form, setForm] = useState({
     display_name: user.display_name ?? "",
-    job_title: user.job_title ?? "",
     phone: user.phone ?? "",
     photo_url: user.photo_url ?? "",
-    bio: user.bio ?? "",
   });
 
   const save = useAction(async () => {
     await saveProfile({
-      display_name: form.display_name.trim() || null,
-      job_title: form.job_title.trim() || null,
+      display_name: form.display_name.trim(),
       phone: form.phone.trim() || null,
       photo_url: form.photo_url.trim() || null,
-      bio: form.bio.trim() || null,
     });
     toast.success("Profile saved");
   });
@@ -123,7 +147,7 @@ function ProfileForm({ user }: { user: User }) {
       <CardHeader>
         <div className="grid gap-1">
           <CardTitle>Profile</CardTitle>
-          <CardDescription>How teammates see you across organizations.</CardDescription>
+          <CardDescription>How teammates see you in your organization.</CardDescription>
         </div>
       </CardHeader>
       <CardContent>
@@ -131,23 +155,25 @@ function ProfileForm({ user }: { user: User }) {
           <Field label="Display name" htmlFor="profile-name">
             <Input
               id="profile-name"
+              required
               value={form.display_name}
               onChange={(event) => set("display_name", event.target.value)}
             />
           </Field>
-          <Field label="Job title" htmlFor="profile-title">
-            <Input
-              id="profile-title"
-              placeholder="Customer success manager"
-              value={form.job_title}
-              onChange={(event) => set("job_title", event.target.value)}
-            />
-          </Field>
-          <Field label="Phone" htmlFor="profile-phone">
+          <Field
+            label="Phone"
+            htmlFor="profile-phone"
+            hint="International format with the country code, e.g. +819012345678."
+          >
             <Input
               id="profile-phone"
+              type="tel"
+              inputMode="tel"
+              placeholder="+819012345678"
+              pattern="\+[1-9][0-9]{6,14}"
+              title="A plus sign, the country code and the number, without spaces: +819012345678"
               value={form.phone}
-              onChange={(event) => set("phone", event.target.value)}
+              onChange={(event) => set("phone", event.target.value.replace(/[\s-]/g, ""))}
             />
           </Field>
           <Field label="Photo URL" htmlFor="profile-photo">
@@ -157,15 +183,6 @@ function ProfileForm({ user }: { user: User }) {
               placeholder="https://…"
               value={form.photo_url}
               onChange={(event) => set("photo_url", event.target.value)}
-            />
-          </Field>
-          <Field label="Bio" htmlFor="profile-bio" className="sm:col-span-2">
-            <Textarea
-              id="profile-bio"
-              rows={4}
-              maxLength={1000}
-              value={form.bio}
-              onChange={(event) => set("bio", event.target.value)}
             />
           </Field>
           {save.error && (
@@ -184,11 +201,11 @@ function ProfileForm({ user }: { user: User }) {
 
 function PreferencesForm({ user }: { user: User }) {
   const { saveProfile } = useAuth();
-  const { memberships } = useWorkspace();
   const [form, setForm] = useState({
-    timezone: user.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
+    timezone: canonicalZone(
+      user.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
+    ),
     locale: user.locale || navigator.language || "en",
-    defaultOrganization: user.default_organization_id || memberships[0]?.business_id || "",
     emailNotifications: user.preferences?.email_notifications ?? true,
     productUpdates: user.preferences?.product_updates ?? false,
   });
@@ -197,7 +214,6 @@ function PreferencesForm({ user }: { user: User }) {
     await saveProfile({
       timezone: form.timezone.trim(),
       locale: form.locale.trim(),
-      default_organization_id: form.defaultOrganization || null,
       preferences: {
         email_notifications: form.emailNotifications,
         product_updates: form.productUpdates,
@@ -219,34 +235,29 @@ function PreferencesForm({ user }: { user: User }) {
       <CardContent>
         <form className="grid gap-4 sm:grid-cols-2" onSubmit={submit}>
           <Field label="Time zone" htmlFor="pref-timezone">
-            <Input
+            <NativeSelect
               id="pref-timezone"
               required
               value={form.timezone}
               onChange={(event) => setForm({ ...form, timezone: event.target.value })}
-            />
+            >
+              {timeZones(form.timezone).map((zone) => (
+                <option key={zone} value={zone}>
+                  {zone.replaceAll("_", " ")}
+                </option>
+              ))}
+            </NativeSelect>
           </Field>
           <Field label="Language and region" htmlFor="pref-locale">
-            <Input
+            <NativeSelect
               id="pref-locale"
               required
               value={form.locale}
               onChange={(event) => setForm({ ...form, locale: event.target.value })}
-            />
-          </Field>
-          <Field
-            label="Open this organization when I sign in"
-            htmlFor="pref-default-org"
-            className="sm:col-span-2"
-          >
-            <NativeSelect
-              id="pref-default-org"
-              value={form.defaultOrganization}
-              onChange={(event) => setForm({ ...form, defaultOrganization: event.target.value })}
             >
-              {memberships.map((membership) => (
-                <option key={membership.business_id} value={membership.business_id}>
-                  {membership.business_name}
+              {[...new Set([...LANGUAGES, form.locale])].map((code) => (
+                <option key={code} value={code}>
+                  {languageName.of(code) ?? code}
                 </option>
               ))}
             </NativeSelect>
@@ -318,6 +329,8 @@ function SecurityCard({ user }: { user: User }) {
         </div>
         {verify.error && <Notice tone="error">{verify.error}</Notice>}
 
+        <PasswordSection />
+
         <div className="flex flex-wrap items-center gap-3 border-t pt-5">
           <div className="grid flex-1 gap-1">
             <span className="font-medium">Sign out of all devices</span>
@@ -327,9 +340,7 @@ function SecurityCard({ user }: { user: User }) {
           </div>
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="outline" className="text-danger">
-                Sign out everywhere
-              </Button>
+              <Button variant="destructive-outline">Sign out everywhere</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -409,5 +420,110 @@ function AppearanceCard() {
         </fieldset>
       </CardContent>
     </Card>
+  );
+}
+
+/* Google accounts can add a password so the same email also signs in with it;
+   accounts that have one can change it. */
+function PasswordSection() {
+  const { hasPassword, setPassword } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ current: "", next: "", confirm: "" });
+  const mismatch = form.confirm !== "" && form.next !== form.confirm;
+
+  const save = useAction(async () => {
+    await setPassword(form.next, hasPassword ? form.current : undefined);
+    toast.success(hasPassword ? "Password changed" : "Password added");
+    setOpen(false);
+  });
+
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!mismatch) void save.run();
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-3 border-t pt-5">
+      <div className="grid flex-1 gap-1">
+        <span className="font-medium">Password</span>
+        <span className="text-sm text-muted-foreground">
+          {hasPassword
+            ? "You can sign in with your email and password."
+            : "You sign in with Google. Add a password to also sign in with your email address."}
+        </span>
+      </div>
+      <Dialog
+        open={open}
+        onOpenChange={(next) => {
+          setOpen(next);
+          if (!next) {
+            setForm({ current: "", next: "", confirm: "" });
+            save.clearError();
+          }
+        }}
+      >
+        <DialogTrigger asChild>
+          <Button variant="outline">{hasPassword ? "Change password" : "Add a password"}</Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{hasPassword ? "Change password" : "Add a password"}</DialogTitle>
+            <DialogDescription>
+              {hasPassword
+                ? "Other devices are signed out when the password changes."
+                : "Google may ask you to sign in again first. Other devices are signed out afterwards."}
+            </DialogDescription>
+          </DialogHeader>
+          <form className="grid gap-4" onSubmit={submit}>
+            {hasPassword && (
+              <Field label="Current password" htmlFor="password-current">
+                <Input
+                  id="password-current"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={form.current}
+                  onChange={(event) => setForm({ ...form, current: event.target.value })}
+                />
+              </Field>
+            )}
+            <Field label="New password" htmlFor="password-new" hint="At least 8 characters.">
+              <Input
+                id="password-new"
+                type="password"
+                autoComplete="new-password"
+                minLength={8}
+                required
+                value={form.next}
+                onChange={(event) => setForm({ ...form, next: event.target.value })}
+              />
+            </Field>
+            <Field label="Repeat the new password" htmlFor="password-confirm">
+              <Input
+                id="password-confirm"
+                type="password"
+                autoComplete="new-password"
+                required
+                aria-invalid={mismatch || undefined}
+                value={form.confirm}
+                onChange={(event) => setForm({ ...form, confirm: event.target.value })}
+              />
+            </Field>
+            {mismatch && <Notice tone="error">The two passwords don't match.</Notice>}
+            {save.error && <Notice tone="error">{save.error}</Notice>}
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="outline">
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button type="submit" disabled={save.busy || mismatch}>
+                {save.busy ? "Saving…" : hasPassword ? "Change password" : "Add password"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

@@ -10,6 +10,7 @@ import {
 import { AreaChart } from "@/components/app/charts.tsx";
 import {
   EmptyState,
+  LoadError,
   LoadingRows,
   PageContainer,
   PageHeader,
@@ -69,13 +70,22 @@ export default function AnalyticsPage() {
 
   if (!can("analytics.view")) return <NoAccess what="analytics" />;
   if (summary.isLoading) return <LoadingRows />;
+  // Every figure here comes from the same analytics API, so one failure means none can be trusted.
+  const failed = [summary, byDate, byAgent, byModel].find((query) => query.isError);
+  if (failed)
+    return (
+      <PageContainer>
+        <PageHeader title="Analytics" />
+        <LoadError what="analytics" query={failed} />
+      </PageContainer>
+    );
 
   const data = summary.data;
   const resolutionRate = data?.conversations
     ? Math.round((data.resolved / data.conversations) * 100)
     : 0;
   const agentName = (id: string) =>
-    agents.data?.find((agent) => agent.id === id)?.name ?? "Unknown assistant";
+    agents.data?.find((agent) => agent.id === id)?.name ?? "Unknown agent";
   const days = dailySeries(byDate.data ?? [], 30);
 
   return (
@@ -145,7 +155,7 @@ export default function AnalyticsPage() {
           </Card>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <UsageTable title="By assistant" rows={byAgent.data ?? []} label={agentName} />
+            <UsageTable title="By agent" rows={byAgent.data ?? []} label={agentName} />
             <UsageTable title="By model" rows={byModel.data ?? []} label={(key) => key} />
           </div>
         </div>

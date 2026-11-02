@@ -17,7 +17,7 @@ export function DialogClose(props: ComponentProps<typeof DialogPrimitive.Close>)
 }
 
 const overlay =
-  "fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0";
+  "fixed inset-0 z-50 bg-slate-900/40 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0";
 
 const closeButton =
   "absolute top-4 right-4 rounded-sm p-0.5 text-muted-foreground opacity-80 transition-opacity hover:opacity-100 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none";
@@ -32,7 +32,7 @@ export function DialogContent({
       <DialogPrimitive.Overlay className={overlay} />
       <DialogPrimitive.Content
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 overflow-y-auto rounded-xl border bg-background p-6 text-foreground shadow-lg duration-200 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
+          "fixed top-1/2 left-1/2 z-50 grid max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 overflow-y-auto rounded-2xl border bg-card p-6 text-foreground shadow-xl duration-200 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-bottom-2",
           className,
         )}
         {...props}
@@ -53,13 +53,15 @@ export function SheetContent({
   children,
   side = "right",
   ...props
-}: ComponentProps<typeof DialogPrimitive.Content> & { side?: "left" | "right" }) {
+}: ComponentProps<typeof DialogPrimitive.Content> & {
+  side?: "left" | "right";
+}) {
   return (
     <DialogPrimitive.Portal>
       <DialogPrimitive.Overlay className={overlay} />
       <DialogPrimitive.Content
         className={cn(
-          "fixed inset-y-0 z-50 flex w-[min(24rem,100%)] flex-col overflow-y-auto bg-background text-foreground shadow-lg data-[state=open]:animate-in data-[state=open]:duration-300",
+          "fixed inset-y-0 z-50 flex w-[min(24rem,100%)] flex-col overflow-y-auto bg-card text-foreground shadow-xl data-[state=open]:animate-in data-[state=open]:duration-300",
           side === "right"
             ? "right-0 border-l data-[state=open]:slide-in-from-right"
             : "left-0 border-r data-[state=open]:slide-in-from-left",
@@ -77,13 +79,13 @@ export function SheetContent({
 }
 
 export function DialogHeader({ className, ...props }: ComponentProps<"div">) {
-  return <div className={cn("grid gap-1.5 pr-6", className)} {...props} />;
+  return <div className={cn("grid gap-2 pr-6", className)} {...props} />;
 }
 
 export function DialogTitle({ className, ...props }: ComponentProps<typeof DialogPrimitive.Title>) {
   return (
     <DialogPrimitive.Title
-      className={cn("text-lg leading-none font-semibold", className)}
+      className={cn("text-lg leading-snug font-medium", className)}
       {...props}
     />
   );

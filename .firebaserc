@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "liftofsolutions-123"
+    "default": "liftofsolutions-123",
+    "prod": "liftofsolutions-123"
   }
 }

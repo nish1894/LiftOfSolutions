@@ -3,15 +3,18 @@ import type { Conversation } from "@/shared/types.ts";
 
 export const INBOX_FILTERS = [
   { value: "WAITING_FOR_AGENT", label: "Waiting" },
-  { value: "AGENT_ACTIVE", label: "With an agent" },
+  { value: "AGENT_ACTIVE", label: "With a teammate" },
   { value: "AI_ACTIVE", label: "AI active" },
   { value: "RESOLVED", label: "Resolved" },
   { value: "", label: "All" },
 ];
 
+/** The API returns at most this many conversations per list; there's no paging yet. */
+export const CONVERSATION_LIMIT = 50;
+
 /** One key and URL per filter, shared by the inbox, overview and sidebar. */
 export function conversationsQuery(status: string, assigneeId?: string) {
-  const params = new URLSearchParams({ limit: "50" });
+  const params = new URLSearchParams({ limit: String(CONVERSATION_LIMIT) });
   if (status) params.set("conversation_status", status);
   if (assigneeId) params.set("assigned_agent_id", assigneeId);
   return {

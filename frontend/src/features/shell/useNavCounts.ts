@@ -1,9 +1,21 @@
 import { conversationsQuery } from "@/features/inbox/inbox.ts";
-import { useSources } from "@/features/workspace/resources.ts";
+import { useToolApprovals } from "@/features/workspace/resources.ts";
 import { useOrgQuery, useWorkspace } from "@/features/workspace/workspace.ts";
-import type { Conversation, JoinRequest } from "@/shared/types.ts";
+import type { Conversation } from "@/shared/types.ts";
+
+import { CONVERSATION_LIMIT } from "@/features/inbox/inbox.ts";
+import { TOOL_RUN_LIMIT } from "@/features/workspace/resources.ts";
+import { cappedCount } from "@/lib/utils.ts";
 
 import type { NavBadge } from "./navigation.ts";
+
+const BADGE_LIMITS: Record<NavBadge, number> = {
+  waiting: CONVERSATION_LIMIT,
+  requests: TOOL_RUN_LIMIT,
+};
+/** How a badge shows its count: "50+" once the list it comes from is full. */
+export const badgeLabel = (badge: NavBadge, count: number) =>
+  cappedCount(count, BADGE_LIMITS[badge]);
 
 const MINUTE = 60_000;
 
@@ -15,16 +27,10 @@ export function useNavCounts(): Record<NavBadge, number> {
     enabled: can("conversations.view"),
     refetchInterval: MINUTE,
   });
-  const requests = useOrgQuery<JoinRequest[]>(["joinRequests"], "/join-requests", [], {
-    enabled: can("organization.members.manage"),
-    refetchInterval: MINUTE,
-  });
-  const sources = useSources();
+  const requests = useToolApprovals(MINUTE);
 
   return {
     waiting: waiting.data?.length ?? 0,
-    requests: requests.data?.filter((item) => item.status === "PENDING").length ?? 0,
-    failedKnowledge:
-      sources.data?.filter((item) => item.processing_status === "FAILED").length ?? 0,
+    requests: requests.data?.length ?? 0,
   };
 }

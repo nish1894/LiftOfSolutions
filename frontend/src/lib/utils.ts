@@ -32,6 +32,25 @@ export function timeAgo(value: unknown): string {
   return `${Math.round(hours / 24)}d ago`;
 }
 
+/** A count from a list the API caps at `limit`. At the cap it reads "50+", so it never looks exact. */
+export const cappedCount = (count: number, limit: number) =>
+  count >= limit ? `${limit}+` : String(count);
+
+/** Short time left until a deadline: "in under a minute", "in 8m", "in 3h", "in 2d", or "expired".
+    "expired" only once the deadline has really passed, so it agrees with what the API accepts. */
+export function timeUntil(value: unknown, now = Date.now()): string {
+  const time = toDate(value)?.getTime();
+  if (time === undefined) return "";
+  const left = time - now;
+  if (left <= 0) return "expired";
+  if (left < 60_000) return "in under a minute";
+  const minutes = Math.floor(left / 60_000);
+  if (minutes < 60) return `in ${minutes}m`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `in ${hours}h`;
+  return `in ${Math.round(hours / 24)}d`;
+}
+
 /** Firestore timestamps arrive as ISO strings or {_seconds} objects. */
 export function toDate(value: unknown): Date | null {
   if (!value) return null;
@@ -46,6 +65,12 @@ const numberFormat = new Intl.NumberFormat();
 
 export function formatNumber(value: number | null | undefined): string {
   return numberFormat.format(Number(value ?? 0));
+}
+
+export function formatBytes(value: number): string {
+  if (value < 1024) return `${value} B`;
+  if (value < 1_048_576) return `${Math.round(value / 1024)} KB`;
+  return `${(value / 1_048_576).toFixed(1)} MB`;
 }
 
 /** Costs per request are often fractions of a cent, so small values keep 4 decimals. */

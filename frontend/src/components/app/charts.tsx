@@ -117,3 +117,51 @@ export function AreaChart({ data, label, className }: AreaChartProps) {
     </figure>
   );
 }
+
+/** Vertical bars, one per point, as on the design's volume chart. The last bar is "now". */
+export function BarChart({ data, label, className }: AreaChartProps) {
+  if (data.length === 0) return null;
+  const max = Math.max(1, ...data.map((point) => point.value));
+  // Label every bar when few, otherwise only the first, middle and last.
+  const showLabel = (index: number) =>
+    data.length <= 8 ||
+    index === 0 ||
+    index === data.length - 1 ||
+    index === Math.floor(data.length / 2);
+
+  return (
+    <figure className={cn("grid gap-2", className)}>
+      <div className="flex h-48 items-end gap-1.5 border-b" role="img" aria-label={label}>
+        {data.map((point, index) => (
+          <div
+            key={point.label}
+            title={`${point.label}: ${formatNumber(point.value)}`}
+            className={cn(
+              "min-h-0.5 flex-1 rounded-t-md bg-chart-1",
+              index === data.length - 1 ? "opacity-100" : "opacity-80",
+            )}
+            style={{ height: `${(point.value / max) * 100}%` }}
+          />
+        ))}
+      </div>
+      <figcaption className="flex gap-1.5 text-2xs text-muted-foreground tabular-nums">
+        {data.map((point, index) => (
+          <span key={point.label} className="flex-1 truncate text-center">
+            {showLabel(index) ? point.label.slice(5) : ""}
+          </span>
+        ))}
+      </figcaption>
+      <table className="sr-only">
+        <caption>{label}</caption>
+        <tbody>
+          {data.map((point) => (
+            <tr key={point.label}>
+              <th scope="row">{point.label}</th>
+              <td>{point.value}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </figure>
+  );
+}

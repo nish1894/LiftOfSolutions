@@ -7,6 +7,10 @@
     "node": ">=24"
   },
   "scripts": {
+    "schema:sync": "node scripts/sync-schema.mjs",
+    "schema:check": "node scripts/sync-schema.mjs --check",
+    "db:init": "tsx src/firestore/provision.ts",
+    "test:firestore": "firebase emulators:exec --config tests/firestore/firebase.test.json --only firestore --project demo-liftof-test \"vitest run tests/firestore\"",
     "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",

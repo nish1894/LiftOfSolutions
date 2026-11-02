@@ -9,15 +9,15 @@ import { Checkbox, Input } from "@/components/ui/input.tsx";
 import { NoAccess } from "@/features/shell/NotFound.tsx";
 import { useAgents, useCustomers } from "@/features/workspace/resources.ts";
 import { useOrgQuery, useWorkspace } from "@/features/workspace/workspace.ts";
-import { cn, timeAgo } from "@/lib/utils.ts";
+import { cappedCount, cn, timeAgo } from "@/lib/utils.ts";
 import { CONVERSATION_STATUS } from "@/shared/statuses.ts";
 import type { Conversation } from "@/shared/types.ts";
 
 import ConversationView from "./ConversationView.tsx";
-import { conversationsQuery, INBOX_FILTERS } from "./inbox.ts";
+import { CONVERSATION_LIMIT, conversationsQuery, INBOX_FILTERS } from "./inbox.ts";
 
-/* Two panes, styled after the ShadcnStore chat app (MIT): a 360px queue and
-   the open conversation. Phones show one pane at a time. */
+/* Three panes from the design's shared inbox: the queue, the open thread and
+   the contact panel (inside ConversationView). Phones show one pane at a time. */
 export default function InboxPage() {
   const { conversationId } = useParams();
   const { user, can } = useWorkspace();
@@ -25,7 +25,7 @@ export default function InboxPage() {
   const [mineOnly, setMineOnly] = useState(false);
   const [search, setSearch] = useState("");
 
-  const query = conversationsQuery(status, mineOnly ? user.uid : undefined);
+  const query = conversationsQuery(status, mineOnly ? user.id : undefined);
   const list = useOrgQuery<Conversation[]>(query.key, query.path, [], {
     enabled: can("conversations.view"),
     refetchInterval: 30_000,
@@ -38,7 +38,7 @@ export default function InboxPage() {
       new Map(
         (customers.data ?? []).map((item) => [
           item.id,
-          item.display_name || item.email || "Unnamed customer",
+          item.display_name || item.email || "Unnamed contact",
         ]),
       ),
     [customers.data],
@@ -50,7 +50,7 @@ export default function InboxPage() {
 
   if (!can("conversations.view")) return <NoAccess what="the inbox" />;
 
-  const customerName = (id?: string) => customerNames.get(id ?? "") ?? "Customer";
+  const customerName = (id?: string) => customerNames.get(id ?? "") ?? "Contact";
   const term = search.trim().toLowerCase();
   const conversations = (list.data ?? []).filter(
     (item) => !term || customerName(item.customer_id).toLowerCase().includes(term),
@@ -58,19 +58,30 @@ export default function InboxPage() {
   const filterLabel = INBOX_FILTERS.find((item) => item.value === status)?.label ?? "All";
 
   return (
-    <div className="flex h-[calc(100svh-7.5rem)] min-h-0 md:h-[calc(100svh-4.5rem)]">
+    <div className="flex min-h-0 tall:h-[calc(100dvh-7.5rem)] tall:md:h-[calc(100dvh-3.5rem)]">
+      {/* The page's name for screen readers; the queue's own heading sits below it. */}
+      <h1 className="sr-only">Inbox</h1>
       <section
         aria-label="Conversation queue"
         className={cn(
-          "flex w-full flex-col border-r md:w-90 md:shrink-0",
-          conversationId && "hidden md:flex",
+          "flex w-full flex-col border-r bg-card lg:w-80 lg:shrink-0 xl:w-96",
+          conversationId && "hidden lg:flex",
         )}
       >
-        <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b px-4">
-          <h1 className="text-lg font-semibold">Inbox</h1>
-          <label className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Checkbox checked={mineOnly} onChange={(event) => setMineOnly(event.target.checked)} />
-            Assigned to me
+        <div className="flex h-14 shrink-0 items-center justify-between gap-2 px-4">
+          <h2 className="flex items-center gap-2 text-sm font-medium">
+            Conversations
+            <span className="rounded-md bg-muted px-2 text-xs font-medium tabular-nums">
+              {term ? conversations.length : cappedCount(conversations.length, CONVERSATION_LIMIT)}
+            </span>
+          </h2>
+          <label className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Checkbox
+              aria-label="Only conversations assigned to me"
+              checked={mineOnly}
+              onChange={(event) => setMineOnly(event.target.checked)}
+            />
+            Mine
           </label>
         </div>
 
@@ -86,7 +97,7 @@ export default function InboxPage() {
             <Input
               id="inbox-search"
               type="search"
-              placeholder="Search by customer"
+              placeholder="Search by contact"
               className="pl-9"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
@@ -95,7 +106,7 @@ export default function InboxPage() {
           <div
             role="group"
             aria-label="Filter by state"
-            className="flex gap-0.5 overflow-x-auto rounded-lg bg-muted p-0.75"
+            className="flex gap-0.5 overflow-x-auto rounded-lg bg-muted p-1"
           >
             {INBOX_FILTERS.map((filter) => (
               <button
@@ -104,9 +115,8 @@ export default function InboxPage() {
                 aria-pressed={status === filter.value}
                 onClick={() => setStatus(filter.value)}
                 className={cn(
-                  "h-7 flex-1 shrink-0 rounded-md px-2 text-xs font-medium whitespace-nowrap text-muted-foreground hover:text-foreground",
-                  status === filter.value &&
-                    "bg-background text-foreground shadow-sm dark:bg-input/30",
+                  "h-7 flex-1 shrink-0 rounded-md px-2 text-xs font-medium whitespace-nowrap text-subtle-foreground hover:text-foreground",
+                  status === filter.value && "bg-card text-primary shadow-xs",
                 )}
               >
                 {filter.label}
@@ -121,13 +131,18 @@ export default function InboxPage() {
           </Notice>
         )}
 
-        <div className="min-h-0 flex-1 overflow-y-auto p-2">
+        {(list.data ?? []).length >= CONVERSATION_LIMIT && (
+          <p className="shrink-0 border-b px-4 py-2 text-xs text-muted-foreground">
+            Showing the {CONVERSATION_LIMIT} most recent. Search covers only these.
+          </p>
+        )}
+        <div className="min-h-0 flex-1 overflow-y-auto">
           {list.isLoading && <LoadingRows />}
           {!list.isLoading && conversations.length === 0 && (
             <EmptyState
               className="m-1 border-0"
               icon={InboxIcon}
-              title={term ? "No customers match your search" : `Nothing in "${filterLabel}"`}
+              title={term ? "No contacts match your search" : `Nothing in "${filterLabel}"`}
               description={
                 status === "WAITING_FOR_AGENT" && !term
                   ? "Nobody is waiting for a person right now."
@@ -135,7 +150,7 @@ export default function InboxPage() {
               }
             />
           )}
-          <ul className="grid gap-0.5">
+          <ul className="divide-y">
             {conversations.map((conversation) => {
               const name = customerName(conversation.customer_id);
               return (
@@ -144,15 +159,15 @@ export default function InboxPage() {
                     to={`/app/inbox/${conversation.id}`}
                     className={({ isActive }) =>
                       cn(
-                        "flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg-muted/60",
-                        isActive && "bg-accent hover:bg-accent",
+                        "flex items-start gap-3 border-l-2 border-transparent px-4 py-3.5 transition-colors hover:bg-background",
+                        isActive && "border-primary bg-accent/60 hover:bg-accent/60",
                       )
                     }
                   >
-                    <Avatar name={name} className="size-10" />
+                    <Avatar name={name} className="size-9" />
                     <span className="grid min-w-0 flex-1 gap-1">
                       <span className="flex items-baseline justify-between gap-2">
-                        <span className="truncate font-medium">{name}</span>
+                        <span className="truncate text-sm font-medium">{name}</span>
                         <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
                           {timeAgo(conversation.last_message_at)}
                         </span>
@@ -164,8 +179,11 @@ export default function InboxPage() {
                       </span>
                       <span className="flex flex-wrap items-center gap-2">
                         <StatusPill map={CONVERSATION_STATUS} value={conversation.status} />
-                        {conversation.assigned_user_id === user.uid && (
-                          <span className="text-xs text-muted-foreground">Assigned to you</span>
+                        {conversation.assigned_user_id === user.id && (
+                          <span className="flex items-center gap-1 text-xs font-medium text-primary">
+                            <span className="size-1.5 rounded-full bg-primary" aria-hidden="true" />
+                            Active with you
+                          </span>
                         )}
                       </span>
                     </span>
@@ -177,13 +195,15 @@ export default function InboxPage() {
         </div>
       </section>
 
-      <section className={cn("flex min-w-0 flex-1", !conversationId && "hidden md:flex")}>
+      <section
+        className={cn("flex min-w-0 flex-1 bg-background", !conversationId && "hidden lg:flex")}
+      >
         {conversationId ? (
           <ConversationView
             key={conversationId}
             conversationId={conversationId}
             customerName={customerName}
-            agentName={(id) => agentNames.get(id ?? "") ?? "AI assistant"}
+            agentName={(id) => agentNames.get(id ?? "") ?? "AI agent"}
           />
         ) : (
           <EmptyState

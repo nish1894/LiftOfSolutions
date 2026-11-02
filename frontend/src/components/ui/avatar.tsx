@@ -21,7 +21,7 @@ export function Avatar({ name, src, shape = "circle", className }: AvatarProps) 
         base,
         shape === "square"
           ? "bg-primary text-primary-foreground"
-          : "bg-accent text-accent-foreground",
+          : "bg-accent text-accent-foreground ring-1 ring-accent-border",
       )}
       aria-hidden="true"
     >

@@ -1,0 +1,33 @@
+{
+  "contact": {
+    "_id": "c9e4b2a7-1f3d-4c68-a5b0-7e2d9f4c1a83",
+    "project_id": "d3a8f1c6-4b2e-4f97-8a05-6e1c9b7d3f42",
+    "display_name": "Priya Sharma",
+    "phone": "+919812345678",
+    "email": "priya.sharma@example.com",
+    "country": "IN",
+    "language": "hi",
+    "metadata": { "order_count": 3, "tier": "gold" },
+    "status": "active",
+    "created_at": "2026-10-12T08:41:00Z",
+    "updated_at": "2026-10-18T14:02:00Z"
+  },
+  "contact_identities": [
+    {
+      "_id": "1b7d3e9f-4a2c-4e81-b6d5-8c0f2a9e7b34",
+      "project_id": "d3a8f1c6-4b2e-4f97-8a05-6e1c9b7d3f42",
+      "contact_id": "c9e4b2a7-1f3d-4c68-a5b0-7e2d9f4c1a83",
+      "channel": "whatsapp",
+      "external_id": "+919812345678",
+      "created_at": "2026-10-12T08:41:00Z"
+    },
+    {
+      "_id": "8e2a6c4f-9d1b-4f37-a0e5-3b7c1d9f6a28",
+      "project_id": "d3a8f1c6-4b2e-4f97-8a05-6e1c9b7d3f42",
+      "contact_id": "c9e4b2a7-1f3d-4c68-a5b0-7e2d9f4c1a83",
+      "channel": "web_widget",
+      "external_id": "v_4f8a2c91d7e3",
+      "created_at": "2026-10-18T14:02:00Z"
+    }
+  ]
+}

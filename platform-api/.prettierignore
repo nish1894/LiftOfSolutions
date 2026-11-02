@@ -1,0 +1,4 @@
+# Generated from Schema_liftofsol by npm run schema:sync; schema:check compares them byte for byte.
+src/domain/schema/
+dist/
+node_modules/

@@ -3,7 +3,7 @@
    maintaining a mapping layer for no benefit. */
 
 export type Role = "PRIME" | "OWNER" | "ADMIN" | "AGENT" | "VIEWER" | "CUSTOM";
-export type MemberStatus = "ACTIVE" | "DISABLED";
+export type MemberStatus = "ACTIVE" | "SUSPENDED";
 export type JoinRequestStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 /** Firestore timestamps reach the browser as ISO strings or {_seconds} objects. */
@@ -29,6 +29,18 @@ export interface User {
   default_organization_id: string | null;
   email_verified: boolean;
   created_at: string | null;
+  terms_required?: boolean;
+  current_terms_version?: string;
+  terms_url?: string | null;
+}
+
+export interface Project {
+  id: string;
+  org_id: string;
+  name: string;
+  description?: string;
+  status: "active" | "archived" | "deleted";
+  effective_permissions: string[];
 }
 
 export interface Membership {
@@ -105,63 +117,50 @@ export interface NotificationFeed {
   unread_count: number;
 }
 
+/* What an agent says and knows. The draft and the published copy have the same shape. */
+export interface AgentSettings {
+  instructions: string;
+  tone: string | null;
+  languages: string[];
+  /** The one knowledge source it searches, if any. */
+  source_id: string | null;
+  model: string;
+  /** direct: one step writes the reply. checked: a second step reviews each reply first. */
+  flow: "direct" | "checked";
+}
+
+/* Customers get `published`; the studio's test chat runs the saved `draft`. */
 export interface Agent {
   id: string;
   name: string;
-  description?: string | null;
-  instructions?: string;
-  status?: string;
-  lifecycle_status?: string;
-  model_provider?: string;
-  model_name?: string;
-  tone?: string | null;
-  languages?: string[];
-  escalation_policy_json?: Record<string, unknown>;
-  knowledge_enabled?: boolean;
-  knowledge_source_ids?: string[];
-  version?: number;
-  active_version_id?: string | null;
-  draft_version_id?: string | null;
-  updated_at?: ApiTime;
+  description: string | null;
+  status: "draft" | "live" | "paused" | "archived";
+  draft: AgentSettings;
+  published: AgentSettings | null;
+  version: number;
+  published_version: number | null;
+  /** True when customers don't get the latest saved draft. */
+  unpublished_changes: boolean;
+  published_at: ApiTime | null;
+  created_at: ApiTime;
+  updated_at: ApiTime;
 }
 
+/* One uploaded document, which the RAG service turns into one knowledge base.
+   status and the counts come from the RAG service. */
 export interface KnowledgeSource {
   id: string;
   name: string;
-  status?: string;
-  source_type?: string;
-  source_uri?: string | null;
-  processing_status?: string;
-  processing_error_code?: string | null;
-  external_job_id?: string | null;
-  created_at?: ApiTime;
-  updated_at?: ApiTime;
-}
-
-export interface SourceStatus {
-  source_id: string;
+  file_name: string;
+  file_size: number;
   status: string;
-  errorCode?: string;
-  service_available?: boolean;
-}
-
-export interface KnowledgeDocument {
-  id: string;
-  source_id: string;
-  title: string;
-  mime_type: string;
-  processing_status: string;
-  error_code: string | null;
-  document_metadata?: { size?: number };
-  ingestion_version?: number;
-  created_at?: ApiTime;
-  updated_at?: ApiTime;
-}
-
-export interface UploadResponse {
-  job_id: string;
-  resource_id: string;
-  status: string;
+  job_status: string | null;
+  error: string | null;
+  strategy: string | null;
+  token_count: number | null;
+  chunk_count: number | null;
+  created_by: string;
+  created_at: ApiTime;
 }
 
 export interface Customer {
@@ -267,16 +266,17 @@ export interface Subscription {
   status?: string;
 }
 
-/** Stored as-is by the API, so these fields are camelCase. */
+/** Billing profile fields use the platform API's snake_case names. */
 export interface BillingProfile {
-  legalName?: string | null;
-  billingEmail?: string | null;
+  legal_name?: string | null;
+  email?: string | null;
 }
 
 /** Shape of /auth/me and every endpoint that returns the whole account. */
 export interface AccountResponse {
   user: User;
   memberships: Membership[];
+  projects?: Project[];
   join_requests: OwnJoinRequest[];
 }
 

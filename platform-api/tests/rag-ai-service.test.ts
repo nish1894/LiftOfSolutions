@@ -35,7 +35,10 @@ afterEach(() => vi.unstubAllGlobals());
 describe("RAG AI service adapter", () => {
   it("maps an agent turn to the RAG query contract", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
-      Response.json({ answer: "Thirty days.", ragDbId: "organization-1:handbook" }),
+      Response.json({
+        answer: "Thirty days.",
+        ragDbId: "organization-1:handbook",
+      }),
     );
     vi.stubGlobal("fetch", fetchMock);
 
@@ -59,7 +62,10 @@ describe("RAG AI service adapter", () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
-        Response.json({ jobId: "organization-1:handbook", status: "queued" }, { status: 202 }),
+        Response.json(
+          { jobId: "organization-1:handbook", status: "queued" },
+          { status: 202 },
+        ),
       )
       .mockResolvedValueOnce(
         Response.json({ status: "done", ragDbId: "organization-1:handbook" }),
@@ -80,7 +86,9 @@ describe("RAG AI service adapter", () => {
       "http://rag-files/organization-1/refund%20policy.txt",
     );
 
-    await expect(service.knowledgeStatus("organization-1:handbook")).resolves.toEqual({
+    await expect(
+      service.knowledgeStatus("organization-1:handbook"),
+    ).resolves.toEqual({
       jobId: "organization-1:handbook",
       status: "READY",
       progress: 100,

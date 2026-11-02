@@ -3,7 +3,7 @@ import { type QueryKey, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { apiRequest, apiRequestOptional, type RequestOptions } from "@/shared/api/client.ts";
 import type { PlatformPermission } from "@/shared/permissions.ts";
-import type { Membership, User } from "@/shared/types.ts";
+import type { Membership, Project, User } from "@/shared/types.ts";
 
 /* The organization currently on screen. Every page reads it from here instead
    of receiving it through props. */
@@ -11,9 +11,12 @@ export interface WorkspaceValue {
   user: User;
   membership: Membership;
   memberships: Membership[];
+  projects: Project[];
   businessId: string;
+  projectId: string;
   can: (permission: PlatformPermission) => boolean;
   selectBusiness: (businessId: string) => void;
+  selectProject: (projectId: string) => void;
 }
 
 export const WorkspaceContext = createContext<WorkspaceValue | null>(null);
@@ -24,8 +27,14 @@ export function useWorkspace(): WorkspaceValue {
   return value;
 }
 
-export const orgPath = (businessId: string, path: string) =>
-  `/api/v1/businesses/${businessId}${path}`;
+export const orgPath = (businessId: string, path: string, projectId?: string) => {
+  const orgResource =
+    !path ||
+    /^\/(?:members|invitations|join-requests|billing|audit|projects)(?:\/|\?|$)/.test(path);
+  return orgResource || !projectId
+    ? `/api/v1/businesses/${businessId}${path}`
+    : `/api/v1/projects/${projectId}${path}`;
+};
 
 type Interval<T> = number | false | ((data: T | undefined) => number | false);
 
@@ -46,10 +55,10 @@ export function useOrgQuery<T>(
   fallback: T,
   { enabled = true, refetchInterval = false }: OrgQueryOptions<T> = {},
 ) {
-  const { businessId } = useWorkspace();
+  const { businessId, projectId } = useWorkspace();
   return useQuery({
-    queryKey: ["workspace", businessId, ...key],
-    queryFn: () => apiRequestOptional<T>(orgPath(businessId, path), fallback),
+    queryKey: ["workspace", businessId, projectId, ...key],
+    queryFn: () => apiRequestOptional<T>(orgPath(businessId, path, projectId), fallback),
     enabled,
     refetchInterval:
       typeof refetchInterval === "function"
@@ -60,12 +69,12 @@ export function useOrgQuery<T>(
 
 /** Writes to the current organization and refreshes what changed. */
 export function useOrgMutation() {
-  const { businessId } = useWorkspace();
+  const { businessId, projectId } = useWorkspace();
   const queryClient = useQueryClient();
   return {
     request: <T>(path: string, options?: RequestOptions) =>
-      apiRequest<T>(orgPath(businessId, path), options),
+      apiRequest<T>(orgPath(businessId, path, projectId), options),
     invalidate: (...key: unknown[]) =>
-      queryClient.invalidateQueries({ queryKey: ["workspace", businessId, ...key] }),
+      queryClient.invalidateQueries({ queryKey: ["workspace", businessId, projectId, ...key] }),
   };
 }

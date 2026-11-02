@@ -1,4 +1,4 @@
-FROM node:24-alpine AS build
+FROM public.ecr.aws/docker/library/node:24-alpine AS build
 
 ARG VITE_FIREBASE_API_KEY
 ARG VITE_FIREBASE_AUTH_DOMAIN
@@ -26,7 +26,7 @@ COPY . .
 
 RUN npm run build
 
-FROM nginx:1.29-alpine AS runtime
+FROM public.ecr.aws/docker/library/nginx:1.29-alpine AS runtime
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html

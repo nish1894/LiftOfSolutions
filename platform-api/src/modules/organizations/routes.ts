@@ -96,71 +96,82 @@ export async function organizationRoutes(app: FastifyInstance): Promise<void> {
     });
   });
 
-  app.post("/join-requests", { preHandler: authenticate }, async (request, reply) => {
-    const body = parse(
-      z.object({ join_code: z.string().trim().min(6).max(20) }),
-      request.body,
-    );
-    const organizations = await app.store.db
-      .collection("organizations")
-      .where("joinCode", "==", body.join_code.toUpperCase())
-      .limit(1)
-      .get();
-    const organizationSnapshot = organizations.docs[0];
-    const organization = organizationSnapshot
-      ? document<{ name: string; status: string; primeUserId: string }>(
-          organizationSnapshot,
-        )
-      : null;
-    if (!organization || organization.status !== "ACTIVE")
-      throw notFound("organization");
-    const uid = request.auth!.user.uid;
-    if ((await app.store.member(organization.id, uid).get()).exists)
-      throw conflict("ALREADY_MEMBER", "You already belong to this organization.");
-    const ref = app.store.db
-      .collection("organizationJoinRequests")
-      .doc(`${organization.id}_${uid}`);
-    const existing = document<{ status: string }>(await ref.get());
-    if (existing?.status === "PENDING")
-      throw conflict("JOIN_REQUEST_PENDING", "Your join request is already pending.");
-    await ref.set({
-      organizationId: organization.id,
-      userId: uid,
-      email: request.auth!.user.email,
-      displayName: request.auth!.user.display_name,
-      status: "PENDING",
-      requestedAt: now(),
-      updatedAt: now(),
-    });
-    const applicant = request.auth!.user.display_name || request.auth!.user.email;
-    const managers = await membersWithPermission(
-      app,
-      organization.id,
-      "organization.members.manage",
-      organization.primeUserId,
-    );
-    await notifyQuietly(
-      app,
-      managers.map((userId) => ({
-        userId,
-        type: "join_request.created" as const,
-        title: "New join request",
-        body: `${applicant} used the join code to request access to ${organization.name}.`,
+  app.post(
+    "/join-requests",
+    { preHandler: authenticate },
+    async (request, reply) => {
+      const body = parse(
+        z.object({ join_code: z.string().trim().min(6).max(20) }),
+        request.body,
+      );
+      const organizations = await app.store.db
+        .collection("organizations")
+        .where("joinCode", "==", body.join_code.toUpperCase())
+        .limit(1)
+        .get();
+      const organizationSnapshot = organizations.docs[0];
+      const organization = organizationSnapshot
+        ? document<{ name: string; status: string; primeUserId: string }>(
+            organizationSnapshot,
+          )
+        : null;
+      if (!organization || organization.status !== "ACTIVE")
+        throw notFound("organization");
+      const uid = request.auth!.user.uid;
+      if ((await app.store.member(organization.id, uid).get()).exists)
+        throw conflict(
+          "ALREADY_MEMBER",
+          "You already belong to this organization.",
+        );
+      const ref = app.store.db
+        .collection("organizationJoinRequests")
+        .doc(`${organization.id}_${uid}`);
+      const existing = document<{ status: string }>(await ref.get());
+      if (existing?.status === "PENDING")
+        throw conflict(
+          "JOIN_REQUEST_PENDING",
+          "Your join request is already pending.",
+        );
+      await ref.set({
         organizationId: organization.id,
-        organizationName: organization.name,
-        section: "team",
-        resourceType: "join_request",
-        resourceId: ref.id,
-        actorUserId: uid,
-      })),
-    );
-    return reply.status(201).send({
-      id: ref.id,
-      organization_id: organization.id,
-      organization_name: organization.name,
-      status: "PENDING",
-    });
-  });
+        userId: uid,
+        email: request.auth!.user.email,
+        displayName: request.auth!.user.display_name,
+        status: "PENDING",
+        requestedAt: now(),
+        updatedAt: now(),
+      });
+      const applicant =
+        request.auth!.user.display_name || request.auth!.user.email;
+      const managers = await membersWithPermission(
+        app,
+        organization.id,
+        "organization.members.manage",
+        organization.primeUserId,
+      );
+      await notifyQuietly(
+        app,
+        managers.map((userId) => ({
+          userId,
+          type: "join_request.created" as const,
+          title: "New join request",
+          body: `${applicant} used the join code to request access to ${organization.name}.`,
+          organizationId: organization.id,
+          organizationName: organization.name,
+          section: "team",
+          resourceType: "join_request",
+          resourceId: ref.id,
+          actorUserId: uid,
+        })),
+      );
+      return reply.status(201).send({
+        id: ref.id,
+        organization_id: organization.id,
+        organization_name: organization.name,
+        status: "PENDING",
+      });
+    },
+  );
 
   app.get(
     "/:businessId",
@@ -306,11 +317,9 @@ export async function organizationRoutes(app: FastifyInstance): Promise<void> {
       const ref = app.store.member(request.organization!.id, userId);
       const before = document<Record<string, unknown>>(await ref.get());
       if (!before) throw notFound("member");
-      const actorIsPrime = request.auth!.user.uid === request.organization!.primeUserId;
-      if (
-        !actorIsPrime &&
-        (body.role === "OWNER" || before.role === "OWNER")
-      )
+      const actorIsPrime =
+        request.auth!.user.uid === request.organization!.primeUserId;
+      if (!actorIsPrime && (body.role === "OWNER" || before.role === "OWNER"))
         throw forbidden("organization.prime");
       await ref.update({
         ...(body.role ? { role: body.role } : {}),
@@ -514,18 +523,21 @@ export async function organizationRoutes(app: FastifyInstance): Promise<void> {
           throw notFound("pending_join_request");
         applicantUserId = value.userId;
         if (body.decision === "APPROVED") {
-          transaction.set(app.store.member(request.organization!.id, value.userId), {
-            uid: value.userId,
-            email: value.email,
-            displayName: value.displayName ?? null,
-            role: body.role,
-            permissions: body.permissions,
-            deniedPermissions: [],
-            status: "ACTIVE",
-            certifiedBy: request.auth!.user.uid,
-            joinedAt: now(),
-            updatedAt: now(),
-          });
+          transaction.set(
+            app.store.member(request.organization!.id, value.userId),
+            {
+              uid: value.userId,
+              email: value.email,
+              displayName: value.displayName ?? null,
+              role: body.role,
+              permissions: body.permissions,
+              deniedPermissions: [],
+              status: "ACTIVE",
+              certifiedBy: request.auth!.user.uid,
+              joinedAt: now(),
+              updatedAt: now(),
+            },
+          );
           transaction.set(
             app.store.user(value.userId),
             {

@@ -43,15 +43,17 @@ export type OrgAction =
   | "billing.manage"    // plan and payments
   | "org.close"
   | "projects.view_all" // see every project in the organization
-  | "projects.create";
+  | "projects.create"
+  | "projects.manage_access" // change who can do what in a project (Project schema)
+  | "audit.view";       // read the organization's audit log (Audit schema)
 
 export const ORG_ROLE_ACTIONS: Record<OrgRole, readonly OrgAction[]> = {
   owner: [
     "org.edit", "members.manage", "owners.manage", "billing.manage",
-    "org.close", "projects.view_all", "projects.create",
+    "org.close", "projects.view_all", "projects.create", "projects.manage_access", "audit.view",
   ],
-  admin: ["org.edit", "members.manage", "projects.view_all", "projects.create"],
-  member: ["projects.create"],
+  admin: ["org.edit", "members.manage", "projects.view_all", "projects.create", "projects.manage_access", "audit.view"],
+  member: [],
 };
 
 export function canOrg(role: OrgRole, action: OrgAction): boolean {

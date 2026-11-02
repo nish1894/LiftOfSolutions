@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import {
   EmptyState,
   Field,
+  LoadError,
   LoadingRows,
   Notice,
   PageContainer,
@@ -44,14 +45,16 @@ export default function IntegrationsPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="Integrations"
-        description="Where customers reach your assistants, and the outside systems this organization connects to."
+        title="Channels"
+        description="Where customers reach your agents, and the outside systems this organization connects to."
       />
       <Tabs defaultValue={canChannels ? "channels" : "integrations"}>
-        <TabsList>
-          {canChannels && <TabsTrigger value="channels">Channels</TabsTrigger>}
-          {canIntegrations && <TabsTrigger value="integrations">Connected systems</TabsTrigger>}
-        </TabsList>
+        {canChannels && canIntegrations && (
+          <TabsList>
+            <TabsTrigger value="channels">Channels</TabsTrigger>
+            <TabsTrigger value="integrations">Connected systems</TabsTrigger>
+          </TabsList>
+        )}
         {canChannels && (
           <TabsContent value="channels">
             <ChannelList />
@@ -84,10 +87,12 @@ function IntegrationsList() {
             turned off.
           </CardDescription>
         </div>
-        {manage && <AddIntegrationDialog />}
+        {manage && !integrations.isError && <AddIntegrationDialog />}
       </CardHeader>
       {integrations.isLoading ? (
         <LoadingRows />
+      ) : integrations.isError ? (
+        <LoadError className="m-6 mt-4" what="integrations" query={integrations} />
       ) : list.length === 0 ? (
         <EmptyState className="m-6 mt-4" icon={PlugIcon} title="No integrations yet" />
       ) : (

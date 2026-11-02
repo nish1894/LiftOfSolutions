@@ -68,9 +68,13 @@ async function authResponse(app: FastifyInstance, request: FastifyRequest) {
         organization.primeUserId === uid ? "PRIME" : member.role,
       );
       for (const permission of member.permissions ?? [])
-        effectivePermissions.add(permission as (typeof ALL_PERMISSIONS)[number]);
+        effectivePermissions.add(
+          permission as (typeof ALL_PERMISSIONS)[number],
+        );
       for (const permission of member.deniedPermissions ?? [])
-        effectivePermissions.delete(permission as (typeof ALL_PERMISSIONS)[number]);
+        effectivePermissions.delete(
+          permission as (typeof ALL_PERMISSIONS)[number],
+        );
       return {
         business_id: organizationId,
         organization_id: organizationId,
@@ -153,7 +157,9 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     const uid = request.auth!.user.uid;
     const userRef = app.store.user(uid);
     const organizationRef = body.organization_name
-      ? app.store.organization(app.store.db.collection("organizations").doc().id)
+      ? app.store.organization(
+          app.store.db.collection("organizations").doc().id,
+        )
       : null;
     await app.store.db.runTransaction(async (transaction) => {
       const existing = await transaction.get(userRef);
@@ -284,8 +290,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
               preferences: {
                 ...(body.preferences.email_notifications !== undefined
                   ? {
-                      emailNotifications:
-                        body.preferences.email_notifications,
+                      emailNotifications: body.preferences.email_notifications,
                     }
                   : {}),
                 ...(body.preferences.product_updates !== undefined

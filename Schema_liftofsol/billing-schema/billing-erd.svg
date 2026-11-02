@@ -1,0 +1,330 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1252" height="1244" viewBox="0 0 1252 1244" role="img" aria-labelledby="er-title er-desc">
+        <title id="er-title">billing entity relationship diagram</title>
+        <desc id="er-desc">Each organization has exactly one billing account with the same id, holding the latest subscription (embedded), the numbered credit period and the credit balances. An organization points to one plan; a subscription points to one plan. An organization has zero or more invoices, credit ledger entries and usage charges; a credit purchase entry points to its invoice. Each agent run in the Transactions schema has at most one usage charge with the same id, created at admission for the organization that admitted it and settled once. Billing events are temporary webhook records.</desc>
+        <style>
+.er-box { fill: #FFFFFF; stroke: #B9C2CC; stroke-width: 1; }
+.er-box-ref { fill: #FFFFFF; stroke: #5A6474; stroke-width: 1; stroke-dasharray: 5 4; }
+.er-head-main { fill: #0B6B6B; }
+.er-head { fill: #E2EFEE; }
+.er-head-ref { fill: #EDF0F3; }
+.er-sep { stroke: #E1E6EB; stroke-width: 1; }
+.er-linkrow { fill: #E2EFEE; }
+.er-title-main { font-family: "Instrument Sans", "Helvetica Neue", Arial, "DejaVu Sans", sans-serif; font-size: 16px; font-weight: 600; fill: #FFFFFF; }
+.er-tag-main { font-family: "IBM Plex Sans", "Segoe UI", Roboto, Arial, "DejaVu Sans", sans-serif; font-size: 12px; fill: #FFFFFF; opacity: 0.85; }
+.er-title { font-family: "Instrument Sans", "Helvetica Neue", Arial, "DejaVu Sans", sans-serif; font-size: 16px; font-weight: 600; fill: #17202A; }
+.er-tag { font-family: "IBM Plex Sans", "Segoe UI", Roboto, Arial, "DejaVu Sans", sans-serif; font-size: 12px; fill: #5A6474; }
+.er-f { font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 12.5px; fill: #17202A; }
+.er-f.link { fill: #0B6B6B; font-weight: 500; }
+.er-ty { font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 12px; fill: #5A6474; }
+.er-pk { fill: #0B6B6B; font-weight: 500; }
+.er-line { stroke: #0B6B6B; stroke-width: 1.5; fill: none; }
+.er-zero { fill: #FFFFFF; stroke: #0B6B6B; stroke-width: 1.5; }
+.er-card { font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 12px; font-weight: 500; fill: #0B6B6B; }
+        
+        </style>
+        <rect width="1252" height="1244" fill="#FFFFFF"/>
+
+        <!-- organizations -->
+        <rect class="er-box-ref" x="24" y="24" width="300" height="96" rx="8"/>
+        <rect class="er-linkrow" x="25" y="92" width="298" height="28"/>
+        <path class="er-head-ref" d="M24 32 Q24 24 32 24 H316 Q324 24 324 32 V64 H24 Z"/>
+        <text class="er-title" x="38" y="49">organizations</text>
+        <text class="er-tag" x="310" y="49" text-anchor="end">from Organization schema</text>
+        <line class="er-sep" x1="24" y1="64" x2="324" y2="64"/>
+        <line class="er-sep" x1="24" y1="92" x2="324" y2="92"/>
+        <text class="er-f" x="38" y="82">_id</text><text class="er-ty" x="310" y="82" text-anchor="end">uuid <tspan class="er-pk">PK</tspan></text>
+        <text class="er-f link" x="38" y="110">plan_id</text><text class="er-ty" x="310" y="110" text-anchor="end">uuid FK</text>
+
+        <!-- plans -->
+        <rect class="er-box" x="24" y="168" width="300" height="320" rx="8"/>
+        <path class="er-head-main" d="M24 176 Q24 168 32 168 H316 Q324 168 324 176 V208 H24 Z"/>
+        <text class="er-title-main" x="38" y="193">plans</text>
+        <text class="er-tag-main" x="310" y="193" text-anchor="end">collection</text>
+        <line class="er-sep" x1="24" y1="236" x2="324" y2="236"/>
+        <line class="er-sep" x1="24" y1="264" x2="324" y2="264"/>
+        <line class="er-sep" x1="24" y1="292" x2="324" y2="292"/>
+        <line class="er-sep" x1="24" y1="320" x2="324" y2="320"/>
+        <line class="er-sep" x1="24" y1="348" x2="324" y2="348"/>
+        <line class="er-sep" x1="24" y1="376" x2="324" y2="376"/>
+        <line class="er-sep" x1="24" y1="404" x2="324" y2="404"/>
+        <line class="er-sep" x1="24" y1="432" x2="324" y2="432"/>
+        <line class="er-sep" x1="24" y1="460" x2="324" y2="460"/>
+        <text class="er-f" x="38" y="226">_id</text><text class="er-ty" x="310" y="226" text-anchor="end">uuid <tspan class="er-pk">PK</tspan></text>
+        <text class="er-f" x="38" y="254">code</text><text class="er-ty" x="310" y="254" text-anchor="end">string <tspan class="er-pk">UK</tspan></text>
+        <text class="er-f" x="38" y="282">name</text><text class="er-ty" x="310" y="282" text-anchor="end">string</text>
+        <text class="er-f" x="38" y="310">is_default</text><text class="er-ty" x="310" y="310" text-anchor="end">bool</text>
+        <text class="er-f" x="38" y="338">status</text><text class="er-ty" x="310" y="338" text-anchor="end">active | retired</text>
+        <text class="er-f" x="38" y="366">prices</text><text class="er-ty" x="310" y="366" text-anchor="end">array</text>
+        <text class="er-f" x="38" y="394">monthly_credits</text><text class="er-ty" x="310" y="394" text-anchor="end">int</text>
+        <text class="er-f" x="38" y="422">limits</text><text class="er-ty" x="310" y="422" text-anchor="end">object</text>
+        <text class="er-f" x="38" y="450">created_at</text><text class="er-ty" x="310" y="450" text-anchor="end">date</text>
+        <text class="er-f" x="38" y="478">updated_at</text><text class="er-ty" x="310" y="478" text-anchor="end">date</text>
+
+        <!-- billing_events -->
+        <rect class="er-box" x="24" y="536" width="300" height="348" rx="8"/>
+        <path class="er-head-main" d="M24 544 Q24 536 32 536 H316 Q324 536 324 544 V576 H24 Z"/>
+        <text class="er-title-main" x="38" y="561">billing_events</text>
+        <text class="er-tag-main" x="310" y="561" text-anchor="end">collection, TTL 90 days</text>
+        <line class="er-sep" x1="24" y1="604" x2="324" y2="604"/>
+        <line class="er-sep" x1="24" y1="632" x2="324" y2="632"/>
+        <line class="er-sep" x1="24" y1="660" x2="324" y2="660"/>
+        <line class="er-sep" x1="24" y1="688" x2="324" y2="688"/>
+        <line class="er-sep" x1="24" y1="716" x2="324" y2="716"/>
+        <line class="er-sep" x1="24" y1="744" x2="324" y2="744"/>
+        <line class="er-sep" x1="24" y1="772" x2="324" y2="772"/>
+        <line class="er-sep" x1="24" y1="800" x2="324" y2="800"/>
+        <line class="er-sep" x1="24" y1="828" x2="324" y2="828"/>
+        <line class="er-sep" x1="24" y1="856" x2="324" y2="856"/>
+        <text class="er-f" x="38" y="594">_id</text><text class="er-ty" x="310" y="594" text-anchor="end">uuid <tspan class="er-pk">PK</tspan></text>
+        <text class="er-f" x="38" y="622">provider</text><text class="er-ty" x="310" y="622" text-anchor="end">razorpay | stripe</text>
+        <text class="er-f" x="38" y="650">provider_event_id</text><text class="er-ty" x="310" y="650" text-anchor="end">string <tspan class="er-pk">UK</tspan></text>
+        <text class="er-f" x="38" y="678">type</text><text class="er-ty" x="310" y="678" text-anchor="end">string</text>
+        <text class="er-f" x="38" y="706">payload</text><text class="er-ty" x="310" y="706" text-anchor="end">object</text>
+        <text class="er-f" x="38" y="734">status</text><text class="er-ty" x="310" y="734" text-anchor="end">received | processed | failed</text>
+        <text class="er-f" x="38" y="762">attempts</text><text class="er-ty" x="310" y="762" text-anchor="end">int</text>
+        <text class="er-f" x="38" y="790">error?</text><text class="er-ty" x="310" y="790" text-anchor="end">string</text>
+        <text class="er-f" x="38" y="818">received_at</text><text class="er-ty" x="310" y="818" text-anchor="end">date</text>
+        <text class="er-f" x="38" y="846">processed_at?</text><text class="er-ty" x="310" y="846" text-anchor="end">date</text>
+        <text class="er-f" x="38" y="874">expires_at</text><text class="er-ty" x="310" y="874" text-anchor="end">date, TTL</text>
+
+        <!-- transactions -->
+        <rect class="er-box-ref" x="24" y="932" width="300" height="152" rx="8"/>
+        <path class="er-head-ref" d="M24 940 Q24 932 32 932 H316 Q324 932 324 940 V972 H24 Z"/>
+        <text class="er-title" x="38" y="957">transactions</text>
+        <text class="er-tag" x="310" y="957" text-anchor="end">from Transactions schema</text>
+        <line class="er-sep" x1="24" y1="972" x2="324" y2="972"/>
+        <line class="er-sep" x1="24" y1="1000" x2="324" y2="1000"/>
+        <line class="er-sep" x1="24" y1="1028" x2="324" y2="1028"/>
+        <line class="er-sep" x1="24" y1="1056" x2="324" y2="1056"/>
+        <text class="er-f" x="38" y="990">_id</text><text class="er-ty" x="310" y="990" text-anchor="end">uuid <tspan class="er-pk">PK</tspan></text>
+        <text class="er-f" x="38" y="1018">project_id</text><text class="er-ty" x="310" y="1018" text-anchor="end">uuid FK</text>
+        <text class="er-f" x="38" y="1046">agent_id</text><text class="er-ty" x="310" y="1046" text-anchor="end">uuid FK</text>
+        <text class="er-f" x="38" y="1074">total_micros</text><text class="er-ty" x="310" y="1074" text-anchor="end">int, micro-USD</text>
+
+        <!-- billing_accounts -->
+        <rect class="er-box" x="464" y="24" width="300" height="404" rx="8"/>
+        <rect class="er-linkrow" x="465" y="148" width="298" height="28"/>
+        <rect class="er-linkrow" x="465" y="176" width="298" height="28"/>
+        <path class="er-head-main" d="M464 32 Q464 24 472 24 H756 Q764 24 764 32 V64 H464 Z"/>
+        <text class="er-title-main" x="478" y="49">billing_accounts</text>
+        <text class="er-tag-main" x="750" y="49" text-anchor="end">one per organization</text>
+        <line class="er-sep" x1="464" y1="92" x2="764" y2="92"/>
+        <line class="er-sep" x1="464" y1="120" x2="764" y2="120"/>
+        <line class="er-sep" x1="464" y1="148" x2="764" y2="148"/>
+        <line class="er-sep" x1="464" y1="176" x2="764" y2="176"/>
+        <line class="er-sep" x1="464" y1="204" x2="764" y2="204"/>
+        <line class="er-sep" x1="464" y1="232" x2="764" y2="232"/>
+        <line class="er-sep" x1="464" y1="260" x2="764" y2="260"/>
+        <line class="er-sep" x1="464" y1="288" x2="764" y2="288"/>
+        <line class="er-sep" x1="464" y1="316" x2="764" y2="316"/>
+        <line class="er-sep" x1="464" y1="344" x2="764" y2="344"/>
+        <line class="er-sep" x1="464" y1="372" x2="764" y2="372"/>
+        <line class="er-sep" x1="464" y1="400" x2="764" y2="400"/>
+        <text class="er-f" x="478" y="82">_id</text><text class="er-ty" x="750" y="82" text-anchor="end">uuid <tspan class="er-pk">PK</tspan></text>
+        <text class="er-f" x="478" y="110">provider?</text><text class="er-ty" x="750" y="110" text-anchor="end">razorpay | stripe</text>
+        <text class="er-f" x="478" y="138">provider_customer_id?</text><text class="er-ty" x="750" y="138" text-anchor="end">string <tspan class="er-pk">UK</tspan></text>
+        <text class="er-f link" x="478" y="166">profile?</text><text class="er-ty" x="750" y="166" text-anchor="end">object</text>
+        <text class="er-f link" x="478" y="194">subscription?</text><text class="er-ty" x="750" y="194" text-anchor="end">object</text>
+        <text class="er-f" x="478" y="222">credit_period</text><text class="er-ty" x="750" y="222" text-anchor="end">int</text>
+        <text class="er-f" x="478" y="250">credit_period_cause</text><text class="er-ty" x="750" y="250" text-anchor="end">string</text>
+        <text class="er-f" x="478" y="278">subscription_revision</text><text class="er-ty" x="750" y="278" text-anchor="end">int</text>
+        <text class="er-f" x="478" y="306">included_credits_left</text><text class="er-ty" x="750" y="306" text-anchor="end">int</text>
+        <text class="er-f" x="478" y="334">purchased_credits_left</text><text class="er-ty" x="750" y="334" text-anchor="end">int</text>
+        <text class="er-f" x="478" y="362">credits_reset_at</text><text class="er-ty" x="750" y="362" text-anchor="end">date</text>
+        <text class="er-f" x="478" y="390">created_at</text><text class="er-ty" x="750" y="390" text-anchor="end">date</text>
+        <text class="er-f" x="478" y="418">updated_at</text><text class="er-ty" x="750" y="418" text-anchor="end">date</text>
+
+        <!-- subscription -->
+        <rect class="er-box" x="464" y="476" width="300" height="320" rx="8"/>
+        <rect class="er-linkrow" x="465" y="516" width="298" height="28"/>
+        <path class="er-head" d="M464 484 Q464 476 472 476 H756 Q764 476 764 484 V516 H464 Z"/>
+        <text class="er-title" x="478" y="501">subscription</text>
+        <text class="er-tag" x="750" y="501" text-anchor="end">embedded, latest</text>
+        <line class="er-sep" x1="464" y1="516" x2="764" y2="516"/>
+        <line class="er-sep" x1="464" y1="544" x2="764" y2="544"/>
+        <line class="er-sep" x1="464" y1="572" x2="764" y2="572"/>
+        <line class="er-sep" x1="464" y1="600" x2="764" y2="600"/>
+        <line class="er-sep" x1="464" y1="628" x2="764" y2="628"/>
+        <line class="er-sep" x1="464" y1="656" x2="764" y2="656"/>
+        <line class="er-sep" x1="464" y1="684" x2="764" y2="684"/>
+        <line class="er-sep" x1="464" y1="712" x2="764" y2="712"/>
+        <line class="er-sep" x1="464" y1="740" x2="764" y2="740"/>
+        <line class="er-sep" x1="464" y1="768" x2="764" y2="768"/>
+        <text class="er-f link" x="478" y="534">plan_id</text><text class="er-ty" x="750" y="534" text-anchor="end">uuid FK → plans</text>
+        <text class="er-f" x="478" y="562">status</text><text class="er-ty" x="750" y="562" text-anchor="end">active | past_due | cancelled</text>
+        <text class="er-f" x="478" y="590">currency</text><text class="er-ty" x="750" y="590" text-anchor="end">INR | USD</text>
+        <text class="er-f" x="478" y="618">interval</text><text class="er-ty" x="750" y="618" text-anchor="end">month | year</text>
+        <text class="er-f" x="478" y="646">provider_subscription_id</text><text class="er-ty" x="750" y="646" text-anchor="end">string <tspan class="er-pk">UK</tspan></text>
+        <text class="er-f" x="478" y="674">current_period_start</text><text class="er-ty" x="750" y="674" text-anchor="end">date</text>
+        <text class="er-f" x="478" y="702">current_period_end</text><text class="er-ty" x="750" y="702" text-anchor="end">date</text>
+        <text class="er-f" x="478" y="730">cancel_at_period_end</text><text class="er-ty" x="750" y="730" text-anchor="end">bool</text>
+        <text class="er-f" x="478" y="758">started_at</text><text class="er-ty" x="750" y="758" text-anchor="end">date</text>
+        <text class="er-f" x="478" y="786">cancelled_at?</text><text class="er-ty" x="750" y="786" text-anchor="end">date, at ended</text>
+
+        <!-- usage_charges -->
+        <rect class="er-box" x="464" y="844" width="300" height="376" rx="8"/>
+        <rect class="er-linkrow" x="465" y="884" width="298" height="28"/>
+        <rect class="er-linkrow" x="465" y="912" width="298" height="28"/>
+        <path class="er-head-main" d="M464 852 Q464 844 472 844 H756 Q764 844 764 852 V884 H464 Z"/>
+        <text class="er-title-main" x="478" y="869">usage_charges</text>
+        <text class="er-tag-main" x="750" y="869" text-anchor="end">pending, then settled once</text>
+        <line class="er-sep" x1="464" y1="912" x2="764" y2="912"/>
+        <line class="er-sep" x1="464" y1="940" x2="764" y2="940"/>
+        <line class="er-sep" x1="464" y1="968" x2="764" y2="968"/>
+        <line class="er-sep" x1="464" y1="996" x2="764" y2="996"/>
+        <line class="er-sep" x1="464" y1="1024" x2="764" y2="1024"/>
+        <line class="er-sep" x1="464" y1="1052" x2="764" y2="1052"/>
+        <line class="er-sep" x1="464" y1="1080" x2="764" y2="1080"/>
+        <line class="er-sep" x1="464" y1="1108" x2="764" y2="1108"/>
+        <line class="er-sep" x1="464" y1="1136" x2="764" y2="1136"/>
+        <line class="er-sep" x1="464" y1="1164" x2="764" y2="1164"/>
+        <line class="er-sep" x1="464" y1="1192" x2="764" y2="1192"/>
+        <text class="er-f link" x="478" y="902">_id</text><text class="er-ty" x="750" y="902" text-anchor="end">uuid PK = transaction</text>
+        <text class="er-f link" x="478" y="930">org_id</text><text class="er-ty" x="750" y="930" text-anchor="end">uuid FK, at admission</text>
+        <text class="er-f" x="478" y="958">status</text><text class="er-ty" x="750" y="958" text-anchor="end">pending | settled</text>
+        <text class="er-f" x="478" y="986">project_id</text><text class="er-ty" x="750" y="986" text-anchor="end">uuid</text>
+        <text class="er-f" x="478" y="1014">agent_id</text><text class="er-ty" x="750" y="1014" text-anchor="end">uuid</text>
+        <text class="er-f" x="478" y="1042">total_micros</text><text class="er-ty" x="750" y="1042" text-anchor="end">int</text>
+        <text class="er-f" x="478" y="1070">credits</text><text class="er-ty" x="750" y="1070" text-anchor="end">int</text>
+        <text class="er-f" x="478" y="1098">included</text><text class="er-ty" x="750" y="1098" text-anchor="end">int</text>
+        <text class="er-f" x="478" y="1126">purchased</text><text class="er-ty" x="750" y="1126" text-anchor="end">int</text>
+        <text class="er-f" x="478" y="1154">shortfall</text><text class="er-ty" x="750" y="1154" text-anchor="end">int</text>
+        <text class="er-f" x="478" y="1182">created_at</text><text class="er-ty" x="750" y="1182" text-anchor="end">date</text>
+        <text class="er-f" x="478" y="1210">settled_at?</text><text class="er-ty" x="750" y="1210" text-anchor="end">date</text>
+
+        <!-- invoices -->
+        <rect class="er-box" x="928" y="24" width="300" height="544" rx="8"/>
+        <rect class="er-linkrow" x="929" y="92" width="298" height="28"/>
+        <path class="er-head-main" d="M928 32 Q928 24 936 24 H1220 Q1228 24 1228 32 V64 H928 Z"/>
+        <text class="er-title-main" x="942" y="49">invoices</text>
+        <text class="er-tag-main" x="1214" y="49" text-anchor="end">collection</text>
+        <line class="er-sep" x1="928" y1="92" x2="1228" y2="92"/>
+        <line class="er-sep" x1="928" y1="120" x2="1228" y2="120"/>
+        <line class="er-sep" x1="928" y1="148" x2="1228" y2="148"/>
+        <line class="er-sep" x1="928" y1="176" x2="1228" y2="176"/>
+        <line class="er-sep" x1="928" y1="204" x2="1228" y2="204"/>
+        <line class="er-sep" x1="928" y1="232" x2="1228" y2="232"/>
+        <line class="er-sep" x1="928" y1="260" x2="1228" y2="260"/>
+        <line class="er-sep" x1="928" y1="288" x2="1228" y2="288"/>
+        <line class="er-sep" x1="928" y1="316" x2="1228" y2="316"/>
+        <line class="er-sep" x1="928" y1="344" x2="1228" y2="344"/>
+        <line class="er-sep" x1="928" y1="372" x2="1228" y2="372"/>
+        <line class="er-sep" x1="928" y1="400" x2="1228" y2="400"/>
+        <line class="er-sep" x1="928" y1="428" x2="1228" y2="428"/>
+        <line class="er-sep" x1="928" y1="456" x2="1228" y2="456"/>
+        <line class="er-sep" x1="928" y1="484" x2="1228" y2="484"/>
+        <line class="er-sep" x1="928" y1="512" x2="1228" y2="512"/>
+        <line class="er-sep" x1="928" y1="540" x2="1228" y2="540"/>
+        <text class="er-f" x="942" y="82">_id</text><text class="er-ty" x="1214" y="82" text-anchor="end">uuid <tspan class="er-pk">PK</tspan></text>
+        <text class="er-f link" x="942" y="110">org_id</text><text class="er-ty" x="1214" y="110" text-anchor="end">uuid FK</text>
+        <text class="er-f" x="942" y="138">provider</text><text class="er-ty" x="1214" y="138" text-anchor="end">razorpay | stripe</text>
+        <text class="er-f" x="942" y="166">provider_invoice_id</text><text class="er-ty" x="1214" y="166" text-anchor="end">string <tspan class="er-pk">UK</tspan></text>
+        <text class="er-f" x="942" y="194">number?</text><text class="er-ty" x="1214" y="194" text-anchor="end">string</text>
+        <text class="er-f" x="942" y="222">status</text><text class="er-ty" x="1214" y="222" text-anchor="end">open | paid | failed | void</text>
+        <text class="er-f" x="942" y="250">currency</text><text class="er-ty" x="1214" y="250" text-anchor="end">INR | USD</text>
+        <text class="er-f" x="942" y="278">subtotal_minor</text><text class="er-ty" x="1214" y="278" text-anchor="end">int</text>
+        <text class="er-f" x="942" y="306">tax_minor</text><text class="er-ty" x="1214" y="306" text-anchor="end">int</text>
+        <text class="er-f" x="942" y="334">total_minor</text><text class="er-ty" x="1214" y="334" text-anchor="end">int</text>
+        <text class="er-f" x="942" y="362">lines</text><text class="er-ty" x="1214" y="362" text-anchor="end">array</text>
+        <text class="er-f" x="942" y="390">period_start?</text><text class="er-ty" x="1214" y="390" text-anchor="end">date</text>
+        <text class="er-f" x="942" y="418">period_end?</text><text class="er-ty" x="1214" y="418" text-anchor="end">date</text>
+        <text class="er-f" x="942" y="446">issued_at</text><text class="er-ty" x="1214" y="446" text-anchor="end">date</text>
+        <text class="er-f" x="942" y="474">paid_at?</text><text class="er-ty" x="1214" y="474" text-anchor="end">date</text>
+        <text class="er-f" x="942" y="502">pdf_url?</text><text class="er-ty" x="1214" y="502" text-anchor="end">string</text>
+        <text class="er-f" x="942" y="530">created_at</text><text class="er-ty" x="1214" y="530" text-anchor="end">date</text>
+        <text class="er-f" x="942" y="558">updated_at</text><text class="er-ty" x="1214" y="558" text-anchor="end">date</text>
+
+        <!-- credit_ledger -->
+        <rect class="er-box" x="928" y="632" width="300" height="320" rx="8"/>
+        <rect class="er-linkrow" x="929" y="700" width="298" height="28"/>
+        <rect class="er-linkrow" x="929" y="840" width="298" height="28"/>
+        <path class="er-head-main" d="M928 640 Q928 632 936 632 H1220 Q1228 632 1228 640 V672 H928 Z"/>
+        <text class="er-title-main" x="942" y="657">credit_ledger</text>
+        <text class="er-tag-main" x="1214" y="657" text-anchor="end">collection, append-only</text>
+        <line class="er-sep" x1="928" y1="700" x2="1228" y2="700"/>
+        <line class="er-sep" x1="928" y1="728" x2="1228" y2="728"/>
+        <line class="er-sep" x1="928" y1="756" x2="1228" y2="756"/>
+        <line class="er-sep" x1="928" y1="784" x2="1228" y2="784"/>
+        <line class="er-sep" x1="928" y1="812" x2="1228" y2="812"/>
+        <line class="er-sep" x1="928" y1="840" x2="1228" y2="840"/>
+        <line class="er-sep" x1="928" y1="868" x2="1228" y2="868"/>
+        <line class="er-sep" x1="928" y1="896" x2="1228" y2="896"/>
+        <line class="er-sep" x1="928" y1="924" x2="1228" y2="924"/>
+        <text class="er-f" x="942" y="690">_id</text><text class="er-ty" x="1214" y="690" text-anchor="end">uuid <tspan class="er-pk">PK</tspan></text>
+        <text class="er-f link" x="942" y="718">org_id</text><text class="er-ty" x="1214" y="718" text-anchor="end">uuid FK</text>
+        <text class="er-f" x="942" y="746">type</text><text class="er-ty" x="1214" y="746" text-anchor="end">enum</text>
+        <text class="er-f" x="942" y="774">idempotency_key</text><text class="er-ty" x="1214" y="774" text-anchor="end">string <tspan class="er-pk">UK</tspan></text>
+        <text class="er-f" x="942" y="802">credits</text><text class="er-ty" x="1214" y="802" text-anchor="end">int, + or −</text>
+        <text class="er-f" x="942" y="830">pool</text><text class="er-ty" x="1214" y="830" text-anchor="end">included | purchased</text>
+        <text class="er-f link" x="942" y="858">invoice_id?</text><text class="er-ty" x="1214" y="858" text-anchor="end">uuid FK</text>
+        <text class="er-f" x="942" y="886">reason?</text><text class="er-ty" x="1214" y="886" text-anchor="end">string</text>
+        <text class="er-f" x="942" y="914">created_by?</text><text class="er-ty" x="1214" y="914" text-anchor="end">uuid FK → users</text>
+        <text class="er-f" x="942" y="942">created_at</text><text class="er-ty" x="1214" y="942" text-anchor="end">date</text>
+
+        <!-- organizations to billing_accounts: one to one (same _id) -->
+        <path class="er-line" d="M324 78 H464"/>
+        <line class="er-line" x1="333" y1="71" x2="333" y2="85"/>
+        <line class="er-line" x1="339" y1="71" x2="339" y2="85"/>
+        <line class="er-line" x1="455" y1="85" x2="455" y2="71"/>
+        <line class="er-line" x1="449" y1="85" x2="449" y2="71"/>
+        <text class="er-card" x="394" y="68" text-anchor="middle">1 : 1</text>
+
+        <!-- plans to organizations: one to zero-or-more (organizations.plan_id) -->
+        <path class="er-line" d="M174 120 V168"/>
+        <path class="er-line" d="M174 134 L182 120 M174 134 L166 120"/>
+        <circle class="er-zero" cx="174" cy="143" r="4.5"/>
+        <line class="er-line" x1="167" y1="159" x2="181" y2="159"/>
+        <line class="er-line" x1="167" y1="153" x2="181" y2="153"/>
+        <text class="er-card" x="186" y="150" text-anchor="start">1 : 0..N</text>
+
+        <!-- plans to subscription: one to zero-or-more (subscription.plan_id) -->
+        <path class="er-line" d="M324 222 H394 V530 H464"/>
+        <line class="er-line" x1="333" y1="215" x2="333" y2="229"/>
+        <line class="er-line" x1="339" y1="215" x2="339" y2="229"/>
+        <path class="er-line" d="M450 530 L464 538 M450 530 L464 522"/>
+        <circle class="er-zero" cx="441" cy="530" r="4.5"/>
+        <text class="er-card" x="400" y="350" text-anchor="start">1 : 0..N</text>
+
+        <!-- billing_accounts to subscription: one to zero-or-one (embedded) -->
+        <path class="er-line" d="M614 428 V476"/>
+        <line class="er-line" x1="621" y1="437" x2="607" y2="437"/>
+        <line class="er-line" x1="621" y1="443" x2="607" y2="443"/>
+        <line class="er-line" x1="607" y1="467" x2="621" y2="467"/>
+        <circle class="er-zero" cx="614" cy="455" r="4.5"/>
+        <text class="er-card" x="626" y="458" text-anchor="start">1 : 0..1</text>
+
+        <!-- organization (billing_accounts._id) to invoices and credit_ledger: one to zero-or-more (org_id) -->
+        <path class="er-line" d="M764 78 H860 V714 H928 M860 106 H928"/>
+        <line class="er-line" x1="773" y1="71" x2="773" y2="85"/>
+        <line class="er-line" x1="779" y1="71" x2="779" y2="85"/>
+        <path class="er-line" d="M914 106 L928 114 M914 106 L928 98"/>
+        <circle class="er-zero" cx="905" cy="106" r="4.5"/>
+        <path class="er-line" d="M914 714 L928 722 M914 714 L928 706"/>
+        <circle class="er-zero" cx="905" cy="714" r="4.5"/>
+        <text class="er-card" x="866" y="98" text-anchor="start">1 : 0..N</text>
+        <text class="er-card" x="866" y="706" text-anchor="start">1 : 0..N</text>
+
+        <!-- invoices to credit_ledger: one to zero-or-more (invoice_id, a purchase) -->
+        <path class="er-line" d="M1078 568 V632"/>
+        <line class="er-line" x1="1085" y1="577" x2="1071" y2="577"/>
+        <line class="er-line" x1="1085" y1="583" x2="1071" y2="583"/>
+        <path class="er-line" d="M1078 618 L1070 632 M1078 618 L1086 632"/>
+        <circle class="er-zero" cx="1078" cy="609" r="4.5"/>
+        <text class="er-card" x="1090" y="606" text-anchor="start">1 : 0..N</text>
+
+        <!-- organization (billing_accounts._id) to usage_charges: one to zero-or-more (org_id at admission) -->
+        <path class="er-line" d="M764 926 H800 V316 H764"/>
+        <path class="er-line" d="M778 926 L764 918 M778 926 L764 934"/>
+        <circle class="er-zero" cx="787" cy="926" r="4.5"/>
+        <line class="er-line" x1="773" y1="309" x2="773" y2="323"/>
+        <line class="er-line" x1="779" y1="309" x2="779" y2="323"/>
+        <text class="er-card" x="806" y="620" text-anchor="start">N : 1</text>
+
+        <!-- transactions to usage_charges: one to zero-or-one (same _id, charged once) -->
+        <path class="er-line" d="M324 986 H394 V898 H464"/>
+        <line class="er-line" x1="333" y1="979" x2="333" y2="993"/>
+        <line class="er-line" x1="339" y1="979" x2="339" y2="993"/>
+        <line class="er-line" x1="455" y1="905" x2="455" y2="891"/>
+        <circle class="er-zero" cx="443" cy="898" r="4.5"/>
+        <text class="er-card" x="400" y="948" text-anchor="start">1 : 0..1</text>
+      </svg>

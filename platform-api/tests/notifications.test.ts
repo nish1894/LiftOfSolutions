@@ -6,7 +6,11 @@ import {
   resolveNotifications,
 } from "../src/modules/notifications/service.js";
 
-const snapshot = (id, data) => ({ id, data: () => data, get: (key) => data[key] });
+const snapshot = (id, data) => ({
+  id,
+  data: () => data,
+  get: (key) => data[key],
+});
 
 /** Minimal stand-in for the pieces of PlatformStore the service touches. */
 function appWith({ members = [], notifications = [] } = {}) {
@@ -16,7 +20,9 @@ function appWith({ members = [], notifications = [] } = {}) {
     doc: () => ({ _ref: name }),
     where: () => collection(name),
     limit: () => collection(name),
-    get: async () => ({ docs: notifications.map((item) => snapshot(item.id, item)) }),
+    get: async () => ({
+      docs: notifications.map((item) => snapshot(item.id, item)),
+    }),
   });
   return {
     log: { warn: vi.fn() },
@@ -33,7 +39,9 @@ function appWith({ members = [], notifications = [] } = {}) {
       },
       collection: () => ({
         limit: () => ({
-          get: async () => ({ docs: members.map((item) => snapshot(item.uid, item)) }),
+          get: async () => ({
+            docs: members.map((item) => snapshot(item.uid, item)),
+          }),
         }),
       }),
     },
@@ -137,7 +145,9 @@ describe("notify", () => {
     app.store.db.batch = () => {
       throw new Error("firestore unavailable");
     };
-    await expect(notifyQuietly(app as never, [input("a")])).resolves.toBeUndefined();
+    await expect(
+      notifyQuietly(app as never, [input("a")]),
+    ).resolves.toBeUndefined();
     expect(app.log.warn).toHaveBeenCalled();
   });
 });
@@ -146,9 +156,24 @@ describe("resolveNotifications", () => {
   it("marks only the matching unread notifications read", async () => {
     const app = appWith({
       notifications: [
-        { id: "n1", resourceType: "join_request", resourceId: "req-1", readAt: null },
-        { id: "n2", resourceType: "join_request", resourceId: "req-1", readAt: "2026-08-25T00:00:00.000Z" },
-        { id: "n3", resourceType: "invitation", resourceId: "req-1", readAt: null },
+        {
+          id: "n1",
+          resourceType: "join_request",
+          resourceId: "req-1",
+          readAt: null,
+        },
+        {
+          id: "n2",
+          resourceType: "join_request",
+          resourceId: "req-1",
+          readAt: "2026-08-25T00:00:00.000Z",
+        },
+        {
+          id: "n3",
+          resourceType: "invitation",
+          resourceId: "req-1",
+          readAt: null,
+        },
       ],
     });
     await resolveNotifications(app as never, "join_request", "req-1");
@@ -159,7 +184,12 @@ describe("resolveNotifications", () => {
   it("commits nothing when every notification is already read", async () => {
     const app = appWith({
       notifications: [
-        { id: "n1", resourceType: "join_request", resourceId: "req-1", readAt: "2026-08-25T00:00:00.000Z" },
+        {
+          id: "n1",
+          resourceType: "join_request",
+          resourceId: "req-1",
+          readAt: "2026-08-25T00:00:00.000Z",
+        },
       ],
     });
     await resolveNotifications(app as never, "join_request", "req-1");

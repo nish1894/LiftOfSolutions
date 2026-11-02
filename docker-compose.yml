@@ -1,143 +1,110 @@
+# Local stack on native Firestore: the Firestore emulator, the same kind of database the RAG reads.
+#   docker compose up -d --build
+# Sign-in uses real Firebase Auth when .env sets FIREBASE_AUTH_EMULATOR_HOST= and
+# VITE_FIREBASE_AUTH_EMULATOR_URL= (empty) and GOOGLE_APPLICATION_CREDENTIALS to a key in untracked/keys.
+# Left unset, everything runs on the emulators.
+name: liftof-platform
+
+# api-init and maintenance run the image the api service builds.
+x-api-image: &api-image
+  image: liftof-platform-api:latest
+  pull_policy: never
+
 services:
   firebase-emulator:
-    build:
-      context: .
-      dockerfile: firebase-emulator/Dockerfile
+    image: chatbotbackend-firebase-emulator:latest
+    build: { context: ., dockerfile: firebase-emulator/Dockerfile }
     command:
       - sh
       - -c
-      # `exec` matters: without it firebase runs as a child of this shell, so
-      # Docker's SIGTERM stops the shell and kills the emulator before
-      # --export-on-exit can write /data. That silently loses the database on
-      # every restart. exec makes firebase PID 1 so it gets the signal itself.
-      # Export target is a SUBDIRECTORY of the volume, never /data itself:
-      # firebase clears the export directory before writing, and the kernel
-      # refuses that on a mount point with EBUSY ("Device or resource busy"),
-      # which silently loses the whole database on every restart.
-      - if [ -f /data/export/firebase-export-metadata.json ]; then exec firebase emulators:start --project ${FIREBASE_PROJECT_ID:-demo-erp-chatbot} --only auth,firestore --import=/data/export --export-on-exit=/data/export; else exec firebase emulators:start --project ${FIREBASE_PROJECT_ID:-demo-erp-chatbot} --only auth,firestore --export-on-exit=/data/export; fi
-    ports:
-      - "4000:4000"
-      - "8080:8080"
-      - "9099:9099"
-    volumes:
-      - firebase_data:/data
-    # Writing the export takes a few seconds; the 10s default would kill the
-    # emulator mid-write and leave a corrupt or missing snapshot.
+      # exec makes firebase PID 1, so it gets Docker's SIGTERM and writes the export before exiting.
+      # The export goes to a subdirectory of the volume: firebase clears that directory first, which
+      # fails on a mount point.
+      - if [ -f /data/export/firebase-export-metadata.json ]; then exec firebase emulators:start --project ${FIREBASE_PROJECT_ID:-demo-liftof-platform} --only auth,firestore --import=/data/export --export-on-exit=/data/export; else exec firebase emulators:start --project ${FIREBASE_PROJECT_ID:-demo-liftof-platform} --only auth,firestore --export-on-exit=/data/export; fi
+    ports: ["127.0.0.1:8080:8080", "127.0.0.1:9099:9099", "127.0.0.1:4000:4000"]
+    volumes: ["firestore_data:/data"]
+    # Writing the export takes a few seconds; the 10 s default would cut it off.
     stop_grace_period: 60s
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4000').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
-      interval: 10s
-      timeout: 5s
-      retries: 20
-
-  redis:
-    image: redis:8-alpine
-    command: redis-server --appendonly yes
-    ports: ["6379:6379"]
-    volumes: ["redis_data:/data"]
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
       interval: 5s
-      timeout: 3s
-      retries: 10
+      retries: 30
 
-  rag-service:
-    build:
-      context: ../LiftOff-Sol-Rag
-      dockerfile_inline: |
-        FROM python:3.12-slim
-        ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
-        WORKDIR /app
-        COPY . .
-        RUN pip install --no-cache-dir -r requirements.txt "uvicorn[standard]>=0.52.2"
-        EXPOSE 8010
-        CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8010"]
-    environment:
-      RAG_SERVER_CREDENTIALS: '{"chatbot-platform":{"secret":"${AI_SERVICE_API_KEY:-local-rag-secret-change-me}"}}'
-      RAG_TEST_MODE: "1"
-      RAG_LOCAL_STORE_DIR: /app/data/chunks
-    ports: ["8010:8010"]
-    volumes:
-      - rag_data:/app/data/chunks
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8010/health', timeout=3)"]
-      interval: 10s
-      timeout: 5s
-      retries: 20
-
-  rag-files:
-    image: nginx:1.29-alpine
-    ports: ["8081:80"]
-    volumes:
-      - upload_data:/usr/share/nginx/html:ro
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-
-  api:
-    build:
-      context: ./platform-api
+  # Creates the default plan once; onboarding needs it.
+  api-init:
+    <<: *api-image
+    command: ["node", "dist/firestore/provision.js"]
+    restart: "no"
     environment:
       APP_ENV: development
-      APP_SECRET_KEY: ${APP_SECRET_KEY:-local-docker-secret-change-before-deployment}
-      REDIS_URL: redis://redis:6379/0
-      ALLOWED_ORIGINS: http://localhost:5173,http://localhost:8000
-      FRONTEND_URL: http://localhost:5173
-      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-demo-erp-chatbot}
-      FIREBASE_APP_NAME: erp-chatbot-platform-docker
-      FIREBASE_SERVICE_ACCOUNT_JSON: ${FIREBASE_SERVICE_ACCOUNT_JSON:-}
-      FIRESTORE_EMULATOR_HOST: ${FIRESTORE_EMULATOR_HOST-firebase-emulator:8080}
-      FIREBASE_AUTH_EMULATOR_HOST: ${FIREBASE_AUTH_EMULATOR_HOST-firebase-emulator:9099}
-      AI_SERVICE_MODE: ${AI_SERVICE_MODE:-rag}
-      AI_SERVICE_URL: ${AI_SERVICE_URL:-http://rag-service:8010}
-      AI_SERVICE_SERVER_ID: ${AI_SERVICE_SERVER_ID:-chatbot-platform}
-      AI_SERVICE_API_KEY: ${AI_SERVICE_API_KEY:-local-rag-secret-change-me}
-      AI_SERVICE_DOCUMENT_BASE_URL: ${AI_SERVICE_DOCUMENT_BASE_URL:-http://rag-files}
-      STORAGE_BACKEND: local
-      LOCAL_STORAGE_PATH: /app/data/uploads
-      S3_ENDPOINT_URL: ${S3_ENDPOINT_URL:-}
-      S3_REGION: ${S3_REGION:-us-east-1}
-      S3_BUCKET: ${S3_BUCKET:-}
-      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
-      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
-    ports: ["8000:8000"]
-    volumes: ["upload_data:/app/data/uploads"]
+      DATABASE_BACKEND: firestore
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-demo-liftof-platform}
+      FIRESTORE_EMULATOR_HOST: firebase-emulator:8080
+      DEFAULT_PLAN_CREDITS: ${DEFAULT_PLAN_CREDITS:-1000}
+      DEFAULT_PLAN_PROJECTS: ${DEFAULT_PLAN_PROJECTS:-3}
+      DEFAULT_PLAN_MEMBERS: ${DEFAULT_PLAN_MEMBERS:-10}
     depends_on:
-      firebase-emulator:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      rag-service:
-        condition: service_healthy
-      rag-files:
-        condition: service_healthy
+      firebase-emulator: { condition: service_healthy }
+
+  api:
+    image: liftof-platform-api:latest
+    build: { context: ./platform-api }
+    environment:
+      APP_ENV: development
+      DATABASE_BACKEND: firestore
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-demo-liftof-platform}
+      FIRESTORE_EMULATOR_HOST: firebase-emulator:8080
+      # Empty in .env = real Firebase Auth; GOOGLE_APPLICATION_CREDENTIALS then names a key in /run/keys.
+      FIREBASE_AUTH_EMULATOR_HOST: ${FIREBASE_AUTH_EMULATOR_HOST-firebase-emulator:9099}
+      GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS:-}
+      FRONTEND_URL: http://localhost:5173
+      ALLOWED_ORIGINS: http://localhost:5173
+      TERMS_VERSION: development-preview
+      # The RAG runs on this Mac (uv run fastapi run src/main.py --port 8001) and downloads uploads from here.
+      RAG_SERVICE_URL: ${RAG_SERVICE_URL:-http://host.docker.internal:8001}
+      PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8000}
+      LOCAL_STORAGE_PATH: /app/data/uploads
+    volumes: ["./untracked/keys:/run/keys:ro", "uploads:/app/data/uploads"]
+    ports: ["127.0.0.1:8000:8000"]
+    depends_on:
+      api-init: { condition: service_completed_successfully }
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8000/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 12
+
+  # The once-a-minute sweeps: credit periods, expired approvals and records, stale runs.
+  maintenance:
+    <<: *api-image
+    command: ["node", "dist/firestore/maintenance.js"]
+    environment:
+      APP_ENV: development
+      DATABASE_BACKEND: firestore
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-demo-liftof-platform}
+      FIRESTORE_EMULATOR_HOST: firebase-emulator:8080
+      LOCAL_STORAGE_PATH: /app/data/uploads
+    volumes: ["uploads:/app/data/uploads"]
+    depends_on:
+      api-init: { condition: service_completed_successfully }
 
   frontend:
     build:
       context: ./frontend
       args:
         VITE_FIREBASE_API_KEY: ${VITE_FIREBASE_API_KEY:-demo-key}
-        VITE_FIREBASE_AUTH_DOMAIN: ${VITE_FIREBASE_AUTH_DOMAIN:-demo-erp-chatbot.firebaseapp.com}
-        VITE_FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-demo-erp-chatbot}
+        VITE_FIREBASE_AUTH_DOMAIN: ${VITE_FIREBASE_AUTH_DOMAIN:-demo-liftof-platform.firebaseapp.com}
+        VITE_FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-demo-liftof-platform}
         VITE_FIREBASE_STORAGE_BUCKET: ${VITE_FIREBASE_STORAGE_BUCKET:-}
         VITE_FIREBASE_MESSAGING_SENDER_ID: ${VITE_FIREBASE_MESSAGING_SENDER_ID:-}
         VITE_FIREBASE_APP_ID: ${VITE_FIREBASE_APP_ID:-demo-app-id}
         VITE_FIREBASE_MEASUREMENT_ID: ${VITE_FIREBASE_MEASUREMENT_ID:-}
         VITE_FIREBASE_AUTH_EMULATOR_URL: ${VITE_FIREBASE_AUTH_EMULATOR_URL-http://localhost:9099}
-    ports: ["5173:80"]
+    ports: ["127.0.0.1:5173:80"]
     depends_on:
-      api:
-        condition: service_healthy
+      api: { condition: service_healthy }
 
 volumes:
-  firebase_data:
-  redis_data:
-  upload_data:
-  rag_data:
+  firestore_data:
+  # Knowledge uploads wait here until the RAG has read them.
+  uploads:

@@ -19,3 +19,4 @@ platform-api/data/
 
 # Local-only working notes, status, and historical design docs.
 untracked/
+*.tsbuildinfo

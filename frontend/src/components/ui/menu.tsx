@@ -5,7 +5,7 @@ import { CheckIcon } from "lucide-react";
 import { cn } from "@/lib/utils.ts";
 
 const floating =
-  "z-50 rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95";
+  "z-50 rounded-lg border bg-popover text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-top-1";
 
 export function DropdownMenu(props: ComponentProps<typeof Menu.Root>) {
   return <Menu.Root {...props} />;
@@ -36,7 +36,7 @@ export function DropdownMenuContent({
 }
 
 const item =
-  "relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-muted [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:text-muted-foreground [&_svg:not([class*='size-'])]:size-4";
+  "relative flex cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-muted [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:text-muted-foreground [&_svg:not([class*='size-'])]:size-4";
 
 export function DropdownMenuItem({ className, ...props }: ComponentProps<typeof Menu.Item>) {
   return <Menu.Item className={cn(item, className)} {...props} />;
@@ -58,12 +58,7 @@ export function DropdownMenuRadioItem({
 }
 
 export function DropdownMenuLabel({ className, ...props }: ComponentProps<typeof Menu.Label>) {
-  return (
-    <Menu.Label
-      className={cn("px-2 py-1.5 text-xs font-medium text-muted-foreground", className)}
-      {...props}
-    />
-  );
+  return <Menu.Label className={cn("label-caps px-2 py-1.5", className)} {...props} />;
 }
 
 export function DropdownMenuSeparator({

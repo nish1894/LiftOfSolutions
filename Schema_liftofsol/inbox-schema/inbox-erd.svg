@@ -1,0 +1,184 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1228" height="666" viewBox="0 0 1228 666" role="img" aria-labelledby="er-title er-desc">
+        <title id="er-title">inbox entity relationship diagram</title>
+        <desc id="er-desc">A conversation has zero or more messages. A message can embed citations (AI answers), attachments and event data (system messages for handoffs). Conversations point to a project, an agent, a contact and the contact identity replies go to; messages from the AI point to the transaction that wrote them.</desc>
+        <style>
+.er-box { fill: #FFFFFF; stroke: #B9C2CC; stroke-width: 1; }
+.er-box-ref { fill: #FFFFFF; stroke: #5A6474; stroke-width: 1; stroke-dasharray: 5 4; }
+.er-head-main { fill: #0B6B6B; }
+.er-head { fill: #E2EFEE; }
+.er-head-ref { fill: #EDF0F3; }
+.er-sep { stroke: #E1E6EB; stroke-width: 1; }
+.er-linkrow { fill: #E2EFEE; }
+.er-title-main { font-family: "Instrument Sans", "Helvetica Neue", Arial, "DejaVu Sans", sans-serif; font-size: 16px; font-weight: 600; fill: #FFFFFF; }
+.er-tag-main { font-family: "IBM Plex Sans", "Segoe UI", Roboto, Arial, "DejaVu Sans", sans-serif; font-size: 12px; fill: #FFFFFF; opacity: 0.85; }
+.er-title { font-family: "Instrument Sans", "Helvetica Neue", Arial, "DejaVu Sans", sans-serif; font-size: 16px; font-weight: 600; fill: #17202A; }
+.er-tag { font-family: "IBM Plex Sans", "Segoe UI", Roboto, Arial, "DejaVu Sans", sans-serif; font-size: 12px; fill: #5A6474; }
+.er-f { font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 12.5px; fill: #17202A; }
+.er-f.link { fill: #0B6B6B; font-weight: 500; }
+.er-ty { font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 12px; fill: #5A6474; }
+.er-pk { fill: #0B6B6B; font-weight: 500; }
+.er-line { stroke: #0B6B6B; stroke-width: 1.5; fill: none; }
+.er-zero { fill: #FFFFFF; stroke: #0B6B6B; stroke-width: 1.5; }
+.er-card { font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 12px; font-weight: 500; fill: #0B6B6B; }
+        
+        </style>
+        <rect width="1228" height="666" fill="#FFFFFF"/>
+
+        <!-- conversations -->
+        <rect class="er-box" x="24" y="24" width="300" height="572" rx="8"/>
+        <path class="er-head-main" d="M24 32 Q24 24 32 24 H316 Q324 24 324 32 V64 H24 Z"/>
+        <text class="er-title-main" x="38" y="49">conversations</text>
+        <text class="er-tag-main" x="310" y="49" text-anchor="end">collection</text>
+        <line class="er-sep" x1="24" y1="92" x2="324" y2="92"/>
+        <line class="er-sep" x1="24" y1="120" x2="324" y2="120"/>
+        <line class="er-sep" x1="24" y1="148" x2="324" y2="148"/>
+        <line class="er-sep" x1="24" y1="176" x2="324" y2="176"/>
+        <line class="er-sep" x1="24" y1="204" x2="324" y2="204"/>
+        <line class="er-sep" x1="24" y1="232" x2="324" y2="232"/>
+        <line class="er-sep" x1="24" y1="260" x2="324" y2="260"/>
+        <line class="er-sep" x1="24" y1="288" x2="324" y2="288"/>
+        <line class="er-sep" x1="24" y1="316" x2="324" y2="316"/>
+        <line class="er-sep" x1="24" y1="344" x2="324" y2="344"/>
+        <line class="er-sep" x1="24" y1="372" x2="324" y2="372"/>
+        <line class="er-sep" x1="24" y1="400" x2="324" y2="400"/>
+        <line class="er-sep" x1="24" y1="428" x2="324" y2="428"/>
+        <line class="er-sep" x1="24" y1="456" x2="324" y2="456"/>
+        <line class="er-sep" x1="24" y1="484" x2="324" y2="484"/>
+        <line class="er-sep" x1="24" y1="512" x2="324" y2="512"/>
+        <line class="er-sep" x1="24" y1="540" x2="324" y2="540"/>
+        <line class="er-sep" x1="24" y1="568" x2="324" y2="568"/>
+        <text class="er-f" x="38" y="82">_id</text><text class="er-ty" x="310" y="82" text-anchor="end">uuid <tspan class="er-pk">PK</tspan></text>
+        <text class="er-f" x="38" y="110">project_id</text><text class="er-ty" x="310" y="110" text-anchor="end">uuid FK → projects</text>
+        <text class="er-f" x="38" y="138">agent_id</text><text class="er-ty" x="310" y="138" text-anchor="end">uuid FK → agents</text>
+        <text class="er-f" x="38" y="166">contact_id</text><text class="er-ty" x="310" y="166" text-anchor="end">uuid FK → contacts</text>
+        <text class="er-f" x="38" y="194">identity_id</text><text class="er-ty" x="310" y="194" text-anchor="end">uuid FK → identities</text>
+        <text class="er-f" x="38" y="222">channel</text><text class="er-ty" x="310" y="222" text-anchor="end">enum</text>
+        <text class="er-f" x="38" y="250">connection_id</text><text class="er-ty" x="310" y="250" text-anchor="end">string</text>
+        <text class="er-f" x="38" y="278">open_key?</text><text class="er-ty" x="310" y="278" text-anchor="end">string <tspan class="er-pk">UK</tspan></text>
+        <text class="er-f" x="38" y="306">external_thread_id?</text><text class="er-ty" x="310" y="306" text-anchor="end">string</text>
+        <text class="er-f" x="38" y="334">status</text><text class="er-ty" x="310" y="334" text-anchor="end">enum (5)</text>
+        <text class="er-f" x="38" y="362">assigned_user_id?</text><text class="er-ty" x="310" y="362" text-anchor="end">uuid FK → users</text>
+        <text class="er-f" x="38" y="390">handoff_reason?</text><text class="er-ty" x="310" y="390" text-anchor="end">string</text>
+        <text class="er-f" x="38" y="418">summary?</text><text class="er-ty" x="310" y="418" text-anchor="end">string</text>
+        <text class="er-f" x="38" y="446">last_message_at</text><text class="er-ty" x="310" y="446" text-anchor="end">date</text>
+        <text class="er-f" x="38" y="474">last_message_preview?</text><text class="er-ty" x="310" y="474" text-anchor="end">string</text>
+        <text class="er-f" x="38" y="502">created_at</text><text class="er-ty" x="310" y="502" text-anchor="end">date</text>
+        <text class="er-f" x="38" y="530">updated_at</text><text class="er-ty" x="310" y="530" text-anchor="end">date</text>
+        <text class="er-f" x="38" y="558">resolved_at?</text><text class="er-ty" x="310" y="558" text-anchor="end">date</text>
+        <text class="er-f" x="38" y="586">closed_at?</text><text class="er-ty" x="310" y="586" text-anchor="end">date</text>
+
+        <!-- messages -->
+        <rect class="er-box" x="464" y="24" width="300" height="460" rx="8"/>
+        <rect class="er-linkrow" x="465" y="92" width="298" height="28"/>
+        <rect class="er-linkrow" x="465" y="260" width="298" height="28"/>
+        <rect class="er-linkrow" x="465" y="288" width="298" height="28"/>
+        <rect class="er-linkrow" x="465" y="372" width="298" height="28"/>
+        <path class="er-head-main" d="M464 32 Q464 24 472 24 H756 Q764 24 764 32 V64 H464 Z"/>
+        <text class="er-title-main" x="478" y="49">messages</text>
+        <text class="er-tag-main" x="750" y="49" text-anchor="end">collection</text>
+        <line class="er-sep" x1="464" y1="92" x2="764" y2="92"/>
+        <line class="er-sep" x1="464" y1="120" x2="764" y2="120"/>
+        <line class="er-sep" x1="464" y1="148" x2="764" y2="148"/>
+        <line class="er-sep" x1="464" y1="176" x2="764" y2="176"/>
+        <line class="er-sep" x1="464" y1="204" x2="764" y2="204"/>
+        <line class="er-sep" x1="464" y1="232" x2="764" y2="232"/>
+        <line class="er-sep" x1="464" y1="260" x2="764" y2="260"/>
+        <line class="er-sep" x1="464" y1="288" x2="764" y2="288"/>
+        <line class="er-sep" x1="464" y1="316" x2="764" y2="316"/>
+        <line class="er-sep" x1="464" y1="344" x2="764" y2="344"/>
+        <line class="er-sep" x1="464" y1="372" x2="764" y2="372"/>
+        <line class="er-sep" x1="464" y1="400" x2="764" y2="400"/>
+        <line class="er-sep" x1="464" y1="428" x2="764" y2="428"/>
+        <line class="er-sep" x1="464" y1="456" x2="764" y2="456"/>
+        <text class="er-f" x="478" y="82">_id</text><text class="er-ty" x="750" y="82" text-anchor="end">uuid <tspan class="er-pk">PK</tspan></text>
+        <text class="er-f link" x="478" y="110">conversation_id</text><text class="er-ty" x="750" y="110" text-anchor="end">uuid FK</text>
+        <text class="er-f" x="478" y="138">project_id</text><text class="er-ty" x="750" y="138" text-anchor="end">uuid FK → projects</text>
+        <text class="er-f" x="478" y="166">sender_type</text><text class="er-ty" x="750" y="166" text-anchor="end">enum (4)</text>
+        <text class="er-f" x="478" y="194">sender_user_id?</text><text class="er-ty" x="750" y="194" text-anchor="end">uuid FK → users</text>
+        <text class="er-f" x="478" y="222">content_type</text><text class="er-ty" x="750" y="222" text-anchor="end">text | image | file</text>
+        <text class="er-f" x="478" y="250">content</text><text class="er-ty" x="750" y="250" text-anchor="end">string</text>
+        <text class="er-f link" x="478" y="278">citations?</text><text class="er-ty" x="750" y="278" text-anchor="end">array</text>
+        <text class="er-f link" x="478" y="306">attachments?</text><text class="er-ty" x="750" y="306" text-anchor="end">array</text>
+        <text class="er-f" x="478" y="334">transaction_id?</text><text class="er-ty" x="750" y="334" text-anchor="end">uuid FK</text>
+        <text class="er-f" x="478" y="362">event?</text><text class="er-ty" x="750" y="362" text-anchor="end">enum (7)</text>
+        <text class="er-f link" x="478" y="390">event_data?</text><text class="er-ty" x="750" y="390" text-anchor="end">object</text>
+        <text class="er-f" x="478" y="418">external_key?</text><text class="er-ty" x="750" y="418" text-anchor="end">string <tspan class="er-pk">UK</tspan></text>
+        <text class="er-f" x="478" y="446">delivery?</text><text class="er-ty" x="750" y="446" text-anchor="end">enum (4)</text>
+        <text class="er-f" x="478" y="474">created_at</text><text class="er-ty" x="750" y="474" text-anchor="end">date</text>
+
+        <!-- citations -->
+        <rect class="er-box" x="904" y="24" width="300" height="180" rx="8"/>
+        <path class="er-head" d="M904 32 Q904 24 912 24 H1196 Q1204 24 1204 32 V64 H904 Z"/>
+        <text class="er-title" x="918" y="49">citations</text>
+        <text class="er-tag" x="1190" y="49" text-anchor="end">embedded, ai messages</text>
+        <line class="er-sep" x1="904" y1="64" x2="1204" y2="64"/>
+        <line class="er-sep" x1="904" y1="92" x2="1204" y2="92"/>
+        <line class="er-sep" x1="904" y1="120" x2="1204" y2="120"/>
+        <line class="er-sep" x1="904" y1="148" x2="1204" y2="148"/>
+        <line class="er-sep" x1="904" y1="176" x2="1204" y2="176"/>
+        <text class="er-f" x="918" y="82">rag_id</text><text class="er-ty" x="1190" y="82" text-anchor="end">uuid FK → rags</text>
+        <text class="er-f" x="918" y="110">document_id</text><text class="er-ty" x="1190" y="110" text-anchor="end">uuid FK → rag_documents</text>
+        <text class="er-f" x="918" y="138">title</text><text class="er-ty" x="1190" y="138" text-anchor="end">string</text>
+        <text class="er-f" x="918" y="166">url?</text><text class="er-ty" x="1190" y="166" text-anchor="end">string</text>
+        <text class="er-f" x="918" y="194">snippet?</text><text class="er-ty" x="1190" y="194" text-anchor="end">string</text>
+
+        <!-- attachments -->
+        <rect class="er-box" x="904" y="282" width="300" height="152" rx="8"/>
+        <path class="er-head" d="M904 290 Q904 282 912 282 H1196 Q1204 282 1204 290 V322 H904 Z"/>
+        <text class="er-title" x="918" y="307">attachments</text>
+        <text class="er-tag" x="1190" y="307" text-anchor="end">embedded</text>
+        <line class="er-sep" x1="904" y1="322" x2="1204" y2="322"/>
+        <line class="er-sep" x1="904" y1="350" x2="1204" y2="350"/>
+        <line class="er-sep" x1="904" y1="378" x2="1204" y2="378"/>
+        <line class="er-sep" x1="904" y1="406" x2="1204" y2="406"/>
+        <text class="er-f" x="918" y="340">url</text><text class="er-ty" x="1190" y="340" text-anchor="end">string</text>
+        <text class="er-f" x="918" y="368">mime_type</text><text class="er-ty" x="1190" y="368" text-anchor="end">string</text>
+        <text class="er-f" x="918" y="396">name?</text><text class="er-ty" x="1190" y="396" text-anchor="end">string</text>
+        <text class="er-f" x="918" y="424">size_bytes?</text><text class="er-ty" x="1190" y="424" text-anchor="end">int</text>
+
+        <!-- event_data -->
+        <rect class="er-box" x="904" y="500" width="300" height="124" rx="8"/>
+        <path class="er-head" d="M904 508 Q904 500 912 500 H1196 Q1204 500 1204 508 V540 H904 Z"/>
+        <text class="er-title" x="918" y="525">event_data</text>
+        <text class="er-tag" x="1190" y="525" text-anchor="end">embedded, system messages</text>
+        <line class="er-sep" x1="904" y1="540" x2="1204" y2="540"/>
+        <line class="er-sep" x1="904" y1="568" x2="1204" y2="568"/>
+        <line class="er-sep" x1="904" y1="596" x2="1204" y2="596"/>
+        <text class="er-f" x="918" y="558">from_user_id?</text><text class="er-ty" x="1190" y="558" text-anchor="end">uuid FK → users</text>
+        <text class="er-f" x="918" y="586">to_user_id?</text><text class="er-ty" x="1190" y="586" text-anchor="end">uuid FK → users</text>
+        <text class="er-f" x="918" y="614">reason?</text><text class="er-ty" x="1190" y="614" text-anchor="end">string</text>
+
+        <!-- conversations to messages: one to zero-or-more -->
+        <path class="er-line" d="M324 78 H394 V106 H464"/>
+        <line class="er-line" x1="333" y1="71" x2="333" y2="85"/>
+        <line class="er-line" x1="339" y1="71" x2="339" y2="85"/>
+        <path class="er-line" d="M450 106 L464 114 M450 106 L464 98"/>
+        <circle class="er-zero" cx="441" cy="106" r="4.5"/>
+        <text class="er-card" x="330" y="68" text-anchor="start">1 : 0..N</text>
+
+        <!-- messages to citations: one to zero-or-more (embedded) -->
+        <path class="er-line" d="M764 274 H834 V64 H904"/>
+        <line class="er-line" x1="773" y1="267" x2="773" y2="281"/>
+        <line class="er-line" x1="779" y1="267" x2="779" y2="281"/>
+        <path class="er-line" d="M890 64 L904 72 M890 64 L904 56"/>
+        <circle class="er-zero" cx="881" cy="64" r="4.5"/>
+        <text class="er-card" x="842" y="180" text-anchor="start">1 : 0..N</text>
+
+        <!-- messages to attachments: one to zero-or-more (embedded) -->
+        <path class="er-line" d="M764 302 H904"/>
+        <line class="er-line" x1="773" y1="295" x2="773" y2="309"/>
+        <line class="er-line" x1="779" y1="295" x2="779" y2="309"/>
+        <path class="er-line" d="M890 302 L904 310 M890 302 L904 294"/>
+        <circle class="er-zero" cx="881" cy="302" r="4.5"/>
+        <text class="er-card" x="834" y="292" text-anchor="middle">1 : 0..N</text>
+
+        <!-- messages to event_data: one to zero-or-one (embedded) -->
+        <path class="er-line" d="M764 386 H850 V520 H904"/>
+        <line class="er-line" x1="773" y1="379" x2="773" y2="393"/>
+        <line class="er-line" x1="779" y1="379" x2="779" y2="393"/>
+        <line class="er-line" x1="895" y1="527" x2="895" y2="513"/>
+        <circle class="er-zero" cx="883" cy="520" r="4.5"/>
+        <text class="er-card" x="858" y="470" text-anchor="start">1 : 0..1</text>
+        <text class="er-tag" x="38" y="622" text-anchor="start">status: ai_active → waiting_for_agent → agent_active → resolved → closed</text>
+        <text class="er-tag" x="38" y="642" text-anchor="start">handoffs = status + assigned_user_id on the conversation, each step a system message</text>
+      </svg>

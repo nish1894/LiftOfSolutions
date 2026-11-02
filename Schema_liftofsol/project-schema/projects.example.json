@@ -1,61 +1,35 @@
 {
   "project": {
-    "_id": "a7c3e2f1-9b4d-4e6a-8c2f-5d1b0e9a7f34",
-    "name": "Support Bot",
-    "description": "Agent that answers customer questions",
-    "scope": "personal",
+    "_id": "d3a8f1c6-4b2e-4f97-8a05-6e1c9b7d3f42",
+    "org_id": "3b9e7c12-4f6a-4d8e-9a21-7c5b0e8f1d34",
+    "name": "Support India",
+    "description": "WhatsApp and web chat support for Indian customers",
     "status": "active",
-    "member_count": 2,
+    "role_permissions": {
+      "member": [
+        "agents.view", "contacts.view", "contacts.manage",
+        "conversations.view", "conversations.reply", "conversations.assign",
+        "channels.view", "knowledge.view", "knowledge.manage", "tools.view", "analytics.view", "usage.view"
+      ]
+    },
+    "members": [
+      {
+        "user_id": "2e7b4c19-6d3a-4f8e-b5c1-9a0d7e3f6b28",
+        "grants": ["tools.approve"],
+        "denies": [],
+        "added_by": "8f3c2a1e-5b7d-4c9a-a1f2-3e6b9d0c7a41",
+        "added_at": "2026-10-06T09:00:00Z"
+      },
+      {
+        "user_id": "6a1f9d3e-8c27-4b50-9e4a-1d7c3b8f2a65",
+        "grants": [],
+        "denies": ["contacts.manage"],
+        "added_by": "8f3c2a1e-5b7d-4c9a-a1f2-3e6b9d0c7a41",
+        "added_at": "2026-10-07T11:30:00Z"
+      }
+    ],
     "created_by": "8f3c2a1e-5b7d-4c9a-a1f2-3e6b9d0c7a41",
-    "created_at": "2026-10-04T15:30:00Z",
-    "updated_at": "2026-10-04T15:40:00Z"
-  },
-
-  "project_roles": [
-    {
-      "_id": "d4e8f2a6-3c1b-4f7e-9a5d-2b6c8e0f1a73",
-      "project_id": "a7c3e2f1-9b4d-4e6a-8c2f-5d1b0e9a7f34",
-      "name": "Owner",
-      "permissions": ["view", "edit", "manage"],
-      "created_at": "2026-10-04T15:30:00Z",
-      "updated_at": "2026-10-04T15:30:00Z"
-    },
-    {
-      "_id": "5b9a1c7e-2f4d-4a8b-b6e3-0c7d9f2a4e15",
-      "project_id": "a7c3e2f1-9b4d-4e6a-8c2f-5d1b0e9a7f34",
-      "name": "Editor",
-      "permissions": ["view", "edit"],
-      "created_at": "2026-10-04T15:30:00Z",
-      "updated_at": "2026-10-04T15:30:00Z"
-    },
-    {
-      "_id": "e2c6a9d3-7b5f-4c1e-8d4a-6f0b3e7c9a21",
-      "project_id": "a7c3e2f1-9b4d-4e6a-8c2f-5d1b0e9a7f34",
-      "name": "Viewer",
-      "permissions": ["view"],
-      "created_at": "2026-10-04T15:30:00Z",
-      "updated_at": "2026-10-04T15:30:00Z"
-    }
-  ],
-
-  "project_members": [
-    {
-      "_id": "a7c3e2f1-9b4d-4e6a-8c2f-5d1b0e9a7f34_8f3c2a1e-5b7d-4c9a-a1f2-3e6b9d0c7a41",
-      "project_id": "a7c3e2f1-9b4d-4e6a-8c2f-5d1b0e9a7f34",
-      "user_id": "8f3c2a1e-5b7d-4c9a-a1f2-3e6b9d0c7a41",
-      "role_id": "d4e8f2a6-3c1b-4f7e-9a5d-2b6c8e0f1a73",
-      "added_by": "8f3c2a1e-5b7d-4c9a-a1f2-3e6b9d0c7a41",
-      "created_at": "2026-10-04T15:30:00Z",
-      "updated_at": "2026-10-04T15:30:00Z"
-    },
-    {
-      "_id": "a7c3e2f1-9b4d-4e6a-8c2f-5d1b0e9a7f34_2e7b4c19-6d3a-4f8e-b5c1-9a0d7e3f6b28",
-      "project_id": "a7c3e2f1-9b4d-4e6a-8c2f-5d1b0e9a7f34",
-      "user_id": "2e7b4c19-6d3a-4f8e-b5c1-9a0d7e3f6b28",
-      "role_id": "e2c6a9d3-7b5f-4c1e-8d4a-6f0b3e7c9a21",
-      "added_by": "8f3c2a1e-5b7d-4c9a-a1f2-3e6b9d0c7a41",
-      "created_at": "2026-10-04T15:40:00Z",
-      "updated_at": "2026-10-04T15:40:00Z"
-    }
-  ]
+    "created_at": "2026-10-05T06:00:00Z",
+    "updated_at": "2026-10-07T11:30:00Z"
+  }
 }

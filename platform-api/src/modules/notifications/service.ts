@@ -8,9 +8,7 @@ import { permissionsFor, type Permission } from "../../permissions/catalog.js";
  * one here.
  */
 export type NotificationType =
-  | "join_request.created"
-  | "join_request.approved"
-  | "join_request.rejected";
+  "join_request.created" | "join_request.approved" | "join_request.rejected";
 
 export interface NotificationInput {
   userId: string;

@@ -9,6 +9,7 @@
  * were genuine is misleading to visitors.
  */
 
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRightIcon,
@@ -22,7 +23,6 @@ import {
   type LucideIcon,
   MessageSquareQuoteIcon,
   ReceiptIcon,
-  SparklesIcon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button.tsx";
@@ -77,13 +77,19 @@ const USE_CASES = [
     title: "Sales enablement",
     body: "Answer product and pricing questions without waiting on an expert.",
   },
-  { title: "People & HR", body: "Give staff a straight answer on leave, benefits, and process." },
-  { title: "Operations", body: "Find the clause, the spec, or the runbook step without hunting." },
+  {
+    title: "People & HR",
+    body: "Give staff a straight answer on leave, benefits, and process.",
+  },
+  {
+    title: "Operations",
+    body: "Find the clause, the spec, or the runbook step without hunting.",
+  },
 ];
 
 const FAQS = [
   {
-    question: "Where do the assistant's answers come from?",
+    question: "Where do the agent's answers come from?",
     answer:
       "Only from the documents and web pages you add to Knowledge. Each answer shows the sources it used, so your team can check it.",
   },
@@ -94,8 +100,7 @@ const FAQS = [
   },
   {
     question: "How do people sign in?",
-    answer:
-      "With Google, GitHub, or an email and password. Each organization approves who can join it.",
+    answer: "With Google, or an email and password. Each organization approves who can join it.",
   },
 ];
 
@@ -112,11 +117,9 @@ function SectionHeading({
   body: string;
 }) {
   return (
-    <div className="mx-auto mb-12 grid max-w-2xl justify-items-center gap-3 text-center">
-      <span className="rounded-md border px-2 py-0.5 text-xs font-medium text-muted-foreground">
-        {eyebrow}
-      </span>
-      <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
+    <div className="mb-10 grid max-w-2xl gap-3">
+      <span className="text-sm font-medium text-primary">{eyebrow}</span>
+      <h2 className="text-2xl font-medium tracking-tight">{title}</h2>
       <p className="text-muted-foreground">{body}</p>
     </div>
   );
@@ -127,23 +130,38 @@ function ProductShowcase({ className }: { className?: string }) {
   const nav: Array<{ icon: LucideIcon; label: string; active?: boolean }> = [
     { icon: LayoutDashboardIcon, label: "Overview" },
     { icon: InboxIcon, label: "Inbox", active: true },
-    { icon: BotIcon, label: "Assistants" },
+    { icon: BotIcon, label: "Agents" },
     { icon: BookOpenIcon, label: "Knowledge" },
   ];
   const queue = [
-    { name: "Priya Nair", note: "Where is my refund?", state: "AI active", tone: "violet" },
-    { name: "Jordan Lee", note: "I'd like to talk to a person", state: "Waiting", tone: "orange" },
-    { name: "Sam Ortiz", note: "Thanks, that fixed it", state: "Resolved", tone: "success" },
+    {
+      name: "Priya Nair",
+      note: "Where is my refund?",
+      state: "AI active",
+      tone: "violet",
+    },
+    {
+      name: "Jordan Lee",
+      note: "I'd like to talk to a person",
+      state: "Waiting",
+      tone: "orange",
+    },
+    {
+      name: "Sam Ortiz",
+      note: "Thanks, that fixed it",
+      state: "Resolved",
+      tone: "success",
+    },
   ];
 
   return (
     <figure
-      className={cn("overflow-hidden rounded-xl border bg-card text-left shadow-lg", className)}
+      className={cn("overflow-hidden rounded-2xl border bg-card text-left shadow-lg", className)}
       aria-label="Illustration of the Lift Off inbox"
     >
-      <div className="grid md:grid-cols-[11rem_16rem_1fr]">
-        <div className="hidden border-r bg-sidebar p-3 md:grid md:content-start md:gap-1">
-          <p className="mb-2 flex items-center gap-2 px-2 text-sm font-semibold">
+      <div className="grid xl:grid-cols-[9rem_1fr] 2xl:grid-cols-[9rem_12rem_1fr]">
+        <div className="hidden border-r bg-sidebar p-3 xl:grid xl:content-start xl:gap-1">
+          <p className="mb-3 flex items-center gap-2 px-2 text-sm font-medium">
             <span className="flex size-6 items-center justify-center rounded-md bg-primary text-xs text-primary-foreground">
               AS
             </span>
@@ -162,7 +180,7 @@ function ProductShowcase({ className }: { className?: string }) {
             </span>
           ))}
         </div>
-        <div className="hidden border-r p-2 md:grid md:content-start md:gap-1">
+        <div className="hidden border-r p-2 2xl:grid 2xl:content-start 2xl:gap-1">
           {queue.map((item, index) => (
             <div
               key={item.name}
@@ -172,14 +190,17 @@ function ProductShowcase({ className }: { className?: string }) {
               <span className="truncate text-xs text-muted-foreground">{item.note}</span>
               <span
                 className="w-fit rounded-md border px-1.5 text-xs font-medium"
-                style={{ color: `var(--${item.tone})`, background: `var(--${item.tone}-bg)` }}
+                style={{
+                  color: `var(--${item.tone})`,
+                  background: `var(--${item.tone}-bg)`,
+                }}
               >
                 {item.state}
               </span>
             </div>
           ))}
         </div>
-        <div className="grid content-start gap-4 p-5 text-sm">
+        <div className="grid min-h-80 content-center gap-6 p-5 text-sm sm:p-6">
           <div className="flex gap-3">
             <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-semibold text-accent-foreground">
               PN
@@ -202,7 +223,7 @@ function ProductShowcase({ className }: { className?: string }) {
           </div>
         </div>
       </div>
-      <figcaption className="border-t px-4 py-2 text-xs text-muted-foreground">
+      <figcaption className="border-t bg-background px-4 py-3 text-xs text-muted-foreground">
         Illustrative example.
       </figcaption>
     </figure>
@@ -210,6 +231,9 @@ function ProductShowcase({ className }: { className?: string }) {
 }
 
 export default function Home({ user }: { user: User | null }) {
+  useEffect(() => {
+    document.title = "Lift Off Solutions";
+  }, []);
   // The homepage is the landing screen for everyone, so a signed-in visitor
   // needs a way into the application rather than another sign-in prompt.
   const signedIn = Boolean(user);
@@ -219,7 +243,7 @@ export default function Home({ user }: { user: User | null }) {
     <div className="min-h-dvh bg-background">
       <header className="sticky top-0 z-30 border-b bg-background">
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4 md:px-6">
-          <a className="flex items-center gap-2 font-semibold" href="#top">
+          <a className="flex items-center gap-3 font-medium" href="#top">
             <BrandMark size={28} />
             Lift Off Solutions
           </a>
@@ -262,49 +286,46 @@ export default function Home({ user }: { user: User | null }) {
       </header>
 
       <main id="top">
-        <section className="relative overflow-hidden border-b">
-          {/* Dot grid, as in the template, faded toward the edges. */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(var(--border)_1px,transparent_1px)] bg-size-[20px_20px] mask-[radial-gradient(ellipse_at_top,black_30%,transparent_70%)]"
-          />
-          <div className="relative mx-auto max-w-6xl px-4 pt-16 pb-16 text-center md:px-6 md:pt-24">
-            <span className="inline-flex items-center gap-2 rounded-full border bg-background px-3 py-1 text-sm text-muted-foreground shadow-xs">
-              <SparklesIcon className="size-3.5 text-primary" aria-hidden="true" />
-              AI customer service with cited answers
-            </span>
-            <h1 className="mx-auto mt-6 max-w-3xl text-xl font-semibold tracking-tight sm:text-display">
-              Your company's knowledge, answered in seconds
-            </h1>
-            <p className="mx-auto mt-5 max-w-2xl text-md text-muted-foreground">
-              Lift Off Solutions reads the documents your business already runs on and answers
-              questions about them in plain language — with the source passage attached, so nobody
-              has to take the answer on trust.
-            </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Button asChild size="lg">
-                <Link to={primaryTarget}>
-                  {signedIn ? "Open your dashboard" : "Get started free"}
-                  <ArrowRightIcon />
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <a href="#how">See how it works</a>
-              </Button>
+        <section className="border-b">
+          <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 md:px-6 md:py-24 lg:grid-cols-[1fr_1.15fr] lg:gap-12">
+            <div>
+              <span className="inline-flex items-center gap-2 text-sm font-medium text-primary">
+                <BookOpenIcon className="size-4" aria-hidden="true" />
+                AI customer service with cited answers
+              </span>
+              <h1 className="mt-6 max-w-xl text-[2.25rem] leading-[1.1] font-medium tracking-tight sm:text-display">
+                Your company's knowledge, answered in seconds
+              </h1>
+              <p className="mt-6 max-w-xl text-md leading-relaxed text-subtle-foreground">
+                Lift Off Solutions reads the documents your business already runs on and answers
+                questions about them in plain language — with the source passage attached, so nobody
+                has to take the answer on trust.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Button asChild size="lg">
+                  <Link to={primaryTarget}>
+                    {signedIn ? "Open your dashboard" : "Get started free"}
+                    <ArrowRightIcon />
+                  </Link>
+                </Button>
+                <Button asChild size="lg" variant="outline">
+                  <a href="#how">See how it works</a>
+                </Button>
+              </div>
+              <p className="mt-4 text-sm text-muted-foreground">
+                {signedIn
+                  ? `Signed in as ${user?.email ?? ""}`
+                  : "No credit card required · Sign in with Google or email"}
+              </p>
             </div>
-            <p className="mt-4 text-sm text-muted-foreground">
-              {signedIn
-                ? `Signed in as ${user?.email ?? ""}`
-                : "No credit card required · Sign in with Google, GitHub, or email"}
-            </p>
-            <ProductShowcase className="mx-auto mt-14 max-w-5xl" />
+            <ProductShowcase />
           </div>
         </section>
 
         <section className="border-b" aria-label="Customers">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-10 gap-y-3 px-4 py-8 md:px-6">
             <p className="text-sm text-muted-foreground">Built for teams like</p>
-            <ul className="flex flex-wrap justify-center gap-x-10 gap-y-2 text-md font-semibold text-muted-foreground">
+            <ul className="flex flex-wrap justify-center gap-x-10 gap-y-2 text-md font-medium text-muted-foreground">
               {CUSTOMERS.map((name) => (
                 <li key={name}>{name}</li>
               ))}
@@ -312,7 +333,7 @@ export default function Home({ user }: { user: User | null }) {
           </div>
         </section>
 
-        <section id="features" className="scroll-mt-16 border-b bg-muted/30 py-20">
+        <section id="features" className="scroll-mt-16 border-b bg-card py-16 md:py-24">
           <div className="mx-auto max-w-6xl px-4 md:px-6">
             <SectionHeading
               eyebrow="Features"
@@ -321,14 +342,11 @@ export default function Home({ user }: { user: User | null }) {
             />
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {FEATURES.map((feature) => (
-                <article
-                  key={feature.title}
-                  className="grid content-start gap-3 rounded-xl border bg-card p-6 shadow-xs"
-                >
-                  <span className="flex size-10 items-center justify-center rounded-lg border bg-background shadow-xs">
-                    <feature.icon className="size-5 text-primary" aria-hidden="true" />
+                <article key={feature.title} className="grid content-start gap-4 border-t p-5 pt-6">
+                  <span className="flex size-8 items-center">
+                    <feature.icon className="size-5 text-muted-foreground" aria-hidden="true" />
                   </span>
-                  <h3 className="font-semibold">{feature.title}</h3>
+                  <h3 className="font-medium">{feature.title}</h3>
                   <p className="text-sm text-muted-foreground">{feature.body}</p>
                 </article>
               ))}
@@ -336,7 +354,7 @@ export default function Home({ user }: { user: User | null }) {
           </div>
         </section>
 
-        <section id="how" className="scroll-mt-16 border-b py-20">
+        <section id="how" className="scroll-mt-16 border-b py-16 md:py-24">
           <div className="mx-auto max-w-6xl px-4 md:px-6">
             <SectionHeading
               eyebrow="How it works"
@@ -345,14 +363,11 @@ export default function Home({ user }: { user: User | null }) {
             />
             <ol className="grid gap-4 md:grid-cols-3">
               {STEPS.map((step, index) => (
-                <li
-                  key={step.title}
-                  className="grid content-start gap-3 rounded-xl border bg-card p-6 shadow-xs"
-                >
-                  <span className="flex size-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+                <li key={step.title} className="grid content-start gap-4 border-t p-5 pt-6">
+                  <span className="flex size-8 items-center justify-center rounded-md border bg-card font-mono text-sm text-primary">
                     {index + 1}
                   </span>
-                  <h3 className="font-semibold">{step.title}</h3>
+                  <h3 className="font-medium">{step.title}</h3>
                   <p className="text-sm text-muted-foreground">{step.body}</p>
                 </li>
               ))}
@@ -360,22 +375,22 @@ export default function Home({ user }: { user: User | null }) {
           </div>
         </section>
 
-        <section className="border-b bg-muted/30 py-20">
+        <section className="border-b py-16 md:py-24">
           <div className="mx-auto grid max-w-6xl gap-12 px-4 md:px-6 lg:grid-cols-2">
             <div className="grid content-start gap-6">
-              <h2 className="text-xl font-semibold tracking-tight">Where it earns its keep</h2>
+              <h2 className="text-2xl font-medium tracking-tight">Where it earns its keep</h2>
               <ul className="grid gap-5 sm:grid-cols-2">
                 {USE_CASES.map((useCase) => (
                   <li key={useCase.title} className="grid gap-1 border-l-2 border-primary/30 pl-4">
-                    <h3 className="font-semibold">{useCase.title}</h3>
+                    <h3 className="font-medium">{useCase.title}</h3>
                     <p className="text-sm text-muted-foreground">{useCase.body}</p>
                   </li>
                 ))}
               </ul>
             </div>
             {/* PLACEHOLDER: invented quote and attribution. Replace or remove. */}
-            <figure className="grid content-center gap-4 rounded-xl border bg-card p-8 shadow-xs">
-              <blockquote className="text-md">
+            <figure className="grid content-center gap-6 rounded-xl border bg-card p-6 sm:p-8">
+              <blockquote className="text-lg leading-relaxed">
                 "Our support team used to keep six policy documents open in tabs. Now they ask one
                 question and get the clause back with it. Onboarding a new agent takes days instead
                 of weeks."
@@ -387,7 +402,7 @@ export default function Home({ user }: { user: User | null }) {
           </div>
         </section>
 
-        <section id="faq" className="scroll-mt-16 border-b py-20">
+        <section id="faq" className="scroll-mt-16 border-b py-16 md:py-24">
           <div className="mx-auto max-w-3xl px-4 md:px-6">
             <SectionHeading
               eyebrow="FAQ"
@@ -396,10 +411,7 @@ export default function Home({ user }: { user: User | null }) {
             />
             <div className="grid gap-3">
               {FAQS.map((faq) => (
-                <details
-                  key={faq.question}
-                  className="group rounded-xl border bg-card px-5 py-4 open:shadow-xs"
-                >
+                <details key={faq.question} className="group rounded-lg border bg-card px-5 py-5">
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
                     {faq.question}
                     <ChevronDownIcon
@@ -414,10 +426,10 @@ export default function Home({ user }: { user: User | null }) {
           </div>
         </section>
 
-        <section className="py-20">
+        <section className="py-16 md:py-24">
           <div className="mx-auto max-w-6xl px-4 md:px-6">
-            <div className="grid justify-items-center gap-4 rounded-2xl border bg-muted/40 px-6 py-14 text-center">
-              <h2 className="text-xl font-semibold tracking-tight">Put your documents to work</h2>
+            <div className="grid justify-items-start gap-5 rounded-xl border bg-card px-6 py-10 text-left sm:px-10">
+              <h2 className="text-2xl font-medium tracking-tight">Put your documents to work</h2>
               <p className="max-w-xl text-muted-foreground">
                 Create an account and ask your first question in a few minutes.
               </p>

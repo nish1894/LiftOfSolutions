@@ -38,13 +38,11 @@ function requestFor(
       config: { FIREBASE_CHECK_REVOKED_TOKENS: false },
       firebase: {
         auth: {
-          verifyIdToken: vi
-            .fn()
-            .mockResolvedValue({
-              uid,
-              email: "agent@example.com",
-              email_verified: true,
-            }),
+          verifyIdToken: vi.fn().mockResolvedValue({
+            uid,
+            email: "agent@example.com",
+            email_verified: true,
+          }),
         },
       },
       store: {

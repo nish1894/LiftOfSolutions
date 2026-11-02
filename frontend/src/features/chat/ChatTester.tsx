@@ -1,37 +1,42 @@
 import { type FormEvent, useEffect, useRef, useState } from "react";
-import { SendIcon } from "lucide-react";
+import { RotateCcwIcon, SendIcon } from "lucide-react";
 
-import { Citations } from "@/components/app/citations.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { useOrgMutation } from "@/features/workspace/workspace.ts";
 import { cn } from "@/lib/utils.ts";
-import type { Citation } from "@/shared/types.ts";
 
 interface TestMessage {
   id: number;
-  role: "user" | "assistant";
+  /** "note" is a line from the studio itself, such as a restarted conversation. */
+  role: "user" | "assistant" | "note";
   text: string;
-  citations: Citation[];
   isError?: boolean;
 }
 
 interface TestResponse {
-  result?: { content?: string; citations?: Citation[] };
+  answer: string;
+  convo_id: string;
+  /** The draft changed since the last question, so the agent has no memory of the chat so far. */
+  restarted: boolean;
 }
 
-/** Sends test questions to an assistant's saved draft and shows its sources. */
+/** Sends test questions to an agent's saved draft, in one conversation until "New chat". */
 export default function ChatTester({
   agentId,
+  prepare,
   className,
 }: {
   agentId: string;
+  /** Runs before each question, e.g. to save unsaved changes first. */
+  prepare?: () => Promise<void>;
   className?: string;
 }) {
   const { request } = useOrgMutation();
   const [messages, setMessages] = useState<TestMessage[]>([]);
   const [draft, setDraft] = useState("");
   const [pending, setPending] = useState(false);
+  const [convoId, setConvoId] = useState(() => crypto.randomUUID());
   const nextId = useRef(0);
   const endRef = useRef<HTMLDivElement | null>(null);
 
@@ -45,26 +50,34 @@ export default function ChatTester({
     setMessages((current) => [...current, { ...message, id }]);
   }
 
+  function restart() {
+    setMessages([]);
+    setConvoId(crypto.randomUUID());
+  }
+
   async function send(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const text = draft.trim();
     if (!text || pending) return;
+    const hadMessages = messages.length > 0;
     setDraft("");
-    add({ role: "user", text, citations: [] });
+    add({ role: "user", text });
     setPending(true);
     try {
+      await prepare?.();
       const data = await request<TestResponse>(`/assistants/${agentId}/test`, {
         method: "POST",
-        body: { message: text },
+        body: { message: text, convo_id: convoId },
       });
-      add({
-        role: "assistant",
-        text: data.result?.content || "No reply.",
-        citations: data.result?.citations ?? [],
-      });
+      if (data.restarted && hadMessages)
+        add({
+          role: "note",
+          text: "The draft changed, so the agent started this conversation afresh.",
+        });
+      add({ role: "assistant", text: data.answer || "No reply." });
     } catch (error) {
       const message = error instanceof Error ? error.message : "The test failed.";
-      add({ role: "assistant", text: message, citations: [], isError: true });
+      add({ role: "assistant", text: message, isError: true });
     } finally {
       setPending(false);
     }
@@ -78,26 +91,29 @@ export default function ChatTester({
             Ask something a customer would ask.
           </p>
         )}
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}
-          >
+        {messages.map((message) =>
+          message.role === "note" ? (
+            <p key={message.id} className="text-center text-xs text-muted-foreground">
+              {message.text}
+            </p>
+          ) : (
             <div
-              className={cn(
-                "max-w-[85%] rounded-lg px-3 py-2",
-                message.role === "user" && "bg-primary text-primary-foreground",
-                message.role === "assistant" && "border bg-card",
-                message.isError && "border-danger/30 bg-danger-bg text-danger",
-              )}
+              key={message.id}
+              className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}
             >
-              <p className="whitespace-pre-wrap">{message.text}</p>
-              {message.role === "assistant" && !message.isError && (
-                <Citations citations={message.citations} />
-              )}
+              <div
+                className={cn(
+                  "max-w-[85%] rounded-lg px-3 py-2",
+                  message.role === "user" && "bg-primary text-primary-foreground",
+                  message.role === "assistant" && "border bg-card",
+                  message.isError && "border-danger-border bg-danger-bg text-danger",
+                )}
+              >
+                <p className="whitespace-pre-wrap">{message.text}</p>
+              </div>
             </div>
-          </div>
-        ))}
+          ),
+        )}
         {pending && <p className="text-sm text-muted-foreground">Thinking…</p>}
         <div ref={endRef} />
       </div>
@@ -116,6 +132,17 @@ export default function ChatTester({
         <Button type="submit" disabled={pending || !draft.trim()}>
           <SendIcon />
           Send
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          aria-label="New chat"
+          title="New chat"
+          onClick={restart}
+          disabled={pending || messages.length === 0}
+        >
+          <RotateCcwIcon />
         </Button>
       </form>
     </div>

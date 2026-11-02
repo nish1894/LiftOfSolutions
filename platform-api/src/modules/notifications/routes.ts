@@ -63,17 +63,21 @@ export async function notificationRoutes(app: FastifyInstance): Promise<void> {
     };
   });
 
-  app.post("/:notificationId/read", { preHandler: authenticate }, async (request) => {
-    const { notificationId } = request.params as { notificationId: string };
-    const ref = app.store.db.collection("notifications").doc(notificationId);
-    const value = document<NotificationRecord>(await ref.get());
-    // Scoping the ownership check here is what keeps one user from marking
-    // another user's notifications read by guessing a document id.
-    if (!value || value.userId !== request.auth!.user.uid)
-      throw notFound("notification");
-    if (!value.readAt) await ref.update({ readAt: now() });
-    return { id: notificationId, read: true };
-  });
+  app.post(
+    "/:notificationId/read",
+    { preHandler: authenticate },
+    async (request) => {
+      const { notificationId } = request.params as { notificationId: string };
+      const ref = app.store.db.collection("notifications").doc(notificationId);
+      const value = document<NotificationRecord>(await ref.get());
+      // Scoping the ownership check here is what keeps one user from marking
+      // another user's notifications read by guessing a document id.
+      if (!value || value.userId !== request.auth!.user.uid)
+        throw notFound("notification");
+      if (!value.readAt) await ref.update({ readAt: now() });
+      return { id: notificationId, read: true };
+    },
+  );
 
   app.post("/read-all", { preHandler: authenticate }, async (request) => {
     const snapshot = await app.store.db

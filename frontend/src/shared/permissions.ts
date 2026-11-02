@@ -33,6 +33,7 @@ export const PLATFORM_PERMISSIONS = [
   "billing.view",
   "billing.manage",
   "audit.view",
+  "projects.create",
 ] as const;
 
 export type PlatformPermission = (typeof PLATFORM_PERMISSIONS)[number];
@@ -51,7 +52,7 @@ export const ROLE_LABELS: Record<Role, string> = {
   PRIME: "Prime",
   OWNER: "Owner",
   ADMIN: "Admin",
-  AGENT: "Agent",
+  AGENT: "Member",
   VIEWER: "Viewer",
   CUSTOM: "Custom",
 };
@@ -60,7 +61,7 @@ export const ROLE_DESCRIPTIONS: Record<Role, string> = {
   PRIME: "Created the organization. Has every permission and can't be restricted.",
   OWNER: "Every permission. Only the Prime user can grant or change it.",
   ADMIN: "Everything except deleting the organization and managing billing.",
-  AGENT: "Works the inbox and customers; can view assistants and knowledge.",
+  AGENT: "Works the inbox and contacts; can view agents and knowledge.",
   VIEWER: "Read-only access across the workspace.",
   CUSTOM: "Only the permissions picked for this member.",
 };

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import {
   EmptyState,
   Field,
+  LoadError,
   LoadingRows,
   Notice,
   PageContainer,
@@ -34,7 +35,7 @@ import {
   TableRow,
 } from "@/components/ui/table.tsx";
 import { NoAccess } from "@/features/shell/NotFound.tsx";
-import { useCustomers } from "@/features/workspace/resources.ts";
+import { CONTACT_LIMIT, useCustomers } from "@/features/workspace/resources.ts";
 import { useOrgMutation, useOrgQuery, useWorkspace } from "@/features/workspace/workspace.ts";
 import { timeAgo } from "@/lib/utils.ts";
 import { CONVERSATION_STATUS } from "@/shared/statuses.ts";
@@ -47,7 +48,7 @@ export default function CustomersPage() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Customer | null>(null);
 
-  if (!can("customers.view")) return <NoAccess what="customers" />;
+  if (!can("customers.view")) return <NoAccess what="contacts" />;
 
   const term = search.trim().toLowerCase();
   const rows = (customers.data ?? []).filter((item) =>
@@ -59,14 +60,14 @@ export default function CustomersPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="Customers"
+        title="Contacts"
         description="People who have contacted your support channels."
         actions={can("customers.manage") && <AddCustomerDialog />}
       />
 
       <div className="mb-4 max-w-sm">
         <label htmlFor="customer-search" className="sr-only">
-          Search customers
+          Search contacts
         </label>
         <Input
           id="customer-search"
@@ -77,18 +78,25 @@ export default function CustomersPage() {
         />
       </div>
 
+      {(customers.data ?? []).length >= CONTACT_LIMIT && (
+        <p className="mb-3 text-sm text-muted-foreground">
+          Showing the first {CONTACT_LIMIT} contacts. Search covers only these.
+        </p>
+      )}
       <Card>
         {customers.isLoading ? (
           <LoadingRows />
+        ) : customers.isError ? (
+          <LoadError className="m-5" what="contacts" query={customers} />
         ) : rows.length === 0 ? (
           <EmptyState
             className="m-5"
             icon={ContactIcon}
-            title={term ? "No customers match your search" : "No customers yet"}
+            title={term ? "No contacts match your search" : "No contacts yet"}
             description={
               term
                 ? "Try a different name or email."
-                : "Customers appear here when they start a chat."
+                : "Contacts appear here when they start a chat."
             }
           />
         ) : (
@@ -110,7 +118,7 @@ export default function CustomersPage() {
                       className="font-medium hover:underline"
                       onClick={() => setSelected(customer)}
                     >
-                      {customer.display_name || "Unnamed customer"}
+                      {customer.display_name || "Unnamed contact"}
                     </button>
                   </TableCell>
                   <TableCell className="text-muted-foreground">{customer.email || "—"}</TableCell>
@@ -150,15 +158,13 @@ function CustomerDetails({ customer }: { customer: Customer }) {
   return (
     <div className="grid gap-6 p-5">
       <div className="grid gap-1 pr-6">
-        <DialogTitle>{customer.display_name || "Unnamed customer"}</DialogTitle>
+        <DialogTitle>{customer.display_name || "Unnamed contact"}</DialogTitle>
         <p className="text-sm text-muted-foreground">
           {[customer.email, customer.phone].filter(Boolean).join(" · ") || "No contact details"}
         </p>
       </div>
       <section className="grid gap-2">
-        <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-          Conversations
-        </h3>
+        <h3 className="text-xs font-medium text-muted-foreground">Conversations</h3>
         {history.isLoading && <LoadingRows />}
         {!history.isLoading && (history.data ?? []).length === 0 && (
           <p className="text-sm text-muted-foreground">No conversations yet.</p>
@@ -190,13 +196,13 @@ function AddCustomerDialog() {
     await request("/customers", {
       method: "POST",
       body: {
-        display_name: form.name.trim() || null,
-        email: form.email.trim() || null,
-        phone: form.phone.trim() || null,
+        ...(form.name.trim() ? { display_name: form.name.trim() } : {}),
+        ...(form.email.trim() ? { email: form.email.trim() } : {}),
+        ...(form.phone.trim() ? { phone: form.phone.trim() } : {}),
       },
     });
     await invalidate("customers");
-    toast.success("Customer added");
+    toast.success("Contact added");
     setForm({ name: "", email: "", phone: "" });
     setOpen(false);
   });
@@ -211,12 +217,12 @@ function AddCustomerDialog() {
       <DialogTrigger asChild>
         <Button>
           <PlusIcon />
-          Add customer
+          Add contact
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add a customer</DialogTitle>
+          <DialogTitle>Add a contact</DialogTitle>
           <DialogDescription>
             Only the name is needed; contact details are optional.
           </DialogDescription>
@@ -248,7 +254,7 @@ function AddCustomerDialog() {
           {save.error && <Notice tone="error">{save.error}</Notice>}
           <DialogFooter>
             <Button type="submit" disabled={save.busy}>
-              {save.busy ? "Adding…" : "Add customer"}
+              {save.busy ? "Adding…" : "Add contact"}
             </Button>
           </DialogFooter>
         </form>

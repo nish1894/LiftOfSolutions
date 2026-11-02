@@ -59,7 +59,10 @@ export class RagAiService implements AiService {
     };
   }
 
-  private async call<T>(path: string, body: Record<string, unknown>): Promise<T> {
+  private async call<T>(
+    path: string,
+    body: Record<string, unknown>,
+  ): Promise<T> {
     const controller = new AbortController();
     const timeout = setTimeout(
       () => controller.abort(),

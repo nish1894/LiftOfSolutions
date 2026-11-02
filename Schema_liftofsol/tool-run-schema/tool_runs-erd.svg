@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1228" height="760" viewBox="0 0 1228 760" role="img" aria-labelledby="er-title er-desc">
+        <title id="er-title">tool runs entity relationship diagram</title>
+        <desc id="er-desc">Each tool call an agent makes is one tool run, belonging to the transaction (agent run) that made it and, when it was answering a conversation, to that conversation. A risky call waits as pending_approval until a teammate approves or rejects it, or it expires.</desc>
+        <style>
+.er-box { fill: #FFFFFF; stroke: #B9C2CC; stroke-width: 1; }
+.er-box-ref { fill: #FFFFFF; stroke: #5A6474; stroke-width: 1; stroke-dasharray: 5 4; }
+.er-head-main { fill: #0B6B6B; }
+.er-head { fill: #E2EFEE; }
+.er-head-ref { fill: #EDF0F3; }
+.er-sep { stroke: #E1E6EB; stroke-width: 1; }
+.er-linkrow { fill: #E2EFEE; }
+.er-title-main { font-family: "Instrument Sans", "Helvetica Neue", Arial, "DejaVu Sans", sans-serif; font-size: 16px; font-weight: 600; fill: #FFFFFF; }
+.er-tag-main { font-family: "IBM Plex Sans", "Segoe UI", Roboto, Arial, "DejaVu Sans", sans-serif; font-size: 12px; fill: #FFFFFF; opacity: 0.85; }
+.er-title { font-family: "Instrument Sans", "Helvetica Neue", Arial, "DejaVu Sans", sans-serif; font-size: 16px; font-weight: 600; fill: #17202A; }
+.er-tag { font-family: "IBM Plex Sans", "Segoe UI", Roboto, Arial, "DejaVu Sans", sans-serif; font-size: 12px; fill: #5A6474; }
+.er-f { font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 12.5px; fill: #17202A; }
+.er-f.link { fill: #0B6B6B; font-weight: 500; }
+.er-ty { font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 12px; fill: #5A6474; }
+.er-pk { fill: #0B6B6B; font-weight: 500; }
+.er-line { stroke: #0B6B6B; stroke-width: 1.5; fill: none; }
+.er-zero { fill: #FFFFFF; stroke: #0B6B6B; stroke-width: 1.5; }
+.er-card { font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 12px; font-weight: 500; fill: #0B6B6B; }
+        
+        </style>
+        <rect width="1228" height="760" fill="#FFFFFF"/>
+
+        <!-- transactions -->
+        <rect class="er-box-ref" x="24" y="24" width="300" height="68" rx="8"/>
+        <path class="er-head-ref" d="M24 32 Q24 24 32 24 H316 Q324 24 324 32 V64 H24 Z"/>
+        <text class="er-title" x="38" y="49">transactions</text>
+        <text class="er-tag" x="310" y="49" text-anchor="end">from Transactions schema</text>
+        <line class="er-sep" x1="24" y1="64" x2="324" y2="64"/>
+        <text class="er-f" x="38" y="82">_id</text><text class="er-ty" x="310" y="82" text-anchor="end">uuid <tspan class="er-pk">PK</tspan></text>
+
+        <!-- conversations -->
+        <rect class="er-box-ref" x="24" y="144" width="300" height="68" rx="8"/>
+        <path class="er-head-ref" d="M24 152 Q24 144 32 144 H316 Q324 144 324 152 V184 H24 Z"/>
+        <text class="er-title" x="38" y="169">conversations</text>
+        <text class="er-tag" x="310" y="169" text-anchor="end">from Inbox schema</text>
+        <line class="er-sep" x1="24" y1="184" x2="324" y2="184"/>
+        <text class="er-f" x="38" y="202">_id</text><text class="er-ty" x="310" y="202" text-anchor="end">uuid <tspan class="er-pk">PK</tspan></text>
+
+        <!-- tool_runs -->
+        <rect class="er-box" x="464" y="24" width="300" height="712" rx="8"/>
+        <rect class="er-linkrow" x="465" y="148" width="298" height="28"/>
+        <rect class="er-linkrow" x="465" y="176" width="298" height="28"/>
+        <path class="er-head-main" d="M464 32 Q464 24 472 24 H756 Q764 24 764 32 V64 H464 Z"/>
+        <text class="er-title-main" x="478" y="49">tool_runs</text>
+        <text class="er-tag-main" x="750" y="49" text-anchor="end">collection</text>
+        <line class="er-sep" x1="464" y1="92" x2="764" y2="92"/>
+        <line class="er-sep" x1="464" y1="120" x2="764" y2="120"/>
+        <line class="er-sep" x1="464" y1="148" x2="764" y2="148"/>
+        <line class="er-sep" x1="464" y1="176" x2="764" y2="176"/>
+        <line class="er-sep" x1="464" y1="204" x2="764" y2="204"/>
+        <line class="er-sep" x1="464" y1="232" x2="764" y2="232"/>
+        <line class="er-sep" x1="464" y1="260" x2="764" y2="260"/>
+        <line class="er-sep" x1="464" y1="288" x2="764" y2="288"/>
+        <line class="er-sep" x1="464" y1="316" x2="764" y2="316"/>
+        <line class="er-sep" x1="464" y1="344" x2="764" y2="344"/>
+        <line class="er-sep" x1="464" y1="372" x2="764" y2="372"/>
+        <line class="er-sep" x1="464" y1="400" x2="764" y2="400"/>
+        <line class="er-sep" x1="464" y1="428" x2="764" y2="428"/>
+        <line class="er-sep" x1="464" y1="456" x2="764" y2="456"/>
+        <line class="er-sep" x1="464" y1="484" x2="764" y2="484"/>
+        <line class="er-sep" x1="464" y1="512" x2="764" y2="512"/>
+        <line class="er-sep" x1="464" y1="540" x2="764" y2="540"/>
+        <line class="er-sep" x1="464" y1="568" x2="764" y2="568"/>
+        <line class="er-sep" x1="464" y1="596" x2="764" y2="596"/>
+        <line class="er-sep" x1="464" y1="624" x2="764" y2="624"/>
+        <line class="er-sep" x1="464" y1="652" x2="764" y2="652"/>
+        <line class="er-sep" x1="464" y1="680" x2="764" y2="680"/>
+        <line class="er-sep" x1="464" y1="708" x2="764" y2="708"/>
+        <text class="er-f" x="478" y="82">_id</text><text class="er-ty" x="750" y="82" text-anchor="end">uuid <tspan class="er-pk">PK</tspan></text>
+        <text class="er-f" x="478" y="110">project_id</text><text class="er-ty" x="750" y="110" text-anchor="end">uuid FK → projects</text>
+        <text class="er-f" x="478" y="138">agent_id</text><text class="er-ty" x="750" y="138" text-anchor="end">uuid FK → agents</text>
+        <text class="er-f link" x="478" y="166">transaction_id</text><text class="er-ty" x="750" y="166" text-anchor="end">uuid FK</text>
+        <text class="er-f link" x="478" y="194">conversation_id?</text><text class="er-ty" x="750" y="194" text-anchor="end">uuid FK</text>
+        <text class="er-f" x="478" y="222">node_id</text><text class="er-ty" x="750" y="222" text-anchor="end">→ template node</text>
+        <text class="er-f" x="478" y="250">tool_name</text><text class="er-ty" x="750" y="250" text-anchor="end">string</text>
+        <text class="er-f" x="478" y="278">idempotent</text><text class="er-ty" x="750" y="278" text-anchor="end">bool</text>
+        <text class="er-f" x="478" y="306">retry_window_seconds?</text><text class="er-ty" x="750" y="306" text-anchor="end">int</text>
+        <text class="er-f" x="478" y="334">idempotency_key</text><text class="er-ty" x="750" y="334" text-anchor="end">string <tspan class="er-pk">UK</tspan></text>
+        <text class="er-f" x="478" y="362">arguments</text><text class="er-ty" x="750" y="362" text-anchor="end">object</text>
+        <text class="er-f" x="478" y="390">result?</text><text class="er-ty" x="750" y="390" text-anchor="end">object</text>
+        <text class="er-f" x="478" y="418">status</text><text class="er-ty" x="750" y="418" text-anchor="end">enum (8)</text>
+        <text class="er-f" x="478" y="446">attempts</text><text class="er-ty" x="750" y="446" text-anchor="end">int, claim number</text>
+        <text class="er-f" x="478" y="474">first_attempt_at?</text><text class="er-ty" x="750" y="474" text-anchor="end">date</text>
+        <text class="er-f" x="478" y="502">lease_until?</text><text class="er-ty" x="750" y="502" text-anchor="end">date</text>
+        <text class="er-f" x="478" y="530">approval_expires_at?</text><text class="er-ty" x="750" y="530" text-anchor="end">date</text>
+        <text class="er-f" x="478" y="558">error?</text><text class="er-ty" x="750" y="558" text-anchor="end">string</text>
+        <text class="er-f" x="478" y="586">decided_by?</text><text class="er-ty" x="750" y="586" text-anchor="end">uuid FK → users</text>
+        <text class="er-f" x="478" y="614">decided_at?</text><text class="er-ty" x="750" y="614" text-anchor="end">date</text>
+        <text class="er-f" x="478" y="642">decision_note?</text><text class="er-ty" x="750" y="642" text-anchor="end">string</text>
+        <text class="er-f" x="478" y="670">created_at</text><text class="er-ty" x="750" y="670" text-anchor="end">date</text>
+        <text class="er-f" x="478" y="698">updated_at</text><text class="er-ty" x="750" y="698" text-anchor="end">date</text>
+        <text class="er-f" x="478" y="726">finished_at?</text><text class="er-ty" x="750" y="726" text-anchor="end">date</text>
+
+        <!-- status flow -->
+        <rect class="er-box-ref" x="904" y="24" width="300" height="348" rx="8"/>
+        <path class="er-head-ref" d="M904 32 Q904 24 912 24 H1196 Q1204 24 1204 32 V64 H904 Z"/>
+        <text class="er-title" x="918" y="49">status flow</text>
+        <text class="er-tag" x="1190" y="49" text-anchor="end">canMoveToolRun()</text>
+        <line class="er-sep" x1="904" y1="64" x2="1204" y2="64"/>
+        <line class="er-sep" x1="904" y1="92" x2="1204" y2="92"/>
+        <line class="er-sep" x1="904" y1="120" x2="1204" y2="120"/>
+        <line class="er-sep" x1="904" y1="148" x2="1204" y2="148"/>
+        <line class="er-sep" x1="904" y1="176" x2="1204" y2="176"/>
+        <line class="er-sep" x1="904" y1="204" x2="1204" y2="204"/>
+        <line class="er-sep" x1="904" y1="232" x2="1204" y2="232"/>
+        <line class="er-sep" x1="904" y1="260" x2="1204" y2="260"/>
+        <line class="er-sep" x1="904" y1="288" x2="1204" y2="288"/>
+        <line class="er-sep" x1="904" y1="316" x2="1204" y2="316"/>
+        <line class="er-sep" x1="904" y1="344" x2="1204" y2="344"/>
+        <text class="er-f" x="918" y="82">pending_approval → approved</text><text class="er-ty" x="1190" y="82" text-anchor="end"></text>
+        <text class="er-f" x="918" y="110">pending_approval → rejected</text><text class="er-ty" x="1190" y="110" text-anchor="end"></text>
+        <text class="er-f" x="918" y="138">pending_approval → expired</text><text class="er-ty" x="1190" y="138" text-anchor="end"></text>
+        <text class="er-f" x="918" y="166">approved → running</text><text class="er-ty" x="1190" y="166" text-anchor="end"></text>
+        <text class="er-f" x="918" y="194">running → succeeded</text><text class="er-ty" x="1190" y="194" text-anchor="end"></text>
+        <text class="er-f" x="918" y="222">running → failed</text><text class="er-ty" x="1190" y="222" text-anchor="end"></text>
+        <text class="er-f" x="918" y="250">running → needs_review</text><text class="er-ty" x="1190" y="250" text-anchor="end"></text>
+        <text class="er-f" x="918" y="278">running → running (reclaim)</text><text class="er-ty" x="1190" y="278" text-anchor="end"></text>
+        <text class="er-f" x="918" y="306">needs_review → succeeded</text><text class="er-ty" x="1190" y="306" text-anchor="end"></text>
+        <text class="er-f" x="918" y="334">needs_review → failed</text><text class="er-ty" x="1190" y="334" text-anchor="end"></text>
+        <text class="er-f" x="918" y="362">needs_review → approved</text><text class="er-ty" x="1190" y="362" text-anchor="end"></text>
+
+        <!-- transactions to tool_runs: one to zero-or-more -->
+        <path class="er-line" d="M324 78 H394 V162 H464"/>
+        <line class="er-line" x1="333" y1="71" x2="333" y2="85"/>
+        <line class="er-line" x1="339" y1="71" x2="339" y2="85"/>
+        <path class="er-line" d="M450 162 L464 170 M450 162 L464 154"/>
+        <circle class="er-zero" cx="441" cy="162" r="4.5"/>
+        <text class="er-card" x="400" y="110" text-anchor="start">1 : 0..N</text>
+
+        <!-- conversations to tool_runs: zero-or-one to zero-or-more -->
+        <path class="er-line" d="M324 198 H380 V190 H464"/>
+        <line class="er-line" x1="333" y1="191" x2="333" y2="205"/>
+        <circle class="er-zero" cx="345" cy="198" r="4.5"/>
+        <path class="er-line" d="M450 190 L464 198 M450 190 L464 182"/>
+        <circle class="er-zero" cx="441" cy="190" r="4.5"/>
+        <text class="er-card" x="334" y="188" text-anchor="start">0..1 : 0..N</text>
+      </svg>

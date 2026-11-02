@@ -3,12 +3,13 @@ import { createContext, useContext } from "react";
 import type {
   AccountResponse,
   Membership,
+  Project,
   OwnJoinRequest,
   ProfileUpdate,
   User,
 } from "../../shared/types.ts";
 
-export type OAuthProvider = "google" | "github";
+export type OAuthProvider = "google";
 
 export interface Credentials {
   email: string;
@@ -19,6 +20,7 @@ export interface Credentials {
 export interface AuthValue {
   user: User | null;
   memberships: Membership[];
+  projects: Project[];
   joinRequests: OwnJoinRequest[];
   loading: boolean;
   signIn: (credentials: Credentials) => Promise<AccountResponse>;
@@ -27,9 +29,14 @@ export interface AuthValue {
   signOut: () => Promise<void>;
   refreshAuth: () => Promise<AccountResponse>;
   resetPassword: (email: string) => Promise<void>;
+  /** Whether this account can sign in with email and password, not only Google. */
+  hasPassword: boolean;
+  /** Adds a password (Google-only accounts) or changes it (needs the current one). */
+  setPassword: (newPassword: string, currentPassword?: string) => Promise<void>;
   resendVerification: () => Promise<void>;
   saveProfile: (profile: ProfileUpdate) => Promise<AccountResponse>;
   signOutEverywhere: () => Promise<void>;
+  acceptTerms: (version: string) => Promise<AccountResponse>;
 }
 
 /* Kept apart from AuthProvider.tsx so that file exports only components. A

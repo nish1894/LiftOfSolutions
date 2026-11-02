@@ -2,7 +2,8 @@ import type { ComponentProps } from "react";
 
 import { cn } from "@/lib/utils.ts";
 
-/* 44px rows with 16px cell padding: agents scan these for long stretches.
+/* Tables from the design: sentence-case headers, 48px rows, hairline dividers.
+   Agents scan these for long stretches.
    Wide tables scroll inside their own box so the page never scrolls sideways. */
 
 export function Table({ className, ...props }: ComponentProps<"table">) {
@@ -14,7 +15,7 @@ export function Table({ className, ...props }: ComponentProps<"table">) {
 }
 
 export function TableHeader({ className, ...props }: ComponentProps<"thead">) {
-  return <thead className={cn("[&_tr]:border-b", className)} {...props} />;
+  return <thead className={cn("bg-background/70 [&_tr]:border-b", className)} {...props} />;
 }
 
 export function TableBody({ className, ...props }: ComponentProps<"tbody">) {
@@ -23,22 +24,19 @@ export function TableBody({ className, ...props }: ComponentProps<"tbody">) {
 
 export function TableRow({ className, ...props }: ComponentProps<"tr">) {
   return (
-    <tr className={cn("border-b transition-colors hover:bg-muted/40", className)} {...props} />
+    <tr className={cn("border-b transition-colors hover:bg-background", className)} {...props} />
   );
 }
 
 export function TableHead({ className, ...props }: ComponentProps<"th">) {
   return (
     <th
-      className={cn(
-        "h-11 bg-muted/50 px-4 text-left align-middle text-xs font-medium whitespace-nowrap text-muted-foreground",
-        className,
-      )}
+      className={cn("label-caps h-10 px-4 text-left align-middle whitespace-nowrap", className)}
       {...props}
     />
   );
 }
 
 export function TableCell({ className, ...props }: ComponentProps<"td">) {
-  return <td className={cn("h-11 px-4 py-2 align-middle", className)} {...props} />;
+  return <td className={cn("h-12 px-4 py-3 align-middle", className)} {...props} />;
 }

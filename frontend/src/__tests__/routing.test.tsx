@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import { screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import { MemoryRouter, useLocation } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { renderWithProviders } from "../test/utils.jsx";
 
@@ -20,17 +22,21 @@ import type { User } from "../shared/types.ts";
 const signedOut: AuthValue = {
   user: null,
   memberships: [],
+  projects: [],
   joinRequests: [],
   loading: false,
   signIn: vi.fn(),
   signUp: vi.fn(),
   signInWithOAuth: vi.fn(),
   resetPassword: vi.fn(),
+  hasPassword: false,
+  setPassword: vi.fn(),
   signOut: vi.fn(),
   refreshAuth: vi.fn(),
   resendVerification: vi.fn(),
   saveProfile: vi.fn(),
   signOutEverywhere: vi.fn(),
+  acceptTerms: vi.fn(),
 };
 
 const fakeUser: User = {
@@ -55,6 +61,25 @@ const renderAt = (path: string, auth: AuthValue = signedOut) => {
   return renderWithProviders(<App />, { route: path });
 };
 
+function LocationProbe() {
+  const location = useLocation();
+  return <output data-testid="route">{location.pathname + location.search}</output>;
+}
+
+function renderRoute(path: string, auth: AuthValue) {
+  mockAuth.mockReturnValue(auth);
+  render(
+    <QueryClientProvider
+      client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+    >
+      <MemoryRouter initialEntries={[path]}>
+        <App />
+        <LocationProbe />
+      </MemoryRouter>
+    </QueryClientProvider>,
+  );
+}
+
 describe("routing", () => {
   it("lands on the homepage at /", () => {
     renderAt("/");
@@ -72,6 +97,18 @@ describe("routing", () => {
   it("sends a signed-out visitor from /app to sign-in", () => {
     renderAt("/app/overview");
     expect(screen.getByRole("heading", { name: /sign in|welcome/i })).toBeInTheDocument();
+  });
+
+  it("preserves an invitation link through sign-in", () => {
+    renderRoute("/app?invite=test-token", signedOut);
+    expect(screen.getByTestId("route")).toHaveTextContent(
+      "/signin?next=%2Fapp%3Finvite%3Dtest-token",
+    );
+  });
+
+  it("returns a signed-in visitor to the invitation URL", () => {
+    renderRoute("/signin?next=%2Fapp%3Finvite%3Dtest-token", { ...signedOut, user: fakeUser });
+    expect(screen.getByTestId("route")).toHaveTextContent("/app?invite=test-token");
   });
 
   it("keeps a signed-in user away from the sign-in page", () => {

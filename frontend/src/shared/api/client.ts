@@ -73,24 +73,48 @@ export async function apiRequest<T>(
   const payload = (await response.json().catch(() => null)) as (T & ErrorPayload) | null;
 
   if (!response.ok)
-    throw new ApiError(payload?.error?.message ?? `Request failed (${response.status}).`, {
-      status: response.status,
-      code: payload?.error?.code,
-      details: payload?.error?.details,
-    });
+    throw new ApiError(
+      validationMessage(payload?.error?.details) ??
+        payload?.error?.message ??
+        fallbackMessage(response.status),
+      {
+        status: response.status,
+        code: payload?.error?.code,
+        details: payload?.error?.details,
+      },
+    );
 
   return payload as T;
 }
 
+/* For answers without our error body: a route the API doesn't have yet, or a
+   proxy/server failure. */
+function fallbackMessage(status: number): string {
+  if (status === 404) return "This isn't available yet.";
+  if (status >= 500) return "Something went wrong on our side. Try again in a moment.";
+  return `Request failed (${status}).`;
+}
+
+/* A 422 lists the rejected fields in details.issues.properties (zod's tree of
+   errors). Naming them beats a bare "Request validation failed." */
+function validationMessage(details: Record<string, unknown> | undefined): string | null {
+  const issues = details?.issues as { properties?: Record<string, unknown> } | undefined;
+  const fields = Object.keys(issues?.properties ?? {}).map((field) => field.replaceAll("_", " "));
+  return fields.length ? `Please check: ${fields.join(", ")}.` : null;
+}
+
 /**
- * Some endpoints legitimately 403 or 404 for a member without the matching
- * permission. That is an empty section, not an error worth showing.
+ * A 403 means the member lacks the permission, and a "resource_not_found" 404
+ * means the record is gone: both are an empty section, not an error. Any other
+ * 404 means the API doesn't offer this yet, which the page must show as such.
  */
 export async function apiRequestOptional<T>(path: string, fallback: T): Promise<T> {
   try {
     return await apiRequest<T>(path);
   } catch (error) {
-    if (error instanceof ApiError && [401, 403, 404].includes(error.status ?? 0)) return fallback;
+    if (!(error instanceof ApiError)) throw error;
+    if (error.status === 401 || error.status === 403) return fallback;
+    if (error.status === 404 && error.code === "resource_not_found") return fallback;
     throw error;
   }
 }

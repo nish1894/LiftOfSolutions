@@ -1,0 +1,92 @@
+{
+  "_note": "One WhatsApp conversation: the contact asks, the AI answers with a citation, then hands off to a teammate.",
+  "conversation": {
+    "_id": "f4a9c2e7-3b1d-4e85-9a6c-2d8b0f7e1c53",
+    "project_id": "d3a8f1c6-4b2e-4f97-8a05-6e1c9b7d3f42",
+    "agent_id": "a5c2e8f1-7d4b-4e36-9b10-3f6a8d2c5e79",
+    "contact_id": "c9e4b2a7-1f3d-4c68-a5b0-7e2d9f4c1a83",
+    "identity_id": "1b7d3e9f-4a2c-4e81-b6d5-8c0f2a9e7b34",
+    "channel": "whatsapp",
+    "connection_id": "f833e685-a764-47c5-a765-5a1bda2c8ce4",
+    "open_key": "a5c2e8f1-7d4b-4e36-9b10-3f6a8d2c5e79:f833e685-a764-47c5-a765-5a1bda2c8ce4:1b7d3e9f-4a2c-4e81-b6d5-8c0f2a9e7b34",
+    "status": "agent_active",
+    "assigned_user_id": "2e7b4c19-6d3a-4f8e-b5c1-9a0d7e3f6b28",
+    "handoff_reason": "Asked for a refund over ₹5,000",
+    "summary": "Order 1042 arrived damaged; contact wants a full refund of ₹6,499.",
+    "last_message_at": "2026-10-20T09:16:30Z",
+    "last_message_preview": "Hi Priya, I'm Ravi from Acme. I'm looking at order 1042 now.",
+    "created_at": "2026-10-20T09:13:50Z",
+    "updated_at": "2026-10-20T09:16:30Z"
+  },
+  "messages": [
+    {
+      "_id": "0d6b3f8a-2e9c-4a71-b5d4-7c1e9a3f8b26",
+      "conversation_id": "f4a9c2e7-3b1d-4e85-9a6c-2d8b0f7e1c53",
+      "project_id": "d3a8f1c6-4b2e-4f97-8a05-6e1c9b7d3f42",
+      "sender_type": "contact",
+      "content_type": "text",
+      "content": "My order 1042 arrived damaged. What is your refund policy?",
+      "external_key": "d3a8f1c6-4b2e-4f97-8a05-6e1c9b7d3f42:f833e685-a764-47c5-a765-5a1bda2c8ce4:wamid.HBgMOTE5ODEyMzQ1Njc4FQIAEhgg",
+      "created_at": "2026-10-20T09:13:50Z"
+    },
+    {
+      "_id": "9c2e7a4f-6b1d-4f38-a0c5-3e8d1b7f2a94",
+      "conversation_id": "f4a9c2e7-3b1d-4e85-9a6c-2d8b0f7e1c53",
+      "project_id": "d3a8f1c6-4b2e-4f97-8a05-6e1c9b7d3f42",
+      "sender_type": "ai",
+      "content_type": "text",
+      "content": "Sorry about that! Damaged items can be refunded within 30 days. For refunds over ₹5,000 a teammate confirms the details.",
+      "citations": [
+        {
+          "rag_id": "5f1c8e3a-9d2b-4a76-b4e0-1c7d3f9a2e58",
+          "document_id": "e7b3d9a1-4c6f-4e28-9a5b-0f2d8c1e7a39",
+          "title": "Refund policy (India)",
+          "snippet": "Damaged items can be returned for a full refund within 30 days of delivery."
+        }
+      ],
+      "transaction_id": "7c1e9b34-2a5f-4d80-b6e3-9f4a2c8d1e57",
+      "external_key": "d3a8f1c6-4b2e-4f97-8a05-6e1c9b7d3f42:f833e685-a764-47c5-a765-5a1bda2c8ce4:wamid.HBgMOTE5ODEyMzQ1Njc4FQIAERgS",
+      "delivery": "read",
+      "created_at": "2026-10-20T09:14:00Z"
+    },
+    {
+      "_id": "4a8f2d6c-1e3b-4c97-8b50-6d9e2a7c3f15",
+      "conversation_id": "f4a9c2e7-3b1d-4e85-9a6c-2d8b0f7e1c53",
+      "project_id": "d3a8f1c6-4b2e-4f97-8a05-6e1c9b7d3f42",
+      "sender_type": "system",
+      "content_type": "text",
+      "content": "",
+      "event": "handoff_requested",
+      "event_data": {
+        "reason": "Asked for a refund over ₹5,000"
+      },
+      "created_at": "2026-10-20T09:14:01Z"
+    },
+    {
+      "_id": "b3e9c1f7-5a2d-4b86-9c04-8f1a6d3e2b70",
+      "conversation_id": "f4a9c2e7-3b1d-4e85-9a6c-2d8b0f7e1c53",
+      "project_id": "d3a8f1c6-4b2e-4f97-8a05-6e1c9b7d3f42",
+      "sender_type": "system",
+      "sender_user_id": "2e7b4c19-6d3a-4f8e-b5c1-9a0d7e3f6b28",
+      "content_type": "text",
+      "content": "",
+      "event": "assigned",
+      "event_data": {
+        "to_user_id": "2e7b4c19-6d3a-4f8e-b5c1-9a0d7e3f6b28"
+      },
+      "created_at": "2026-10-20T09:16:10Z"
+    },
+    {
+      "_id": "6f1d8b3e-9c4a-4e72-a5b1-2e7c9f0d4a36",
+      "conversation_id": "f4a9c2e7-3b1d-4e85-9a6c-2d8b0f7e1c53",
+      "project_id": "d3a8f1c6-4b2e-4f97-8a05-6e1c9b7d3f42",
+      "sender_type": "agent",
+      "sender_user_id": "2e7b4c19-6d3a-4f8e-b5c1-9a0d7e3f6b28",
+      "content_type": "text",
+      "content": "Hi Priya, I'm Ravi from Acme. I'm looking at order 1042 now.",
+      "external_key": "d3a8f1c6-4b2e-4f97-8a05-6e1c9b7d3f42:f833e685-a764-47c5-a765-5a1bda2c8ce4:wamid.HBgMOTE5ODEyMzQ1Njc4FQIAERgT",
+      "delivery": "delivered",
+      "created_at": "2026-10-20T09:16:30Z"
+    }
+  ]
+}

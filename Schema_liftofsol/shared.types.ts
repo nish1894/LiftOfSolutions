@@ -13,3 +13,6 @@ export const FIREBASE_SIGN_IN_PROVIDERS: Record<string, AuthProvider> = {
   password: "email",
   "github.com": "github",
 };
+
+// Where a contact talks to an agent. Matches the agent schema's io node handlers, plus the web chat widget.
+export type Channel = "web_widget" | "whatsapp" | "email" | "line";

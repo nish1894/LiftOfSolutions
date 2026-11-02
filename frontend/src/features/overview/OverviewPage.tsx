@@ -1,64 +1,51 @@
 import { Link } from "react-router-dom";
 import {
+  ArrowRightIcon,
+  BellRingIcon,
   BotIcon,
   CheckCircle2Icon,
-  ChevronRightIcon,
   CircleCheckIcon,
   CircleIcon,
-  InboxIcon,
-  type LucideIcon,
+  ClockIcon,
   MessagesSquareIcon,
+  ShieldCheckIcon,
   TimerIcon,
-  TriangleAlertIcon,
-  UserCheckIcon,
 } from "lucide-react";
 
-import { AreaChart, Sparkline } from "@/components/app/charts.tsx";
-import { EmptyState, PageContainer, PageHeader, Stat } from "@/components/app/page.tsx";
-import { StatusPill } from "@/components/app/status-pill.tsx";
+import { BarChart, Sparkline } from "@/components/app/charts.tsx";
+import { EmptyState, LoadError, PageContainer, PageHeader, Stat } from "@/components/app/page.tsx";
+import { Pill, StatusPill } from "@/components/app/status-pill.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card.tsx";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table.tsx";
-import { hasUnpublishedChanges } from "@/features/assistants/agentState.ts";
 import {
   averageLatency,
   dailySeries,
   percentChange,
   sumValues,
 } from "@/features/analytics/usage.ts";
-import { conversationsQuery } from "@/features/inbox/inbox.ts";
-import { useAgents, useCustomers, useMembers, useSources } from "@/features/workspace/resources.ts";
+import { CONVERSATION_LIMIT, conversationsQuery } from "@/features/inbox/inbox.ts";
+import {
+  useAgents,
+  useMembers,
+  useSources,
+  useToolApprovals,
+} from "@/features/workspace/resources.ts";
 import { useOrgQuery, useWorkspace } from "@/features/workspace/workspace.ts";
-import { formatNumber, timeAgo } from "@/lib/utils.ts";
-import { CONVERSATION_STATUS } from "@/shared/statuses.ts";
-import type {
-  AnalyticsSummary,
-  Conversation,
-  JoinRequest,
-  UsageBreakdownRow,
-} from "@/shared/types.ts";
+import { cappedCount, formatNumber, timeUntil } from "@/lib/utils.ts";
+import { AGENT_STATUS } from "@/shared/statuses.ts";
+import type { AnalyticsSummary, Conversation, UsageBreakdownRow } from "@/shared/types.ts";
 
-interface AttentionItem {
-  label: string;
-  count: number;
-  to: string;
-  icon: LucideIcon;
-  show: boolean;
-}
-
+/* Overview from the design: an amber banner when people are waiting, four
+   metric cards, a volume chart beside the agent fleet, then approvals and
+   setup. Only numbers the API returns are shown; the design's CSAT, latency
+   per agent and token runway have no source yet, so they are left out. */
 export default function OverviewPage() {
   const { user, membership, can } = useWorkspace();
   const summary = useOrgQuery<AnalyticsSummary | null>(
@@ -77,29 +64,18 @@ export default function OverviewPage() {
   const waiting = useOrgQuery<Conversation[]>(waitingQuery.key, waitingQuery.path, [], {
     enabled: can("conversations.view"),
   });
-  const recentQuery = conversationsQuery("");
-  const recent = useOrgQuery<Conversation[]>(recentQuery.key, recentQuery.path, [], {
-    enabled: can("conversations.view"),
-  });
-  const requests = useOrgQuery<JoinRequest[]>(["joinRequests"], "/join-requests", [], {
-    enabled: can("organization.members.manage"),
-  });
+  const approvals = useToolApprovals();
   const agents = useAgents();
   const sources = useSources();
   const members = useMembers();
-  const customers = useCustomers();
 
   const firstName = (user.display_name || user.email).split(/[\s@]/)[0];
   const agentList = agents.data ?? [];
-  const sourceList = (sources.data ?? []).filter((source) => source.status !== "ARCHIVED");
-  const customerName = (id?: string) => {
-    const customer = customers.data?.find((item) => item.id === id);
-    return customer?.display_name || customer?.email || "Customer";
-  };
-  const agentName = (id?: string) => agentList.find((agent) => agent.id === id)?.name ?? "—";
+  const sourceList = sources.data ?? [];
+  const waitingCount = waiting.data?.length ?? 0;
+  const approvalList = approvals.data ?? [];
 
-  const days30 = dailySeries(usage.data ?? [], 30);
-  const days14 = days30.slice(-14);
+  const days14 = dailySeries(usage.data ?? [], 14);
   const repliesThisWeek = sumValues(days14.slice(7));
   const repliesLastWeek = sumValues(days14.slice(0, 7));
   const latency = averageLatency(usage.data ?? []);
@@ -108,60 +84,72 @@ export default function OverviewPage() {
     ? `${Math.round((data.resolved / data.conversations) * 100)}%`
     : "—";
 
-  const attention: AttentionItem[] = [
-    {
-      label: "Waiting for an agent",
-      count: waiting.data?.length ?? 0,
-      to: "/app/inbox",
-      icon: InboxIcon,
-      show: can("conversations.view"),
-    },
-    {
-      label: "Knowledge sources failed",
-      count: sourceList.filter((source) => source.processing_status === "FAILED").length,
-      to: "/app/knowledge",
-      icon: TriangleAlertIcon,
-      show: can("knowledge.view"),
-    },
-    {
-      label: "Access requests",
-      count: (requests.data ?? []).filter((item) => item.status === "PENDING").length,
-      to: "/app/requests",
-      icon: UserCheckIcon,
-      show: can("organization.members.manage"),
-    },
-    {
-      label: "Assistants with unpublished changes",
-      count: agentList.filter(
-        (agent) => agent.lifecycle_status !== "ARCHIVED" && hasUnpublishedChanges(agent),
-      ).length,
-      to: "/app/assistants",
-      icon: BotIcon,
-      show: can("agents.publish"),
-    },
-  ].filter((item) => item.show);
-  const needsAttention = attention.filter((item) => item.count > 0);
-
   // Only facts the API can confirm; "installed on your site" can't be checked.
+  // Each person sees only the steps they can do; with none, the card is hidden.
   const steps = [
-    { label: "Create an assistant", done: agentList.length > 0, to: "/app/assistants" },
-    { label: "Add knowledge", done: sourceList.length > 0, to: "/app/knowledge" },
     {
-      label: "Publish an assistant",
-      done: agentList.some((agent) => agent.lifecycle_status === "ACTIVE"),
+      label: "Create an agent",
+      done: agentList.length > 0,
       to: "/app/assistants",
+      allowed: can("agents.create"),
+      available: !agents.isError,
     },
-    { label: "Invite your team", done: (members.data ?? []).length > 1, to: "/app/members" },
-  ];
-  const setupComplete = steps.every((step) => step.done);
+    {
+      label: "Add knowledge",
+      done: sourceList.length > 0,
+      to: "/app/assistants",
+      allowed: can("knowledge.manage"),
+      available: !sources.isError,
+    },
+    {
+      label: "Publish an agent",
+      done: agentList.some((agent) => agent.status === "live"),
+      to: "/app/assistants",
+      allowed: can("agents.publish"),
+      available: !agents.isError,
+    },
+    {
+      label: "Invite your team",
+      done: (members.data ?? []).length > 1,
+      to: "/app/members",
+      allowed: can("organization.members.manage"),
+      available: true,
+    },
+  ].filter((step) => step.allowed);
+  // A step whose feature isn't offered yet is shown but can't be counted as work to do.
+  const openSteps = steps.filter((step) => step.available);
+  const stepsDone = openSteps.filter((step) => step.done).length;
 
   return (
     <PageContainer>
       <PageHeader
+        eyebrow={membership.business_name}
         title="Overview"
-        description={`Welcome back, ${firstName}. Here's what's happening in ${membership.business_name}.`}
+        description={`Welcome back, ${firstName}.`}
       />
 
+      {waitingCount > 0 && (
+        <div className="mb-6 flex flex-wrap items-center gap-4 rounded-xl border border-warning-border bg-warning-bg px-5 py-4">
+          <span className="flex size-9 items-center justify-center rounded-lg bg-warning-border text-warning">
+            <BellRingIcon className="size-4" aria-hidden="true" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold text-foreground">
+              {cappedCount(waitingCount, CONVERSATION_LIMIT)}{" "}
+              {waitingCount === 1 ? "customer needs" : "customers need"} a person
+            </p>
+            <p className="text-sm text-warning">The AI handed these conversations to your team.</p>
+          </div>
+          <Button asChild variant="escalation">
+            <Link to="/app/inbox">
+              Review queue
+              <ArrowRightIcon aria-hidden="true" />
+            </Link>
+          </Button>
+        </div>
+      )}
+
+      {summary.isError && <LoadError className="mb-6" what="conversation totals" query={summary} />}
       {data && (
         <dl className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <Stat
@@ -177,15 +165,14 @@ export default function OverviewPage() {
             hint={`${formatNumber(data.resolved)} resolved`}
           />
           <Stat
-            label="Avg. AI response time"
+            label="Avg. AI response"
             value={latency === null ? "—" : `${(latency / 1000).toFixed(1)}s`}
             icon={TimerIcon}
             hint="Across all AI replies"
           />
           <Stat
-            label="AI replies, last 7 days"
+            label="AI replies, 7 days"
             value={formatNumber(repliesThisWeek)}
-            icon={BotIcon}
             trend={percentChange(repliesThisWeek, repliesLastWeek)}
             hint="vs. previous 7 days"
             chart={<Sparkline values={days14.map((point) => point.value)} />}
@@ -195,148 +182,210 @@ export default function OverviewPage() {
 
       <div className="grid gap-6 lg:grid-cols-12">
         {can("usage.view") && (
-          <Card className="lg:col-span-8">
+          <Card className="lg:col-span-7">
             <CardHeader>
-              <div className="grid gap-1">
-                <CardTitle>AI replies</CardTitle>
-                <CardDescription>Last 30 days</CardDescription>
+              <div className="grid gap-0.5">
+                <CardTitle>AI reply volume</CardTitle>
+                <CardDescription>Replies per day, last 14 days</CardDescription>
               </div>
+              {!usage.isError && (
+                <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span className="size-2 rounded-full bg-chart-1" aria-hidden="true" />
+                  AI replies
+                </span>
+              )}
             </CardHeader>
             <CardContent>
-              <AreaChart data={days30} label="AI replies per day for the last 30 days" />
-            </CardContent>
-          </Card>
-        )}
-
-        <Card className={can("usage.view") ? "lg:col-span-4" : "lg:col-span-12"}>
-          <CardHeader>
-            <div className="grid gap-1">
-              <CardTitle>Needs attention</CardTitle>
-              <CardDescription>Work waiting for someone on your team</CardDescription>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {needsAttention.length === 0 ? (
-              <EmptyState
-                icon={CheckCircle2Icon}
-                title="All clear"
-                description="Nothing is waiting right now."
-              />
-            ) : (
-              <ul className="grid gap-2">
-                {needsAttention.map((item) => (
-                  <li key={item.label}>
-                    <Link
-                      to={item.to}
-                      className="flex items-center gap-3 rounded-lg border px-3 py-2.5 hover:bg-muted/60"
-                    >
-                      <span className="flex size-8 items-center justify-center rounded-md border bg-background shadow-xs">
-                        <item.icon className="size-4 text-muted-foreground" aria-hidden="true" />
-                      </span>
-                      <span className="flex-1 text-sm font-medium">{item.label}</span>
-                      <span className="rounded-md bg-muted px-2 py-0.5 text-sm font-semibold tabular-nums">
-                        {item.count}
-                      </span>
-                      <ChevronRightIcon
-                        className="size-4 text-muted-foreground"
-                        aria-hidden="true"
-                      />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-
-        {!setupComplete && (can("agents.view") || can("knowledge.view")) && (
-          <Card className="lg:col-span-12">
-            <CardHeader>
-              <div className="grid gap-1">
-                <CardTitle>Get set up</CardTitle>
-                <CardDescription>
-                  {steps.filter((step) => step.done).length} of {steps.length} done
-                </CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <ol className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                {steps.map((step) => (
-                  <li key={step.label}>
-                    <Link
-                      to={step.to}
-                      className="flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm hover:bg-muted/60"
-                    >
-                      {step.done ? (
-                        <CheckCircle2Icon className="size-4 text-success" aria-hidden="true" />
-                      ) : (
-                        <CircleIcon className="size-4 text-muted-foreground" aria-hidden="true" />
-                      )}
-                      <span className={step.done ? "text-muted-foreground line-through" : ""}>
-                        {step.label}
-                      </span>
-                      <span className="sr-only">{step.done ? "(done)" : "(to do)"}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ol>
-            </CardContent>
-          </Card>
-        )}
-
-        {can("conversations.view") && (
-          <Card className="lg:col-span-12">
-            <CardHeader>
-              <div className="grid gap-1">
-                <CardTitle>Recent conversations</CardTitle>
-                <CardDescription>The latest activity across every channel</CardDescription>
-              </div>
-              <Button asChild variant="outline" size="sm">
-                <Link to="/app/inbox">Open inbox</Link>
-              </Button>
-            </CardHeader>
-            <CardContent className="p-0 pt-4">
-              {(recent.data ?? []).length === 0 ? (
+              {usage.isError ? (
+                <LoadError what="reply volume" query={usage} />
+              ) : sumValues(days14) === 0 ? (
                 <EmptyState
-                  className="m-6 mt-0"
                   icon={MessagesSquareIcon}
-                  title="No conversations yet"
+                  title="No AI replies yet"
+                  description="Replies show up here once an agent answers customers."
+                  className="border-0 py-10"
                 />
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Customer</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Assistant</TableHead>
-                      <TableHead className="text-right">Last activity</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {(recent.data ?? []).slice(0, 8).map((conversation) => (
-                      <TableRow key={conversation.id}>
-                        <TableCell>
-                          <Link
-                            to={`/app/inbox/${conversation.id}`}
-                            className="font-medium hover:underline"
-                          >
-                            {customerName(conversation.customer_id)}
-                          </Link>
-                        </TableCell>
-                        <TableCell>
-                          <StatusPill map={CONVERSATION_STATUS} value={conversation.status} />
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {agentName(conversation.assistant_id)}
-                        </TableCell>
-                        <TableCell className="text-right text-muted-foreground tabular-nums">
-                          {timeAgo(conversation.last_message_at)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <BarChart data={days14} label="AI replies per day for the last 14 days" />
               )}
+            </CardContent>
+          </Card>
+        )}
+
+        {can("agents.view") && (
+          <Card className={can("usage.view") ? "lg:col-span-5" : "lg:col-span-12"}>
+            <CardHeader>
+              <div className="grid gap-0.5">
+                <CardTitle>Agent fleet</CardTitle>
+                <CardDescription>Your agents and their state</CardDescription>
+              </div>
+              {!agents.isError && <Pill tone="neutral">{agentList.length} total</Pill>}
+            </CardHeader>
+            <CardContent className="py-3">
+              {agents.isError ? (
+                <LoadError what="agents" query={agents} />
+              ) : agentList.length === 0 ? (
+                <EmptyState icon={BotIcon} title="No agents yet" className="border-0 py-8" />
+              ) : (
+                <ul className="divide-y">
+                  {agentList.slice(0, 5).map((agent) => (
+                    <li key={agent.id} className="flex items-center gap-3 py-3">
+                      <span
+                        className={
+                          agent.status === "live"
+                            ? "size-2 rounded-full bg-success-solid"
+                            : "size-2 rounded-full bg-warning-solid"
+                        }
+                        aria-hidden="true"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <Link
+                          to={`/app/assistants/${agent.id}`}
+                          className="block truncate text-sm font-medium hover:text-primary"
+                        >
+                          {agent.name}
+                        </Link>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {agent.draft.model}
+                          {agent.unpublished_changes && " · Unpublished changes"}
+                        </p>
+                      </div>
+                      <StatusPill map={AGENT_STATUS} value={agent.status} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+            <CardFooter className="justify-end">
+              <Link
+                to="/app/assistants"
+                className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+              >
+                All agents
+                <ArrowRightIcon className="size-4" aria-hidden="true" />
+              </Link>
+            </CardFooter>
+          </Card>
+        )}
+
+        {can("tools.view") && (
+          <Card className="lg:col-span-7">
+            <CardHeader>
+              <div className="grid gap-0.5">
+                <CardTitle>Pending approvals</CardTitle>
+                <CardDescription>Tool calls an agent wants to make</CardDescription>
+              </div>
+              {approvalList.length > 0 && (
+                <Pill tone="warning">{approvalList.length} required</Pill>
+              )}
+            </CardHeader>
+            <CardContent>
+              {approvals.isError ? (
+                <LoadError what="approvals" query={approvals} />
+              ) : approvalList.length === 0 ? (
+                <EmptyState
+                  icon={ShieldCheckIcon}
+                  title="Nothing to approve"
+                  description="Agents haven't asked to run any tools."
+                  className="border-0 py-8"
+                />
+              ) : (
+                <ul className="grid gap-3">
+                  {approvalList.slice(0, 3).map((run) => (
+                    <li
+                      key={run.id}
+                      className="flex flex-wrap items-center gap-3 rounded-xl border px-4 py-3"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="flex items-center gap-2 text-sm font-semibold">
+                          {run.idempotent === false && <Pill tone="danger">Not retry-safe</Pill>}
+                          <span className="truncate font-mono">{run.tool_name}</span>
+                        </p>
+                        {run.approval_expires_at && (
+                          <p className="mt-1 flex items-center gap-1 text-xs text-warning">
+                            <ClockIcon className="size-3.5" aria-hidden="true" />
+                            {timeUntil(run.approval_expires_at) === "expired"
+                              ? "Expired"
+                              : `Expires ${timeUntil(run.approval_expires_at)}`}
+                          </p>
+                        )}
+                      </div>
+                      <Button asChild variant="outline" size="sm">
+                        <Link to={`/app/requests?run=${run.id}`}>Review</Link>
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+            {approvalList.length > 0 && (
+              <CardFooter>
+                <Link
+                  to="/app/requests"
+                  className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                >
+                  View all approvals ({approvalList.length})
+                  <ArrowRightIcon className="size-4" aria-hidden="true" />
+                </Link>
+              </CardFooter>
+            )}
+          </Card>
+        )}
+
+        {steps.length > 0 && (
+          <Card className={can("tools.view") ? "lg:col-span-5" : "lg:col-span-12"}>
+            <CardHeader>
+              <div className="grid gap-0.5">
+                <CardTitle>Workspace setup</CardTitle>
+                <CardDescription>Getting {membership.business_name} ready</CardDescription>
+              </div>
+              {openSteps.length > 0 && (
+                <Pill tone={stepsDone === openSteps.length ? "success" : "violet"}>
+                  {stepsDone} of {openSteps.length} done
+                </Pill>
+              )}
+            </CardHeader>
+            <CardContent>
+              <ol className="grid gap-1">
+                {steps.map((step) =>
+                  !step.available ? (
+                    <li
+                      key={step.label}
+                      className="flex items-center gap-3 rounded-lg px-2 py-2 text-sm text-muted-foreground"
+                    >
+                      <CircleIcon className="size-4" aria-hidden="true" />
+                      <span className="flex-1">{step.label}</span>
+                      <span className="text-xs">Not available yet</span>
+                    </li>
+                  ) : (
+                    <li key={step.label}>
+                      <Link
+                        to={step.to}
+                        className="flex items-center gap-3 rounded-lg px-2 py-2 text-sm hover:bg-muted"
+                      >
+                        {step.done ? (
+                          <CheckCircle2Icon
+                            className="size-4 text-success-solid"
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <CircleIcon className="size-4 text-primary" aria-hidden="true" />
+                        )}
+                        <span
+                          className={
+                            step.done ? "flex-1 text-subtle-foreground" : "flex-1 font-medium"
+                          }
+                        >
+                          {step.label}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {step.done ? "Done" : "To do"}
+                        </span>
+                      </Link>
+                    </li>
+                  ),
+                )}
+              </ol>
             </CardContent>
           </Card>
         )}

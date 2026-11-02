@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { CodeIcon, CopyIcon, GlobeIcon } from "lucide-react";
 
-import { EmptyState, LoadingRows, Notice } from "@/components/app/page.tsx";
+import { EmptyState, LoadError, LoadingRows, Notice } from "@/components/app/page.tsx";
 import { StatusPill } from "@/components/app/status-pill.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx";
@@ -21,13 +21,14 @@ import { copyText } from "@/shared/clipboard.ts";
 import { RECORD_STATUS } from "@/shared/statuses.ts";
 import type { ChannelInstall } from "@/shared/types.ts";
 
-/** Channels for every assistant, or for one when `assistantId` is given.
+/** Channels for every agent, or for one when `assistantId` is given.
     Row layout from the template's Connections page (MIT). */
 export function ChannelList({ assistantId }: { assistantId?: string }) {
   const channels = useChannels();
   const agents = useAgents();
 
   if (channels.isLoading) return <LoadingRows />;
+  if (channels.isError) return <LoadError what="channels" query={channels} />;
   const rows = (channels.data ?? []).filter(
     (item) => !assistantId || item.assistant_id === assistantId,
   );
@@ -37,7 +38,7 @@ export function ChannelList({ assistantId }: { assistantId?: string }) {
       <EmptyState
         icon={GlobeIcon}
         title="No channels yet"
-        description="Creating an assistant adds a web chat channel for it automatically."
+        description="Creating an agent adds a web chat channel for it automatically."
       />
     );
   }
@@ -47,7 +48,7 @@ export function ChannelList({ assistantId }: { assistantId?: string }) {
       <CardHeader className="pb-2">
         <div className="grid gap-1">
           <CardTitle>Channels</CardTitle>
-          <CardDescription>Where customers can reach your assistants.</CardDescription>
+          <CardDescription>Where customers can reach your agents.</CardDescription>
         </div>
       </CardHeader>
       <ul className="divide-y px-6 pb-2">

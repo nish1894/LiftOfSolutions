@@ -1,23 +1,32 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { SearchIcon } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { MenuIcon, SearchIcon } from "lucide-react";
 
-import { Separator } from "@/components/ui/separator.tsx";
-import { SidebarTrigger } from "@/components/ui/sidebar.tsx";
+import { Button } from "@/components/ui/button.tsx";
+import { Kbd } from "@/components/ui/input.tsx";
 import { useAuth } from "@/features/auth/AuthContext.ts";
 import NotificationBell from "@/features/notifications/NotificationBell.tsx";
+import CreateProjectDialog from "@/features/workspace/CreateProjectDialog.tsx";
 import { useWorkspace } from "@/features/workspace/workspace.ts";
+import BrandMark from "@/shared/ui/BrandMark.tsx";
 
 import CommandSearch from "./CommandSearch.tsx";
 import ModeToggle from "./ModeToggle.tsx";
 import { pathForSection, sectionLabel } from "./navigation.ts";
+import OrgSwitcher from "./OrgSwitcher.tsx";
+import UserMenu from "./UserMenu.tsx";
+import { badgeLabel, useNavCounts } from "./useNavCounts.ts";
 
-export default function SiteHeader() {
-  const { membership, memberships, selectBusiness } = useWorkspace();
+/* Top bar from the design: brand, tenant pill, search, the amber escalations
+   chip (conversations waiting for a person), notifications and the account. */
+export default function SiteHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
+  const { can, membership, memberships, selectBusiness } = useWorkspace();
   const { refreshAuth } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [newProjectOpen, setNewProjectOpen] = useState(false);
+  const counts = useNavCounts();
   const label = sectionLabel(pathname.split("/")[2]);
 
   // Browser tabs name the organization too, so two orgs in two tabs differ.
@@ -46,36 +55,76 @@ export default function SiteHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4 md:rounded-t-xl lg:px-6">
-        <SidebarTrigger className="-ml-1" />
-        <Separator orientation="vertical" className="mx-1 h-4" />
-        <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-sm">
-          <span className="truncate text-muted-foreground">{membership.business_name}</span>
-          <span className="text-muted-foreground" aria-hidden="true">
-            /
-          </span>
-          <span className="truncate font-medium" aria-current="page">
-            {label}
-          </span>
-        </nav>
-        <div className="ml-auto flex items-center gap-1.5">
-          <button
-            type="button"
+      <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-2 border-b bg-card px-3 sm:gap-3 sm:px-4 lg:px-6">
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="-ml-1 shrink-0 md:hidden"
+          onClick={onOpenMenu}
+          aria-label="Open menu"
+        >
+          <MenuIcon />
+        </Button>
+        <Link
+          to="/app/overview"
+          className="flex shrink-0 items-center gap-2"
+          aria-label="Lift Off overview"
+        >
+          <BrandMark size={28} />
+          <span className="hidden text-sm font-medium sm:inline">Lift Off</span>
+        </Link>
+        <OrgSwitcher onNewProject={() => setNewProjectOpen(true)} />
+
+        <button
+          type="button"
+          onClick={() => setSearchOpen(true)}
+          className="mx-auto hidden h-8 w-full max-w-sm items-center gap-2 rounded-md border bg-background px-3 text-sm text-muted-foreground transition-colors hover:text-foreground md:flex"
+          aria-label="Search (Ctrl or Command + K)"
+        >
+          <SearchIcon className="size-4" aria-hidden="true" />
+          <span className="flex-1 text-left">Search pages, projects…</span>
+          <Kbd className="bg-card">⌘K</Kbd>
+        </button>
+
+        <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2 md:ml-0">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="md:hidden"
             onClick={() => setSearchOpen(true)}
-            className="relative inline-flex h-8 w-8 items-center justify-center gap-2 rounded-md border bg-background text-sm text-muted-foreground shadow-xs hover:bg-muted sm:w-44 sm:justify-start sm:px-3 lg:w-56"
-            aria-label="Search (Ctrl or Command + K)"
+            aria-label="Search"
           >
-            <SearchIcon className="size-3.5" aria-hidden="true" />
-            <span className="hidden sm:inline">Search…</span>
-            <kbd className="pointer-events-none absolute top-1.5 right-1.5 hidden h-5 items-center gap-0.5 rounded border bg-muted px-1.5 font-mono text-xs sm:flex">
-              ⌘K
-            </kbd>
-          </button>
-          <NotificationBell onOpenSection={openSection} onChanged={refreshAuth} />
-          <ModeToggle />
+            <SearchIcon />
+          </Button>
+          {can("conversations.view") && counts.waiting > 0 && (
+            <Link
+              to="/app/inbox"
+              aria-label={`${badgeLabel("waiting", counts.waiting)} waiting for a teammate`}
+              className="inline-flex h-7 items-center gap-1.5 rounded-md border border-warning-border bg-warning-bg px-2.5 text-xs font-medium text-warning transition-colors hover:bg-warning-border"
+            >
+              <span className="size-1.5 rounded-full bg-warning-solid" aria-hidden="true" />
+              {badgeLabel("waiting", counts.waiting)}
+              <span className="hidden sm:inline">
+                {counts.waiting === 1 ? "Escalation" : "Escalations"}
+              </span>
+            </Link>
+          )}
+          <div className="flex items-center gap-0.5">
+            <NotificationBell onOpenSection={openSection} onChanged={refreshAuth} />
+            <span className="hidden sm:contents">
+              <ModeToggle />
+            </span>
+          </div>
+          <span className="mx-0.5 h-4 w-px bg-border" aria-hidden="true" />
+          <UserMenu />
         </div>
       </header>
-      <CommandSearch open={searchOpen} onOpenChange={setSearchOpen} />
+      <CommandSearch
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        onNewProject={() => setNewProjectOpen(true)}
+      />
+      <CreateProjectDialog open={newProjectOpen} onOpenChange={setNewProjectOpen} />
     </>
   );
 }

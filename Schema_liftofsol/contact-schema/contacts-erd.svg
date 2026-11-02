@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1228" height="488" viewBox="0 0 1228 488" role="img" aria-labelledby="er-title er-desc">
+        <title id="er-title">contacts entity relationship diagram</title>
+        <desc id="er-desc">A project has zero or more contacts. A contact has one or more identities, one per channel and external id, unique within the project. Conversations in the Inbox schema point to a contact and to the identity replies go to.</desc>
+        <style>
+.er-box { fill: #FFFFFF; stroke: #B9C2CC; stroke-width: 1; }
+.er-box-ref { fill: #FFFFFF; stroke: #5A6474; stroke-width: 1; stroke-dasharray: 5 4; }
+.er-head-main { fill: #0B6B6B; }
+.er-head { fill: #E2EFEE; }
+.er-head-ref { fill: #EDF0F3; }
+.er-sep { stroke: #E1E6EB; stroke-width: 1; }
+.er-linkrow { fill: #E2EFEE; }
+.er-title-main { font-family: "Instrument Sans", "Helvetica Neue", Arial, "DejaVu Sans", sans-serif; font-size: 16px; font-weight: 600; fill: #FFFFFF; }
+.er-tag-main { font-family: "IBM Plex Sans", "Segoe UI", Roboto, Arial, "DejaVu Sans", sans-serif; font-size: 12px; fill: #FFFFFF; opacity: 0.85; }
+.er-title { font-family: "Instrument Sans", "Helvetica Neue", Arial, "DejaVu Sans", sans-serif; font-size: 16px; font-weight: 600; fill: #17202A; }
+.er-tag { font-family: "IBM Plex Sans", "Segoe UI", Roboto, Arial, "DejaVu Sans", sans-serif; font-size: 12px; fill: #5A6474; }
+.er-f { font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 12.5px; fill: #17202A; }
+.er-f.link { fill: #0B6B6B; font-weight: 500; }
+.er-ty { font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 12px; fill: #5A6474; }
+.er-pk { fill: #0B6B6B; font-weight: 500; }
+.er-line { stroke: #0B6B6B; stroke-width: 1.5; fill: none; }
+.er-zero { fill: #FFFFFF; stroke: #0B6B6B; stroke-width: 1.5; }
+.er-card { font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 12px; font-weight: 500; fill: #0B6B6B; }
+        
+        </style>
+        <rect width="1228" height="488" fill="#FFFFFF"/>
+
+        <!-- projects -->
+        <rect class="er-box-ref" x="24" y="24" width="300" height="68" rx="8"/>
+        <path class="er-head-ref" d="M24 32 Q24 24 32 24 H316 Q324 24 324 32 V64 H24 Z"/>
+        <text class="er-title" x="38" y="49">projects</text>
+        <text class="er-tag" x="310" y="49" text-anchor="end">from Project schema</text>
+        <line class="er-sep" x1="24" y1="64" x2="324" y2="64"/>
+        <text class="er-f" x="38" y="82">_id</text><text class="er-ty" x="310" y="82" text-anchor="end">uuid <tspan class="er-pk">PK</tspan></text>
+
+        <!-- contacts -->
+        <rect class="er-box" x="464" y="24" width="300" height="404" rx="8"/>
+        <rect class="er-linkrow" x="465" y="92" width="298" height="28"/>
+        <path class="er-head-main" d="M464 32 Q464 24 472 24 H756 Q764 24 764 32 V64 H464 Z"/>
+        <text class="er-title-main" x="478" y="49">contacts</text>
+        <text class="er-tag-main" x="750" y="49" text-anchor="end">collection</text>
+        <line class="er-sep" x1="464" y1="92" x2="764" y2="92"/>
+        <line class="er-sep" x1="464" y1="120" x2="764" y2="120"/>
+        <line class="er-sep" x1="464" y1="148" x2="764" y2="148"/>
+        <line class="er-sep" x1="464" y1="176" x2="764" y2="176"/>
+        <line class="er-sep" x1="464" y1="204" x2="764" y2="204"/>
+        <line class="er-sep" x1="464" y1="232" x2="764" y2="232"/>
+        <line class="er-sep" x1="464" y1="260" x2="764" y2="260"/>
+        <line class="er-sep" x1="464" y1="288" x2="764" y2="288"/>
+        <line class="er-sep" x1="464" y1="316" x2="764" y2="316"/>
+        <line class="er-sep" x1="464" y1="344" x2="764" y2="344"/>
+        <line class="er-sep" x1="464" y1="372" x2="764" y2="372"/>
+        <line class="er-sep" x1="464" y1="400" x2="764" y2="400"/>
+        <text class="er-f" x="478" y="82">_id</text><text class="er-ty" x="750" y="82" text-anchor="end">uuid <tspan class="er-pk">PK</tspan></text>
+        <text class="er-f link" x="478" y="110">project_id</text><text class="er-ty" x="750" y="110" text-anchor="end">uuid FK</text>
+        <text class="er-f" x="478" y="138">display_name?</text><text class="er-ty" x="750" y="138" text-anchor="end">string</text>
+        <text class="er-f" x="478" y="166">email?</text><text class="er-ty" x="750" y="166" text-anchor="end">string</text>
+        <text class="er-f" x="478" y="194">phone?</text><text class="er-ty" x="750" y="194" text-anchor="end">E.164 string</text>
+        <text class="er-f" x="478" y="222">country?</text><text class="er-ty" x="750" y="222" text-anchor="end">ISO 3166-1</text>
+        <text class="er-f" x="478" y="250">language?</text><text class="er-ty" x="750" y="250" text-anchor="end">string</text>
+        <text class="er-f" x="478" y="278">metadata</text><text class="er-ty" x="750" y="278" text-anchor="end">object</text>
+        <text class="er-f" x="478" y="306">status</text><text class="er-ty" x="750" y="306" text-anchor="end">enum (4)</text>
+        <text class="er-f" x="478" y="334">merged_into?</text><text class="er-ty" x="750" y="334" text-anchor="end">uuid FK → contacts</text>
+        <text class="er-f" x="478" y="362">created_at</text><text class="er-ty" x="750" y="362" text-anchor="end">date</text>
+        <text class="er-f" x="478" y="390">updated_at</text><text class="er-ty" x="750" y="390" text-anchor="end">date</text>
+        <text class="er-f" x="478" y="418">deleted_at?</text><text class="er-ty" x="750" y="418" text-anchor="end">date</text>
+
+        <!-- contact_identities -->
+        <rect class="er-box" x="904" y="24" width="300" height="208" rx="8"/>
+        <rect class="er-linkrow" x="905" y="120" width="298" height="28"/>
+        <path class="er-head-main" d="M904 32 Q904 24 912 24 H1196 Q1204 24 1204 32 V64 H904 Z"/>
+        <text class="er-title-main" x="918" y="49">contact_identities</text>
+        <text class="er-tag-main" x="1190" y="49" text-anchor="end">collection</text>
+        <line class="er-sep" x1="904" y1="92" x2="1204" y2="92"/>
+        <line class="er-sep" x1="904" y1="120" x2="1204" y2="120"/>
+        <line class="er-sep" x1="904" y1="148" x2="1204" y2="148"/>
+        <line class="er-sep" x1="904" y1="176" x2="1204" y2="176"/>
+        <line class="er-sep" x1="904" y1="204" x2="1204" y2="204"/>
+        <text class="er-f" x="918" y="82">_id</text><text class="er-ty" x="1190" y="82" text-anchor="end">uuid <tspan class="er-pk">PK</tspan></text>
+        <text class="er-f" x="918" y="110">project_id</text><text class="er-ty" x="1190" y="110" text-anchor="end">uuid FK</text>
+        <text class="er-f link" x="918" y="138">contact_id</text><text class="er-ty" x="1190" y="138" text-anchor="end">uuid FK</text>
+        <text class="er-f" x="918" y="166">channel</text><text class="er-ty" x="1190" y="166" text-anchor="end">web_widget | whatsapp | …</text>
+        <text class="er-f" x="918" y="194">external_id</text><text class="er-ty" x="1190" y="194" text-anchor="end">string</text>
+        <text class="er-f" x="918" y="222">created_at</text><text class="er-ty" x="1190" y="222" text-anchor="end">date</text>
+
+        <!-- conversations -->
+        <rect class="er-box-ref" x="904" y="300" width="300" height="124" rx="8"/>
+        <rect class="er-linkrow" x="905" y="368" width="298" height="28"/>
+        <rect class="er-linkrow" x="905" y="396" width="298" height="28"/>
+        <path class="er-head-ref" d="M904 308 Q904 300 912 300 H1196 Q1204 300 1204 308 V340 H904 Z"/>
+        <text class="er-title" x="918" y="325">conversations</text>
+        <text class="er-tag" x="1190" y="325" text-anchor="end">from Inbox schema</text>
+        <line class="er-sep" x1="904" y1="340" x2="1204" y2="340"/>
+        <line class="er-sep" x1="904" y1="368" x2="1204" y2="368"/>
+        <line class="er-sep" x1="904" y1="396" x2="1204" y2="396"/>
+        <text class="er-f" x="918" y="358">_id</text><text class="er-ty" x="1190" y="358" text-anchor="end">uuid <tspan class="er-pk">PK</tspan></text>
+        <text class="er-f link" x="918" y="386">contact_id</text><text class="er-ty" x="1190" y="386" text-anchor="end">uuid FK</text>
+        <text class="er-f link" x="918" y="414">identity_id</text><text class="er-ty" x="1190" y="414" text-anchor="end">uuid FK</text>
+        <text class="er-tag" x="1190" y="452" text-anchor="end">unique: project_id + channel + external_id (identities)</text>
+
+        <!-- projects to contacts: one to zero-or-more -->
+        <path class="er-line" d="M324 78 H394 V106 H464"/>
+        <line class="er-line" x1="333" y1="71" x2="333" y2="85"/>
+        <line class="er-line" x1="339" y1="71" x2="339" y2="85"/>
+        <path class="er-line" d="M450 106 L464 114 M450 106 L464 98"/>
+        <circle class="er-zero" cx="441" cy="106" r="4.5"/>
+        <text class="er-card" x="330" y="68" text-anchor="start">1 : 0..N</text>
+
+        <!-- contacts to contact_identities: one to one-or-more -->
+        <path class="er-line" d="M764 78 H834 V134 H904"/>
+        <line class="er-line" x1="773" y1="71" x2="773" y2="85"/>
+        <line class="er-line" x1="779" y1="71" x2="779" y2="85"/>
+        <path class="er-line" d="M890 134 L904 142 M890 134 L904 126"/>
+        <line class="er-line" x1="884" y1="141" x2="884" y2="127"/>
+        <text class="er-card" x="834" y="68" text-anchor="middle">1 : 1..N</text>
+
+        <!-- contacts to conversations: one to zero-or-more -->
+        <path class="er-line" d="M764 382 H904"/>
+        <line class="er-line" x1="773" y1="375" x2="773" y2="389"/>
+        <line class="er-line" x1="779" y1="375" x2="779" y2="389"/>
+        <path class="er-line" d="M890 382 L904 390 M890 382 L904 374"/>
+        <circle class="er-zero" cx="881" cy="382" r="4.5"/>
+        <text class="er-card" x="834" y="372" text-anchor="middle">1 : 0..N</text>
+
+        <!-- contact_identities to conversations: one to zero-or-more (where replies go) -->
+        <path class="er-line" d="M1154 232 V300"/>
+        <line class="er-line" x1="1161" y1="241" x2="1147" y2="241"/>
+        <line class="er-line" x1="1161" y1="247" x2="1147" y2="247"/>
+        <path class="er-line" d="M1154 286 L1146 300 M1154 286 L1162 300"/>
+        <circle class="er-zero" cx="1154" cy="277" r="4.5"/>
+        <text class="er-card" x="1144" y="272" text-anchor="end">1 : 0..N</text>
+      </svg>
