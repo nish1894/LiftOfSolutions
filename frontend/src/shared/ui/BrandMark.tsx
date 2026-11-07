@@ -1,7 +1,7 @@
 import iconUrl from "../../assets/icon.png";
 
 /**
- * The Lift Off Solutions rocket mark.
+ * The LiftOffSol rocket mark.
  *
  * Imported rather than referenced from public/, so Vite fingerprints it into
  * /assets/ is served by the frontend Nginx container in production.

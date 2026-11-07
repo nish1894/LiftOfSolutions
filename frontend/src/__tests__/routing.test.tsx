@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { MemoryRouter, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -119,5 +119,24 @@ describe("routing", () => {
   it("falls back to the homepage for an unknown URL", () => {
     renderAt("/does-not-exist");
     expect(screen.getByRole("link", { name: "Get started" })).toBeInTheDocument();
+  });
+
+  /* Meta's business verification looks for these pages and the footer's business details on each. */
+  it.each([
+    ["/", "Answer every customer on WhatsApp, day or night"],
+    ["/about", "About LiftOffSol"],
+    ["/contact", "Contact us"],
+    ["/privacy", "Privacy Policy"],
+    ["/terms", "Terms of Service"],
+    ["/data-deletion", "Data Deletion"],
+    ["/signin", "Welcome back"],
+  ])("opens %s with the site footer", (path, title) => {
+    renderAt(path);
+    expect(screen.getByRole("heading", { level: 1, name: title })).toBeInTheDocument();
+    const footer = screen.getByRole("contentinfo");
+    expect(footer).toHaveTextContent("contact@liftoffsol.com");
+    expect(footer).toHaveTextContent("AECS Layout, Bangalore, Karnataka 560068, India");
+    for (const name of ["About", "Contact", "Privacy Policy", "Terms of Service", "Data Deletion"])
+      expect(within(footer).getByRole("link", { name })).toBeInTheDocument();
   });
 });

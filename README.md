@@ -57,6 +57,8 @@ liftofSol/
 - Agents: one studio per agent (setup and knowledge on the left, a test chat on the right), draft, then Publish.
 - Workflows: templates, template pages and an editor. Workflows are saved and can be turned on, but nothing runs
   them until a channel brings in conversations.
+- Public website for Meta's WhatsApp verification: homepage, About, Contact, Privacy Policy, Terms of Service and
+  Data Deletion, each with the business details in the footer.
 
 **Next**
 
@@ -101,6 +103,37 @@ The RAG service runs from its own repository: see `../LiftOfMain/README.md`.
 ## Decision log
 
 Newest first. Each line: what we did, why, and where the detail is.
+
+### 2026-11-06: public website for Meta (WhatsApp Business Platform) verification
+
+You asked for the pages Meta Business Verification and App Review need for the WhatsApp Tech Provider program,
+on liftoffsol.com (this `frontend/`, on Vercel).
+
+- **Pages** (`frontend/src/features/site/`): `/about`, `/contact`, `/privacy`, `/terms`, `/data-deletion`, and a
+  rewritten `/`. Every public page and the sign-in page has the same footer: © year, address, phone, email and links
+  to the five pages.
+  - The business details live once, in `business.ts`, exactly as registered.
+  - The homepage now describes AI customer support on WhatsApp: how it works in four steps, who it's for, and a
+    call to action. The invented customer names and testimonial are gone.
+- **Your choices:** the Privacy Policy names OpenAI, Google (Gemini) and DeepSeek (the studio offers all three), keeps
+  message logs 90 days, and names the Grievance Officer by title. The Contact page has no form: email and phone
+  links only.
+- **Name:** LiftOffSol in the page titles, metadata, sign-in page and app header.
+- **Static HTML:** `npm run build` now also writes each public page as HTML (`scripts/prerender.mjs`, from
+  `src/features/site/prerender.tsx`), so Meta's crawler and search engines read the full page without
+  JavaScript. Other paths get the empty `shell.html`, so `/app` doesn't show the homepage while loading.
+- **Routing:** before this, the live site answered 404 for every path but `/`, as Vercel had no fallback to the
+  app. `frontend/vercel.json` adds clean URLs (`/privacy` serves `privacy.html`) and sends other paths to
+  `shell.html`; `nginx.conf` does the same locally. This assumes Vercel's root directory is `frontend`.
+- **Head:** title "LiftOffSol – AI Customer Support on WhatsApp", description, Open Graph tags, the favicon, and an
+  empty `facebook-domain-verification` tag to fill in. `public/` adds `sitemap.xml`, `robots.txt` and `icon.png`.
+- **Tests:** frontend lint, typecheck, format, and 46/46 tests (new: each public page opens with its footer). The
+  build wrote the six pages; checked in headless Chrome with JavaScript off, and at phone width. Not deployed.
+- **For later:**
+  - Nothing deletes message logs after 90 days yet. Build that before WhatsApp goes live, or the policy isn't true.
+  - Gemini's free API tier lets Google use the data; use a paid key so "only to generate the reply" holds.
+  - Google sign-in still shows `liftofsolutions-123.firebaseapp.com`; a custom auth domain would show ours.
+  - Have the Privacy Policy and Terms reviewed by a lawyer.
 
 ### 2026-11-02: Workflows, built to run later
 

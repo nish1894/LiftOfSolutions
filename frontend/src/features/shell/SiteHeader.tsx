@@ -68,10 +68,10 @@ export default function SiteHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
         <Link
           to="/app/overview"
           className="flex shrink-0 items-center gap-2"
-          aria-label="Lift Off overview"
+          aria-label="LiftOffSol overview"
         >
           <BrandMark size={28} />
-          <span className="hidden text-sm font-medium sm:inline">Lift Off</span>
+          <span className="hidden text-sm font-medium sm:inline">LiftOffSol</span>
         </Link>
         <OrgSwitcher onNewProject={() => setNewProjectOpen(true)} />
 

@@ -1,111 +1,116 @@
 /**
- * Marketing landing page for signed-out visitors. Section structure follows
- * the ShadcnStore landing template (MIT), without its pricing, blog or team
- * sections — this product has no real content for them yet.
- *
- * PLACEHOLDER COPY: the customer names and the testimonial below are invented
- * for layout purposes. Replace them with real, attributable material before
- * this is publicly deployed -- shipping invented social proof as though it
- * were genuine is misleading to visitors.
+ * The public homepage: what LiftOffSol does, how it works and who it's for. Section structure follows the
+ * ShadcnStore landing template (MIT). Every claim here describes the real product; the inbox picture is
+ * labelled as an illustration.
  */
 
-import { useEffect } from "react";
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRightIcon,
-  BookOpenIcon,
   BotIcon,
+  CalendarCheckIcon,
+  CheckIcon,
   ChevronDownIcon,
-  FileTextIcon,
-  GaugeIcon,
+  ContactIcon,
+  HeadsetIcon,
   InboxIcon,
   LayoutDashboardIcon,
   type LucideIcon,
-  MessageSquareQuoteIcon,
-  ReceiptIcon,
+  MessageCircleQuestionIcon,
+  PackageIcon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button.tsx";
+import { useAuth } from "@/features/auth/AuthContext.ts";
+import { BUSINESS } from "@/features/site/business.ts";
+import SiteLayout from "@/features/site/SiteLayout.tsx";
 import { cn } from "@/lib/utils.ts";
-import type { User } from "@/shared/types.ts";
-import BrandMark from "@/shared/ui/BrandMark.tsx";
 
-const FEATURES: Array<{ icon: LucideIcon; title: string; body: string }> = [
+const ANSWERS: Array<{ icon: LucideIcon; title: string; body: string }> = [
   {
-    icon: MessageSquareQuoteIcon,
-    title: "Answers with the source attached",
-    body: "Every reply points back to the document it came from, so your team can verify before acting on it.",
+    icon: MessageCircleQuestionIcon,
+    title: "Frequently asked questions",
+    body: "Prices, opening hours, location and policies: the questions you answer every day.",
   },
   {
-    icon: FileTextIcon,
-    title: "No data project required",
-    body: "Upload the documents you already have — policies, contracts, specs, support history. No pipeline to build first.",
+    icon: PackageIcon,
+    title: "Orders",
+    body: "Delivery times, returns, refunds and payment options, from your own policies.",
   },
   {
-    icon: GaugeIcon,
-    title: "Right model for the job",
-    body: "Quick lookups go to a fast, inexpensive model; involved analysis goes to a stronger one.",
+    icon: CalendarCheckIcon,
+    title: "Bookings",
+    body: "How to book, what's available, and how to reschedule or cancel.",
   },
   {
-    icon: ReceiptIcon,
-    title: "Spend you can account for",
-    body: "Usage is recorded per request, so cost can be attributed to the team or workflow behind it.",
+    icon: HeadsetIcon,
+    title: "Support",
+    body: "Troubleshooting steps and product help, with a handover to your team when needed.",
   },
 ];
 
 const STEPS = [
   {
-    title: "Bring your documents",
-    body: "Point it at the material your team already relies on. Formats you use day to day are handled as-is.",
+    title: "Connect WhatsApp",
+    body: "Link your WhatsApp Business number to LiftOffSol through Meta's WhatsApp Business Platform.",
   },
   {
-    title: "Ask in plain language",
-    body: "No query syntax, no training. People ask the way they would ask a colleague who had read everything.",
+    title: "Train the AI on your business",
+    body: "Add your FAQs, policies, product details and opening hours. The AI answers only from this information.",
   },
   {
-    title: "Act on cited answers",
-    body: "Responses arrive with the passages they were drawn from, so the answer can be checked in seconds.",
-  },
-];
-
-const USE_CASES = [
-  {
-    title: "Customer support",
-    body: "Resolve tickets against current policy instead of a stale macro.",
+    title: "The AI replies to your customers",
+    body: "Customers get an accurate answer in seconds, in their language, at any hour.",
   },
   {
-    title: "Sales enablement",
-    body: "Answer product and pricing questions without waiting on an expert.",
-  },
-  {
-    title: "People & HR",
-    body: "Give staff a straight answer on leave, benefits, and process.",
-  },
-  {
-    title: "Operations",
-    body: "Find the clause, the spec, or the runbook step without hunting.",
+    title: "Your team takes over when needed",
+    body: "When a customer asks for a person, or the AI can't help, the conversation moves to your team's shared inbox.",
   },
 ];
 
-const FAQS = [
+const AUDIENCES = [
+  { title: "Shops and online stores", body: "Product, delivery and return questions." },
+  { title: "Clinics, salons and studios", body: "Appointments, timings and services." },
+  { title: "Restaurants and cafés", body: "Menus, opening hours and reservations." },
+  { title: "Service businesses", body: "Availability, pricing and follow-ups." },
+];
+
+const CONTROL = [
+  "Every conversation in one shared inbox",
+  "Take over from the AI at any time, and hand back when you're done",
+  "The AI answers only from the information you add",
+];
+
+const FAQS: Array<{ question: string; answer: ReactNode }> = [
   {
-    question: "Where do the agent's answers come from?",
+    question: "Is this a general-purpose chatbot?",
     answer:
-      "Only from the documents and web pages you add to Knowledge. Each answer shows the sources it used, so your team can check it.",
+      "No. LiftOffSol answers your customers' questions about your business, using only the information you add. If it can't help, it hands the conversation to your team.",
+  },
+  {
+    question: "Do I need a WhatsApp Business number?",
+    answer:
+      "Yes. You connect your business's number through Meta's WhatsApp Business Platform. Meta's messaging charges are billed to you separately by Meta.",
   },
   {
     question: "Can a person take over a conversation?",
     answer:
-      "Yes. Anyone on your team with the right role can take over from the AI, reply to the customer, and hand the conversation back when they're done.",
+      "Yes. Anyone on your team with the right role can take over from the AI, reply to the customer, and hand the conversation back.",
   },
   {
-    question: "How do people sign in?",
-    answer: "With Google, or an email and password. Each organization approves who can join it.",
+    question: "Is our customers' data used to train AI models?",
+    answer: (
+      <>
+        No. Messages are sent to our AI providers only to write replies. Our{" "}
+        <Link className="text-primary underline underline-offset-2" to="/privacy">
+          Privacy Policy
+        </Link>{" "}
+        has the details.
+      </>
+    ),
   },
 ];
-
-// Placeholder customer names — fictional. Swap for real logos when available.
-const CUSTOMERS = ["Northwind Retail", "Harbor Logistics", "Meridian Health", "Ashfield Legal"];
 
 function SectionHeading({
   eyebrow,
@@ -131,7 +136,7 @@ function ProductShowcase({ className }: { className?: string }) {
     { icon: LayoutDashboardIcon, label: "Overview" },
     { icon: InboxIcon, label: "Inbox", active: true },
     { icon: BotIcon, label: "Agents" },
-    { icon: BookOpenIcon, label: "Knowledge" },
+    { icon: ContactIcon, label: "Contacts" },
   ];
   const queue = [
     {
@@ -157,7 +162,7 @@ function ProductShowcase({ className }: { className?: string }) {
   return (
     <figure
       className={cn("overflow-hidden rounded-2xl border bg-card text-left shadow-lg", className)}
-      aria-label="Illustration of the Lift Off inbox"
+      aria-label="Illustration of the LiftOffSol inbox"
     >
       <div className="grid xl:grid-cols-[9rem_1fr] 2xl:grid-cols-[9rem_12rem_1fr]">
         <div className="hidden border-r bg-sidebar p-3 xl:grid xl:content-start xl:gap-1">
@@ -211,15 +216,9 @@ function ProductShowcase({ className }: { className?: string }) {
             <span className="flex size-8 shrink-0 items-center justify-center rounded-full border bg-background">
               <BotIcon className="size-4 text-muted-foreground" aria-hidden="true" />
             </span>
-            <div className="max-w-md rounded-lg border bg-card px-3 py-2">
+            <p className="max-w-md rounded-lg border bg-card px-3 py-2">
               Refunds go back to the original payment method within 5–7 business days of approval.
-              <span className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-                Sources
-                <span className="rounded-sm border border-citation-border bg-citation-bg px-1.5 font-medium text-citation">
-                  1 Refund policy.pdf
-                </span>
-              </span>
-            </div>
+            </p>
           </div>
         </div>
       </div>
@@ -230,244 +229,174 @@ function ProductShowcase({ className }: { className?: string }) {
   );
 }
 
-export default function Home({ user }: { user: User | null }) {
-  useEffect(() => {
-    document.title = "Lift Off Solutions";
-  }, []);
+export default function Home() {
   // The homepage is the landing screen for everyone, so a signed-in visitor
   // needs a way into the application rather than another sign-in prompt.
+  const { user } = useAuth();
   const signedIn = Boolean(user);
-  const primaryTarget = signedIn ? "/app" : "/signin";
+  const primary = (
+    <Button asChild size="lg">
+      <Link to={signedIn ? "/app" : "/signin"}>
+        {signedIn ? "Open your dashboard" : "Create an account"}
+        <ArrowRightIcon />
+      </Link>
+    </Button>
+  );
+  const contact = (
+    <Button asChild size="lg" variant="outline">
+      <Link to="/contact">Contact us</Link>
+    </Button>
+  );
 
   return (
-    <div className="min-h-dvh bg-background">
-      <header className="sticky top-0 z-30 border-b bg-background">
-        <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4 md:px-6">
-          <a className="flex items-center gap-3 font-medium" href="#top">
-            <BrandMark size={28} />
-            Lift Off Solutions
-          </a>
-          <nav
-            className="hidden items-center gap-6 text-sm text-muted-foreground md:flex"
-            aria-label="Sections"
-          >
-            <a className="hover:text-foreground" href="#features">
-              Features
-            </a>
-            <a className="hover:text-foreground" href="#how">
-              How it works
-            </a>
-            <a className="hover:text-foreground" href="#faq">
-              FAQ
-            </a>
-          </nav>
-          <div className="ml-auto flex items-center gap-2">
-            {user ? (
-              <>
-                <span className="hidden text-sm text-muted-foreground sm:inline">
-                  {user.display_name || user.email}
+    <SiteLayout>
+      <section className="border-b">
+        <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 md:px-6 md:py-24 lg:grid-cols-[1fr_1.15fr] lg:gap-12">
+          <div>
+            <span className="text-sm font-medium text-primary">
+              AI customer support for the WhatsApp Business Platform
+            </span>
+            <h1 className="mt-6 max-w-xl text-[2.25rem] leading-[1.1] font-medium tracking-tight sm:text-display">
+              Answer every customer on WhatsApp, day or night
+            </h1>
+            <p className="mt-6 max-w-xl text-md leading-relaxed text-subtle-foreground">
+              {BUSINESS.name} gives your business an AI assistant that replies to your customers on
+              WhatsApp. It answers questions about your products, orders, bookings and support from
+              the information you give it, and hands the conversation to your team when a person is
+              needed.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              {primary}
+              {contact}
+            </div>
+            <p className="mt-4 text-sm text-muted-foreground">
+              {signedIn
+                ? `Signed in as ${user?.email ?? ""}`
+                : "Not a general-purpose chatbot: it answers only for your business, from your information."}
+            </p>
+          </div>
+          <ProductShowcase />
+        </div>
+      </section>
+
+      <section id="answers" className="scroll-mt-16 border-b bg-card py-16 md:py-24">
+        <div className="mx-auto max-w-6xl px-4 md:px-6">
+          <SectionHeading
+            eyebrow="What it answers"
+            title="The questions your customers ask most"
+            body="Customers get a reply in seconds, while your team focuses on the conversations that need a person."
+          />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {ANSWERS.map((item) => (
+              <article key={item.title} className="grid content-start gap-4 border-t p-5 pt-6">
+                <span className="flex size-8 items-center">
+                  <item.icon className="size-5 text-muted-foreground" aria-hidden="true" />
                 </span>
-                <Button asChild size="sm">
-                  <Link to="/app">Go to dashboard</Link>
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button asChild variant="ghost" size="sm">
-                  <Link to="/signin">Sign in</Link>
-                </Button>
-                <Button asChild size="sm">
-                  <Link to="/signin">Get started</Link>
-                </Button>
-              </>
-            )}
+                <h3 className="font-medium">{item.title}</h3>
+                <p className="text-sm text-muted-foreground">{item.body}</p>
+              </article>
+            ))}
           </div>
         </div>
-      </header>
+      </section>
 
-      <main id="top">
-        <section className="border-b">
-          <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 md:px-6 md:py-24 lg:grid-cols-[1fr_1.15fr] lg:gap-12">
-            <div>
-              <span className="inline-flex items-center gap-2 text-sm font-medium text-primary">
-                <BookOpenIcon className="size-4" aria-hidden="true" />
-                AI customer service with cited answers
-              </span>
-              <h1 className="mt-6 max-w-xl text-[2.25rem] leading-[1.1] font-medium tracking-tight sm:text-display">
-                Your company's knowledge, answered in seconds
-              </h1>
-              <p className="mt-6 max-w-xl text-md leading-relaxed text-subtle-foreground">
-                Lift Off Solutions reads the documents your business already runs on and answers
-                questions about them in plain language — with the source passage attached, so nobody
-                has to take the answer on trust.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Button asChild size="lg">
-                  <Link to={primaryTarget}>
-                    {signedIn ? "Open your dashboard" : "Get started free"}
-                    <ArrowRightIcon />
-                  </Link>
-                </Button>
-                <Button asChild size="lg" variant="outline">
-                  <a href="#how">See how it works</a>
-                </Button>
-              </div>
-              <p className="mt-4 text-sm text-muted-foreground">
-                {signedIn
-                  ? `Signed in as ${user?.email ?? ""}`
-                  : "No credit card required · Sign in with Google or email"}
+      <section id="how" className="scroll-mt-16 border-b py-16 md:py-24">
+        <div className="mx-auto max-w-6xl px-4 md:px-6">
+          <SectionHeading
+            eyebrow="How it works"
+            title="From your WhatsApp number to answered customers"
+            body="Four steps, and none of them need an engineer."
+          />
+          <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {STEPS.map((step, index) => (
+              <li key={step.title} className="grid content-start gap-4 border-t p-5 pt-6">
+                <span className="flex size-8 items-center justify-center rounded-md border bg-card font-mono text-sm text-primary">
+                  {index + 1}
+                </span>
+                <h3 className="font-medium">{step.title}</h3>
+                <p className="text-sm text-muted-foreground">{step.body}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section id="who" className="scroll-mt-16 border-b py-16 md:py-24">
+        <div className="mx-auto grid max-w-6xl gap-12 px-4 md:px-6 lg:grid-cols-2">
+          <div className="grid content-start gap-6">
+            <div className="grid gap-3">
+              <span className="text-sm font-medium text-primary">Who it's for</span>
+              <h2 className="text-2xl font-medium tracking-tight">
+                Made for small and medium businesses
+              </h2>
+              <p className="text-muted-foreground">
+                For businesses that get the same questions on WhatsApp every day and want to answer
+                them faster, without hiring a bigger team.
               </p>
             </div>
-            <ProductShowcase />
-          </div>
-        </section>
-
-        <section className="border-b" aria-label="Customers">
-          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-10 gap-y-3 px-4 py-8 md:px-6">
-            <p className="text-sm text-muted-foreground">Built for teams like</p>
-            <ul className="flex flex-wrap justify-center gap-x-10 gap-y-2 text-md font-medium text-muted-foreground">
-              {CUSTOMERS.map((name) => (
-                <li key={name}>{name}</li>
+            <ul className="grid gap-5 sm:grid-cols-2">
+              {AUDIENCES.map((audience) => (
+                <li key={audience.title} className="grid gap-1 border-l-2 border-primary/30 pl-4">
+                  <h3 className="font-medium">{audience.title}</h3>
+                  <p className="text-sm text-muted-foreground">{audience.body}</p>
+                </li>
               ))}
             </ul>
           </div>
-        </section>
-
-        <section id="features" className="scroll-mt-16 border-b bg-card py-16 md:py-24">
-          <div className="mx-auto max-w-6xl px-4 md:px-6">
-            <SectionHeading
-              eyebrow="Features"
-              title="Why teams choose it"
-              body="Accuracy you can check, set up in an afternoon rather than a quarter."
-            />
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {FEATURES.map((feature) => (
-                <article key={feature.title} className="grid content-start gap-4 border-t p-5 pt-6">
-                  <span className="flex size-8 items-center">
-                    <feature.icon className="size-5 text-muted-foreground" aria-hidden="true" />
-                  </span>
-                  <h3 className="font-medium">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground">{feature.body}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="how" className="scroll-mt-16 border-b py-16 md:py-24">
-          <div className="mx-auto max-w-6xl px-4 md:px-6">
-            <SectionHeading
-              eyebrow="How it works"
-              title="Three steps, and none of them need an engineer"
-              body="From your documents to cited answers your customers can trust."
-            />
-            <ol className="grid gap-4 md:grid-cols-3">
-              {STEPS.map((step, index) => (
-                <li key={step.title} className="grid content-start gap-4 border-t p-5 pt-6">
-                  <span className="flex size-8 items-center justify-center rounded-md border bg-card font-mono text-sm text-primary">
-                    {index + 1}
-                  </span>
-                  <h3 className="font-medium">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground">{step.body}</p>
+          <div className="grid content-center gap-5 rounded-xl border bg-card p-6 sm:p-8">
+            <h3 className="text-lg font-medium">Your team stays in control</h3>
+            <ul className="grid gap-3">
+              {CONTROL.map((point) => (
+                <li key={point} className="flex gap-3 text-subtle-foreground">
+                  <CheckIcon className="mt-0.5 size-4 shrink-0 text-success" aria-hidden="true" />
+                  {point}
                 </li>
               ))}
-            </ol>
+            </ul>
           </div>
-        </section>
-
-        <section className="border-b py-16 md:py-24">
-          <div className="mx-auto grid max-w-6xl gap-12 px-4 md:px-6 lg:grid-cols-2">
-            <div className="grid content-start gap-6">
-              <h2 className="text-2xl font-medium tracking-tight">Where it earns its keep</h2>
-              <ul className="grid gap-5 sm:grid-cols-2">
-                {USE_CASES.map((useCase) => (
-                  <li key={useCase.title} className="grid gap-1 border-l-2 border-primary/30 pl-4">
-                    <h3 className="font-medium">{useCase.title}</h3>
-                    <p className="text-sm text-muted-foreground">{useCase.body}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            {/* PLACEHOLDER: invented quote and attribution. Replace or remove. */}
-            <figure className="grid content-center gap-6 rounded-xl border bg-card p-6 sm:p-8">
-              <blockquote className="text-lg leading-relaxed">
-                "Our support team used to keep six policy documents open in tabs. Now they ask one
-                question and get the clause back with it. Onboarding a new agent takes days instead
-                of weeks."
-              </blockquote>
-              <figcaption className="text-sm text-muted-foreground">
-                Operations Lead · Harbor Logistics — illustrative example
-              </figcaption>
-            </figure>
-          </div>
-        </section>
-
-        <section id="faq" className="scroll-mt-16 border-b py-16 md:py-24">
-          <div className="mx-auto max-w-3xl px-4 md:px-6">
-            <SectionHeading
-              eyebrow="FAQ"
-              title="Questions people ask first"
-              body="Short answers about how Lift Off works."
-            />
-            <div className="grid gap-3">
-              {FAQS.map((faq) => (
-                <details key={faq.question} className="group rounded-lg border bg-card px-5 py-5">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
-                    {faq.question}
-                    <ChevronDownIcon
-                      className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
-                      aria-hidden="true"
-                    />
-                  </summary>
-                  <p className="mt-3 text-sm text-muted-foreground">{faq.answer}</p>
-                </details>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-16 md:py-24">
-          <div className="mx-auto max-w-6xl px-4 md:px-6">
-            <div className="grid justify-items-start gap-5 rounded-xl border bg-card px-6 py-10 text-left sm:px-10">
-              <h2 className="text-2xl font-medium tracking-tight">Put your documents to work</h2>
-              <p className="max-w-xl text-muted-foreground">
-                Create an account and ask your first question in a few minutes.
-              </p>
-              <Button asChild size="lg">
-                <Link to={primaryTarget}>
-                  {signedIn ? "Open your dashboard" : "Get started free"}
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <footer className="border-t">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-8 gap-y-3 px-4 py-8 text-sm text-muted-foreground md:px-6">
-          <span className="flex items-center gap-2 font-medium text-foreground">
-            <BrandMark size={24} />
-            Lift Off Solutions
-          </span>
-          <nav className="flex flex-wrap gap-5" aria-label="Footer">
-            <a className="hover:text-foreground" href="#features">
-              Features
-            </a>
-            <a className="hover:text-foreground" href="#how">
-              How it works
-            </a>
-            <a className="hover:text-foreground" href="#faq">
-              FAQ
-            </a>
-            <Link className="hover:text-foreground" to={primaryTarget}>
-              {signedIn ? "Dashboard" : "Sign in"}
-            </Link>
-          </nav>
-          <p className="ml-auto">
-            © {new Date().getFullYear()} Lift Off Solutions. All rights reserved.
-          </p>
         </div>
-      </footer>
-    </div>
+      </section>
+
+      <section id="faq" className="scroll-mt-16 border-b py-16 md:py-24">
+        <div className="mx-auto max-w-3xl px-4 md:px-6">
+          <SectionHeading
+            eyebrow="FAQ"
+            title="Questions people ask first"
+            body={`Short answers about how ${BUSINESS.name} works.`}
+          />
+          <div className="grid gap-3">
+            {FAQS.map((faq) => (
+              <details key={faq.question} className="group rounded-lg border bg-card px-5 py-5">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
+                  {faq.question}
+                  <ChevronDownIcon
+                    className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+                    aria-hidden="true"
+                  />
+                </summary>
+                <p className="mt-3 text-sm text-muted-foreground">{faq.answer}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 md:py-24">
+        <div className="mx-auto max-w-6xl px-4 md:px-6">
+          <div className="grid justify-items-start gap-5 rounded-xl border bg-card px-6 py-10 text-left sm:px-10">
+            <h2 className="text-2xl font-medium tracking-tight">
+              Start answering customers faster
+            </h2>
+            <p className="max-w-xl text-muted-foreground">
+              Create an account, or tell us about your business and we'll help you get set up.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {primary}
+              {contact}
+            </div>
+          </div>
+        </div>
+      </section>
+    </SiteLayout>
   );
 }

@@ -5,6 +5,11 @@ import { useAuth } from "./features/auth/AuthContext.ts";
 import SignIn from "./features/auth/SignIn.tsx";
 import Home from "./features/home/Home.tsx";
 import AppLayout from "./features/shell/AppLayout.tsx";
+import AboutPage from "./features/site/AboutPage.tsx";
+import ContactPage from "./features/site/ContactPage.tsx";
+import DataDeletionPage from "./features/site/DataDeletionPage.tsx";
+import PrivacyPage from "./features/site/PrivacyPage.tsx";
+import TermsPage from "./features/site/TermsPage.tsx";
 import { pathForSection } from "./features/shell/navigation.ts";
 import NotFound from "./features/shell/NotFound.tsx";
 import { WorkspaceProvider } from "./features/workspace/WorkspaceProvider.tsx";
@@ -32,8 +37,11 @@ const WorkflowsPage = lazy(() => import("./features/workflows/WorkflowsPage.tsx"
 
 /** Keeps /app/* for signed-in users only, sending everyone else to sign-in. */
 function RequireAuth({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const location = useLocation();
+  // Restoring a persisted session is async, so decide nothing until it settles,
+  // or a signed-in user is sent to sign-in on reload.
+  if (loading) return <LoadingScreen />;
   if (!user)
     return (
       <Navigate
@@ -45,8 +53,10 @@ function RequireAuth({ children }: { children: ReactNode }) {
 }
 
 function SignInRoute() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const location = useLocation();
+  // As in RequireAuth: otherwise the sign-in form flashes for a signed-in user.
+  if (loading) return <LoadingScreen />;
   if (!user) return <SignIn />;
   const requested = new URLSearchParams(location.search).get("next");
   const destination =
@@ -81,16 +91,16 @@ function LegacySection() {
 }
 
 export default function App() {
-  const { user, loading } = useAuth();
-
-  // Restoring a persisted session is async, so render nothing decisive until it
-  // settles — otherwise a signed-in user sees the login screen flash on reload.
-  if (loading) return <LoadingScreen />;
-
   return (
     <Routes>
-      {/* "/" is the landing screen for everyone, signed in or not. */}
-      <Route path="/" element={<Home user={user} />} />
+      {/* The public website. "/" is the landing screen for everyone, signed in or not. These pages don't
+          wait for the session: their HTML is already on screen (scripts/prerender.mjs). */}
+      <Route path="/" element={<Home />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/contact" element={<ContactPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
+      <Route path="/data-deletion" element={<DataDeletionPage />} />
       <Route path="/signin" element={<SignInRoute />} />
 
       {/* The agent studio and the workflow editor are full pages of their own, without the app's sidebar. */}
@@ -106,7 +116,6 @@ export default function App() {
           </RequireAuth>
         }
       />
-
       <Route
         path="/app/workflows/:workflowId"
         element={
