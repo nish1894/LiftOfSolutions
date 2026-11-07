@@ -104,6 +104,23 @@ The RAG service runs from its own repository: see `../LiftOfMain/README.md`.
 
 Newest first. Each line: what we did, why, and where the detail is.
 
+### 2026-11-07: frontend fixes from a pre-launch check
+
+You ran a frontend check (secrets, access, errors, dependencies, monitoring) and asked to fix what's ours.
+
+- **Error text:** the API client no longer shows a 5xx body's message, which can be another service's raw text
+  (`firestore/knowledge.ts` passes the RAG's error through as a 502). A failed `fetch` now reads "We couldn't
+  reach the server". The render error boundary no longer prints the exception; it stays in the console.
+- **Dependencies:** `npm audit fix` (no forced upgrades) took production findings from 8 high to 4. All 4 come from
+  `@grpc/grpc-js` under `firebase`'s Firestore package, which is Node-only and not in the bundle (we use only
+  `firebase/app` and `firebase/auth`). The rest are dev-only (`eslint`'s `minimatch`), with fixes that need major
+  upgrades.
+- **Not ours to fix in code:** the live bundle has the demo Firebase settings, so the `VITE_FIREBASE_*` and
+  `VITE_API_BASE_URL` variables aren't set in Vercel. Sign-in also needs the platform API hosted somewhere.
+- **Tests:** lint, typecheck, format, 49/49 tests (new: the client's error messages), and the build.
+- **For later:** error reporting is the console only; a hosted error tracker would need picking against the
+  free-only rule.
+
 ### 2026-11-06: public website for Meta (WhatsApp Business Platform) verification
 
 You asked for the pages Meta Business Verification and App Review need for the WhatsApp Tech Provider program,

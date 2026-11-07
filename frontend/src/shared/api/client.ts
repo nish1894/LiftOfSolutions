@@ -66,16 +66,24 @@ export async function apiRequest<T>(
     ...(options.body !== undefined
       ? { body: isFormData ? (options.body as FormData) : JSON.stringify(options.body) }
       : {}),
+  }).catch(() => {
+    // The browser's own text ("Failed to fetch", "Load failed") means nothing to a user.
+    throw new ApiError("We couldn't reach the server. Check your connection and try again.", {
+      code: "network_error",
+    });
   });
 
   if (response.status === 401 && token && !forceRefresh) return apiRequest<T>(path, options, true);
 
   const payload = (await response.json().catch(() => null)) as (T & ErrorPayload) | null;
 
+  // A 5xx message can carry another service's raw error text, so the user only sees ours.
+  const serverMessage = response.status < 500 ? payload?.error?.message : undefined;
+
   if (!response.ok)
     throw new ApiError(
       validationMessage(payload?.error?.details) ??
-        payload?.error?.message ??
+        serverMessage ??
         fallbackMessage(response.status),
       {
         status: response.status,

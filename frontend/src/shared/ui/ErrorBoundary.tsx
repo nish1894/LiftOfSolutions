@@ -30,13 +30,11 @@ export default class ErrorBoundary extends Component<Props, State> {
       <main className="grid min-h-dvh place-items-center bg-background px-4" role="alert">
         <div className="grid w-full max-w-lg gap-4 rounded-lg border bg-card p-6">
           <h1 className="text-lg font-semibold">Something broke on this screen</h1>
+          {/* The error itself stays in the console: its text can name internals. */}
           <p className="text-sm text-muted-foreground">
-            The rest of the application is still running. Reloading usually clears it; if it keeps
-            happening, the message below is what to report.
+            Something went wrong while showing this page. Reloading usually clears it. If it keeps
+            happening, contact us and tell us what you were doing.
           </p>
-          <pre className="overflow-x-auto rounded-md bg-muted p-3 font-mono text-xs whitespace-pre-wrap">
-            {error.message || String(error)}
-          </pre>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"

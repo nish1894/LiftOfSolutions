@@ -15,14 +15,14 @@ describe("ErrorBoundary", () => {
   beforeEach(() => vi.spyOn(console, "error").mockImplementation(() => {}));
   afterEach(() => vi.restoreAllMocks());
 
-  it("shows the error instead of a blank page", () => {
+  it("shows a message instead of a blank page, without the raw error", () => {
     render(
       <ErrorBoundary>
         <Boom shouldThrow />
       </ErrorBoundary>,
     );
     expect(screen.getByRole("alert")).toHaveTextContent("Something broke on this screen");
-    expect(screen.getByText("render exploded")).toBeInTheDocument();
+    expect(screen.queryByText(/render exploded/)).not.toBeInTheDocument();
   });
 
   it("renders children untouched when nothing throws", () => {
