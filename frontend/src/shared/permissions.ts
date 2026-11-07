@@ -30,6 +30,8 @@ export const PLATFORM_PERMISSIONS = [
   "tools.approve",
   "analytics.view",
   "usage.view",
+  "workflows.view",
+  "workflows.manage",
   "billing.view",
   "billing.manage",
   "audit.view",
@@ -182,6 +184,13 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     permissions: [
       { key: "analytics.view", label: "View analytics" },
       { key: "usage.view", label: "View usage and cost" },
+    ],
+  },
+  {
+    label: "Workflows",
+    permissions: [
+      { key: "workflows.view", label: "View workflows" },
+      { key: "workflows.manage", label: "Create, edit and turn on workflows" },
     ],
   },
   {

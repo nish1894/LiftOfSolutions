@@ -14,6 +14,7 @@ import { toolRoutes } from "./tools.js";
 import { billingRoutes } from "./billing.js";
 import { knowledgeRoutes } from "./knowledge.js";
 import { assistantRoutes } from "./assistants.js";
+import { workflowRoutes } from "./workflows.js";
 
 export interface AppDependencies {
   database?: Database;
@@ -23,7 +24,8 @@ export interface AppDependencies {
 
 // The platform API on native Firestore, the database it shares with the RAG.
 // Ported: sign-in, account, organizations, members, invitations, projects, contacts, inbox,
-// notifications, tool runs, billing, knowledge sources and agents. The maintenance sweeps run as their own process.
+// notifications, tool runs, billing, knowledge sources, agents and workflows. The maintenance sweeps run as their own
+// process.
 export async function buildFirestoreApp(
   config: Config = loadConfig(),
   dependencies: AppDependencies = {},
@@ -133,6 +135,7 @@ export async function buildFirestoreApp(
       await billingRoutes(api, platform, verify);
       await knowledgeRoutes(api, platform, verify);
       await assistantRoutes(api, platform, verify);
+      await workflowRoutes(api, platform, verify);
     },
     { prefix: config.API_PREFIX },
   );

@@ -146,6 +146,44 @@ export interface Agent {
   updated_at: ApiTime;
 }
 
+/* A workflow: one trigger and the steps it runs (Schema_liftofsol workflow-schema). Nothing runs them yet. */
+export type WorkflowTrigger = "conversation_opened" | "message_received" | "conversation_closed";
+export type BranchCondition = "business_hours" | "returning_contact" | "has_email";
+
+export type WorkflowAction =
+  | { id: string; type: "send_message"; text: string }
+  | { id: string; type: "hand_to_agent"; assistant_id?: string }
+  | { id: string; type: "assign"; to: "round_robin" | "member" | "nobody"; member_id?: string }
+  | { id: string; type: "ask"; text: string; save_to: "display_name" | "email" | "phone" }
+  | { id: string; type: "add_note"; text: string }
+  | { id: string; type: "wait"; minutes: number }
+  | { id: string; type: "close" };
+
+export interface WorkflowBranch {
+  id: string;
+  type: "branch";
+  condition: BranchCondition;
+  yes: WorkflowAction[];
+  no: WorkflowAction[];
+}
+
+export type WorkflowStep = WorkflowAction | WorkflowBranch;
+
+export interface Workflow {
+  id: string;
+  name: string;
+  description: string | null;
+  template_id: string | null;
+  status: "off" | "on";
+  trigger: WorkflowTrigger;
+  steps: WorkflowStep[];
+  version: number;
+  /** Why it can't be turned on yet, or null when every step is complete. */
+  incomplete: string | null;
+  created_at: ApiTime;
+  updated_at: ApiTime;
+}
+
 /* One uploaded document, which the RAG service turns into one knowledge base.
    status and the counts come from the RAG service. */
 export interface KnowledgeSource {

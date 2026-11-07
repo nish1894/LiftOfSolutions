@@ -8,6 +8,7 @@ import {
   NetworkIcon,
   SettingsIcon,
   ShieldCheckIcon,
+  WorkflowIcon,
 } from "lucide-react";
 
 import type { PlatformPermission } from "@/shared/permissions.ts";
@@ -51,6 +52,7 @@ export const NAV_ITEMS: NavItem[] = [
     mobile: true,
   },
   { path: "assistants", label: "Agents", icon: BotIcon, permission: "agents.view", mobile: true },
+  { path: "workflows", label: "Workflows", icon: WorkflowIcon, permission: "workflows.view" },
   {
     path: "requests",
     label: "Approvals",

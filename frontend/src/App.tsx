@@ -25,6 +25,10 @@ const IntegrationsPage = lazy(() => import("./features/integrations/Integrations
 const MembersPage = lazy(() => import("./features/members/MembersPage.tsx"));
 const OverviewPage = lazy(() => import("./features/overview/OverviewPage.tsx"));
 const SettingsPage = lazy(() => import("./features/settings/SettingsPage.tsx"));
+const TemplateDetailPage = lazy(() => import("./features/workflows/TemplateDetailPage.tsx"));
+const TemplatesPage = lazy(() => import("./features/workflows/TemplatesPage.tsx"));
+const WorkflowEditorPage = lazy(() => import("./features/workflows/WorkflowEditorPage.tsx"));
+const WorkflowsPage = lazy(() => import("./features/workflows/WorkflowsPage.tsx"));
 
 /** Keeps /app/* for signed-in users only, sending everyone else to sign-in. */
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -89,7 +93,7 @@ export default function App() {
       <Route path="/" element={<Home user={user} />} />
       <Route path="/signin" element={<SignInRoute />} />
 
-      {/* The agent studio is a full page of its own, without the app's sidebar. */}
+      {/* The agent studio and the workflow editor are full pages of their own, without the app's sidebar. */}
       <Route
         path="/app/assistants/:agentId"
         element={
@@ -97,6 +101,19 @@ export default function App() {
             <WorkspaceProvider>
               <Suspense fallback={<LoadingScreen />}>
                 <AssistantDetailPage />
+              </Suspense>
+            </WorkspaceProvider>
+          </RequireAuth>
+        }
+      />
+
+      <Route
+        path="/app/workflows/:workflowId"
+        element={
+          <RequireAuth>
+            <WorkspaceProvider>
+              <Suspense fallback={<LoadingScreen />}>
+                <WorkflowEditorPage />
               </Suspense>
             </WorkspaceProvider>
           </RequireAuth>
@@ -121,6 +138,9 @@ export default function App() {
         {/* Knowledge and the playground are part of the agent studio now; old links land on Agents. */}
         <Route path="knowledge/*" element={<Navigate to="/app/assistants" replace />} />
         <Route path="playground" element={<Navigate to="/app/assistants" replace />} />
+        <Route path="workflows" element={<WorkflowsPage />} />
+        <Route path="workflows/templates" element={<TemplatesPage />} />
+        <Route path="workflows/templates/:templateId" element={<TemplateDetailPage />} />
         <Route path="analytics" element={<AnalyticsPage />} />
         <Route path="members" element={<MembersPage />} />
         <Route path="requests" element={<RequestsPage />} />

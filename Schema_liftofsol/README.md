@@ -41,6 +41,7 @@ transactions).
 | `audit-schema/` | `audit_events` | Platform | New, ready for review |
 | `knowledge-source-schema/` | `knowledge_sources` | Platform | Built (section 13.1) |
 | `assistant-schema/` | `assistants` | Platform | Built (section 13.1) |
+| `workflow-schema/` | `workflows` | Platform | Built; nothing runs them yet (section 13.2) |
 | `agent-schema/` | `node_types`, `agent_templates`, `agents`, `credentials` | Agent side (other team member) | See its own README |
 | `knowledge-schema/` | `rags`, `rag_documents`, `pinecone_indexes`, `rag_jobs` | Agent side (other team member) | See its own README |
 | `transactions-schema/` | `transactions`, `prices`, `agent_storage` | Agent side (other team member) | See its own README |
@@ -364,21 +365,21 @@ back only as a copy that the RAG reads (6.5).
 
 ### 6.2 Project permissions
 
-`ALL_PROJECT_PERMISSIONS` (23): `agents.view`, `agents.create`, `agents.update`, `agents.publish`, `agents.test`,
+`ALL_PROJECT_PERMISSIONS` (25): `agents.view`, `agents.create`, `agents.update`, `agents.publish`, `agents.test`,
 `agents.archive`, `contacts.view`, `contacts.manage`, `conversations.view`, `conversations.reply`,
 `conversations.assign`, `conversations.manage`, `channels.view`, `channels.manage`, `knowledge.view`,
 `knowledge.manage`, `integrations.view`, `integrations.manage`, `tools.view`, `tools.manage`, `tools.approve`,
-`analytics.view`, `usage.view`.
+`analytics.view`, `usage.view`, `workflows.view`, `workflows.manage` (the last two added 2026-11-02).
 
 These are today's names, except `customers.*`, renamed to `contacts.*` (section 8). Organization-level permissions are
 the `OrgAction` list in 5.4.
 
 `DEFAULT_ROLE_PERMISSIONS`, used when a project doesn't set `role_permissions`:
 
-- **admin:** all 23.
+- **admin:** all 25.
 - **member** (support staff): `agents.view`, `contacts.view`, `contacts.manage`, `conversations.view`,
   `conversations.reply`, `conversations.assign`, `channels.view`, `knowledge.view`, `tools.view`, `analytics.view`,
-  `usage.view`.
+  `usage.view`, `workflows.view`.
 - **owner:** always everything, whatever the project says.
 
 ### 6.3 How a person's permissions in a project are worked out (`projectPermissions()`)
@@ -1119,6 +1120,28 @@ To raise with the other team member (2026-11-02):
 - **xAI:** the RAG reads `XAI_API_KEY`, but `server.env` has `GROG_API_KEY`, so `grok-4.5` can't run. It's left
   out of the model list.
 
+### 13.2 Workflows: `workflows`
+
+Added 2026-11-02 (`workflow-schema/`). A project's automations, like respond.io's: one trigger and the steps it
+runs. An agent answers customers; a workflow decides who answers and what happens around the conversation. The
+platform runs workflows, not the RAG.
+
+- **Nothing runs them yet.** No channel delivers conversations to the inbox, so the team can build, save and turn
+  on workflows, and the screens say they don't run yet.
+- **Triggers:** `conversation_opened`, `message_received`, `conversation_closed` (resolved or closed).
+- **Steps:** `send_message`, `hand_to_agent` (`assistant_id`), `assign` (`round_robin`, a `member_id`, or `nobody`
+  to unassign), `ask` (saves the answer as the contact's `display_name`, `email` or `phone`), `add_note`, `wait`
+  (1 minute to 7 days), `close` (ends the workflow), and `branch`.
+- **Branches** ask one yes/no question (`business_hours`, `returning_contact`, `has_email`), run their `yes` or
+  `no` steps, then carry on with the next step. A branch can't hold another branch. At most 30 steps in all.
+- **Unfinished workflows** can be saved. Turning one on needs an agent picked for each `hand_to_agent` and a
+  teammate for each `assign` to a member. The API reports what's missing in `incomplete`.
+- **Statuses:** `off` (new ones start off) and `on`. Deleting removes the workflow; nothing refers to it yet.
+- **Templates** live in the frontend (`frontend/src/features/workflows/templates.ts`). `template_id` records which
+  one a workflow started from.
+
+Still to design before workflows can run (section 14): the runner, business hours, and round-robin turns.
+
 ---
 
 ## 14. Not designed yet
@@ -1126,6 +1149,10 @@ To raise with the other team member (2026-11-02):
 - **Daily analytics totals** (today `stats/totals`): dashboard numbers can be summed from `transactions`,
   `usage_charges` and `conversations`. Add a daily totals collection only if the dashboards get slow.
 - **`password_credentials`:** only when we build our own login (4.5).
+- **Running workflows** (13.2): what starts a run when the inbox receives a message or a conversation changes, a
+  record of each run and where it is, and the maintenance sweep that wakes `wait` steps. Needs a channel first.
+- **Business hours:** an organization setting (days, times, time zone) for the `business_hours` branch.
+- **Round-robin turns:** who got the last conversation, per project, for `assign` `round_robin`.
 - **Web widget lookup** (today `publicChannels`): maps a public widget id to its agent. Agree with the other team
   member whether it lives with their channel nodes (section 13) or with us.
 

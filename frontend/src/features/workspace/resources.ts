@@ -5,6 +5,7 @@ import type {
   KnowledgeSource,
   Member,
   Organization,
+  Workflow,
 } from "@/shared/types.ts";
 
 import { isIngesting } from "@/shared/statuses.ts";
@@ -17,6 +18,13 @@ import { useOrgQuery, useWorkspace } from "./workspace.ts";
 export function useAgents() {
   const { can } = useWorkspace();
   return useOrgQuery<Agent[]>(["agents"], "/assistants", [], { enabled: can("agents.view") });
+}
+
+export function useWorkflows() {
+  const { can } = useWorkspace();
+  return useOrgQuery<Workflow[]>(["workflows"], "/workflows", [], {
+    enabled: can("workflows.view"),
+  });
 }
 
 /** Checks again every 10 seconds while the AI service is still reading a source. */

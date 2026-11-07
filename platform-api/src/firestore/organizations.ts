@@ -550,7 +550,9 @@ export async function organizationRoutes(
     "/projects/:projectId/access",
     { preHandler: authenticated },
     async (request) => {
-      const permissions = z.array(z.enum(ALL_PROJECT_PERMISSIONS)).max(23);
+      const permissions = z
+        .array(z.enum(ALL_PROJECT_PERMISSIONS))
+        .max(ALL_PROJECT_PERMISSIONS.length);
       const input = parse(
         z
           .object({

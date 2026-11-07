@@ -55,10 +55,12 @@ liftofSol/
 - Project settings (access, rename, archive) and the editable URL name.
 - Knowledge: uploads go to the RAG service, which reads them into knowledge bases.
 - Agents: one studio per agent (setup and knowledge on the left, a test chat on the right), draft, then Publish.
+- Workflows: templates, template pages and an editor. Workflows are saved and can be turned on, but nothing runs
+  them until a channel brings in conversations.
 
 **Next**
 
-1. Channels (the web widget into the Inbox), then Analytics.
+1. Channels (the web widget into the Inbox), then running workflows, then Analytics.
 2. Later: invitation email and a payment provider.
 
 **Known gaps**
@@ -99,6 +101,36 @@ The RAG service runs from its own repository: see `../LiftOfMain/README.md`.
 ## Decision log
 
 Newest first. Each line: what we did, why, and where the detail is.
+
+### 2026-11-02: Workflows, built to run later
+
+You asked for respond.io-style workflow templates, and said it's fine if they don't run yet. A workflow is one
+trigger and the steps it runs; the platform will run it, not the RAG.
+
+- **Data:** a new `workflows` collection (`Schema_liftofsol/workflow-schema/`, README 13.2).
+  - Triggers: conversation opened, message received, conversation closed.
+  - Steps: send message, hand to an AI agent, assign (in turn, a teammate, or nobody), ask a question (saved on the
+    contact), add a note, wait, close, and branch.
+  - A branch asks a yes/no question (business hours, returning contact, has an email), and can't hold another
+    branch. At most 30 steps.
+  - New permissions `workflows.view` (members get it by default) and `workflows.manage`.
+- **API** (`platform-api/src/firestore/workflows.ts`): list, get, create, save (with `expected_version`), turn on,
+  turn off and delete, each audited. Unfinished workflows save, but turn on only when every agent and teammate is
+  picked (422 `workflow_incomplete`).
+- **Screens** (`frontend/src/features/workflows/`):
+  - A Workflows page in the sidebar.
+  - A template browser with categories and search, plus "Start from scratch".
+  - A page per template: benefits, how it works, and its steps drawn.
+  - A full-page editor: the steps drawn on the left, with + between them; the selected step's settings on the
+    right; Save and Turn on.
+- **Templates:** welcome message, away message, assign in turn, AI agent first, ask for an email, unassign after
+  close, thank-you after close.
+  - "Close after no reply" was in my proposal but needs a "wait for a reply" step, so it was swapped for the
+    thank-you one.
+- **Placeholders:** nothing runs a workflow; business hours and round-robin turns aren't designed yet (Schema README
+  section 14). The screens say so.
+- **Tests:** `npm run test:firestore` 37/37 (new: the lifecycle, and the step rules). Frontend lint, typecheck and
+  39/39 tests. Not run: a browser pass.
 
 ### 2026-11-02: agent studio redesign: full page, templates, model and flow
 

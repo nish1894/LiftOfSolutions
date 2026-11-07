@@ -38,6 +38,7 @@ export const ALL_PROJECT_PERMISSIONS = [
   "integrations.view", "integrations.manage",
   "tools.view", "tools.manage", "tools.approve",
   "analytics.view", "usage.view",
+  "workflows.view", "workflows.manage",
 ] as const;
 
 export type ProjectPermission = (typeof ALL_PROJECT_PERMISSIONS)[number];
@@ -50,6 +51,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Exclude<OrgRole, "owner">, readonl
     "agents.view", "contacts.view", "contacts.manage",
     "conversations.view", "conversations.reply", "conversations.assign",
     "channels.view", "knowledge.view", "tools.view", "analytics.view", "usage.view",
+    "workflows.view",
   ],
 };
 

@@ -39,6 +39,7 @@ import type { Notification } from "../domain/schema/notification-schema/notifica
 import type { AuditEvent } from "../domain/schema/audit-schema/audit_events.types.js";
 import type { KnowledgeSource } from "../domain/schema/knowledge-source-schema/knowledge_sources.types.js";
 import type { Assistant } from "../domain/schema/assistant-schema/assistants.types.js";
+import type { Workflow } from "../domain/schema/workflow-schema/workflows.types.js";
 
 // A value that must be unique, such as an email address. Its document id is the value itself (see claim()).
 export interface UniqueValue {
@@ -147,6 +148,7 @@ export interface Collections {
   transactions: TransactionRecord;
   knowledge_sources: KnowledgeSource;
   assistants: Assistant;
+  workflows: Workflow;
   rags: RagRecord;
   rag_jobs: RagJobRecord;
   unique_values: UniqueValue;

@@ -7,7 +7,8 @@ const files = ['shared.types.ts', 'user-schema/users.types.ts', 'organization-sc
   'project-schema/projects.types.ts', 'billing-schema/billing.types.ts', 'contact-schema/contacts.types.ts',
   'inbox-schema/inbox.types.ts', 'tool-run-schema/tool_runs.types.ts',
   'notification-schema/notifications.types.ts', 'audit-schema/audit_events.types.ts',
-  'knowledge-source-schema/knowledge_sources.types.ts', 'assistant-schema/assistants.types.ts'];
+  'knowledge-source-schema/knowledge_sources.types.ts', 'assistant-schema/assistants.types.ts',
+  'workflow-schema/workflows.types.ts'];
 for (const file of files) {
   const source = await readFile(resolve(root, 'Schema_liftofsol', file), 'utf8');
   const expected = '// Generated from Schema_liftofsol; run npm run schema:sync. Do not edit by hand.\n' +

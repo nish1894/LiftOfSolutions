@@ -53,7 +53,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       projectId: project.id,
       can: (permission) => {
         if (
-          /^(agents|customers|conversations|channels|knowledge|integrations|tools|analytics|usage)\./.test(
+          /^(agents|customers|conversations|channels|knowledge|integrations|tools|analytics|usage|workflows)\./.test(
             permission,
           )
         ) {

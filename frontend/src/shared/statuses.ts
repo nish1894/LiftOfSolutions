@@ -50,6 +50,11 @@ export const RECORD_STATUS: StatusMap = {
   REJECTED: { label: "Rejected", tone: "neutral" },
 };
 
+export const WORKFLOW_STATUS: StatusMap = {
+  off: { label: "Off", tone: "neutral" },
+  on: { label: "On", tone: "success" },
+};
+
 export const AGENT_STATUS: StatusMap = {
   draft: { label: "Draft", tone: "neutral" },
   live: { label: "Published", tone: "success" },
