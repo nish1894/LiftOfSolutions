@@ -135,7 +135,9 @@ describe("routing", () => {
     expect(screen.getByRole("heading", { level: 1, name: title })).toBeInTheDocument();
     const footer = screen.getByRole("contentinfo");
     expect(footer).toHaveTextContent("contact@liftoffsol.com");
-    expect(footer).toHaveTextContent("AECS Layout, Bangalore, Karnataka 560068, India");
+    expect(footer).toHaveTextContent(
+      "AECS Layout - A Block, Kudlu Road, Singasandra, Bengaluru 560068, India",
+    );
     for (const name of ["About", "Contact", "Privacy Policy", "Terms of Service", "Data Deletion"])
       expect(within(footer).getByRole("link", { name })).toBeInTheDocument();
   });

@@ -104,6 +104,21 @@ The RAG service runs from its own repository: see `../LiftOfMain/README.md`.
 
 Newest first. Each line: what we did, why, and where the detail is.
 
+### 2026-11-07: DeepSeek dropped from the frontend; Grievance Officer named
+
+You decided not to use DeepSeek, after a review pointed out that Meta's App Review asks about data processors and
+their countries (DeepSeek stores data in China).
+
+- **Frontend:** the agent studio no longer offers DeepSeek models (`features/assistants/presets.ts`). The Privacy
+  Policy lists only OpenAI and Google (Gemini), and no longer mentions China.
+- **Address:** now matches the Meta Business details, which you confirmed are correct: "AECS Layout - A Block,
+  Kudlu Road, Singasandra, Bengaluru 560068, India" (`business.ts`, so every page and the footer change).
+- **Grievance Officer:** "Nishant K, Grievance Officer, LiftOffSol", from `business.ts`. The policies' effective
+  date is now 7 November 2026, and the sitemap's `/privacy` date matches.
+- **For later:** platform-api still accepts `deepseek-v4-flash` and `deepseek-v4-pro` (`ASSISTANT_MODELS`), and
+  `firestore/provision.ts` still creates a "DeepSeek chat" flow config for each new organization. Remove them, or
+  the API can still send data to DeepSeek if called directly.
+
 ### 2026-11-07: frontend fixes from a pre-launch check
 
 You ran a frontend check (secrets, access, errors, dependencies, monitoring) and asked to fix what's ours.

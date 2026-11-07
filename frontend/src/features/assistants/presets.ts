@@ -1,6 +1,7 @@
 /* What a new agent can start from, and the models it can run on. */
 
-/** The models platform-api accepts (ASSISTANT_MODELS in assistants.types.ts), grouped by provider. */
+/** The models an agent can use, grouped by provider: ASSISTANT_MODELS in platform-api's assistants.types.ts,
+    without DeepSeek, which we don't offer (the Privacy Policy lists only OpenAI and Google). */
 export const MODEL_GROUPS = [
   {
     label: "OpenAI",
@@ -17,14 +18,6 @@ export const MODEL_GROUPS = [
       { id: "gemini-3.5-flash", label: "Gemini 3.5 Flash" },
       { id: "gemini-3.1-pro-preview", label: "Gemini 3.1 Pro (preview)" },
       { id: "gemini-3.1-flash-lite", label: "Gemini 3.1 Flash-Lite" },
-    ],
-    canCheck: false,
-  },
-  {
-    label: "DeepSeek",
-    models: [
-      { id: "deepseek-v4-flash", label: "DeepSeek V4 Flash" },
-      { id: "deepseek-v4-pro", label: "DeepSeek V4 Pro" },
     ],
     canCheck: false,
   },

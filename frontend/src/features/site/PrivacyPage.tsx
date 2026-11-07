@@ -104,9 +104,9 @@ export default function PrivacyPage() {
       <SiteSection title="AI processing">
         <p>
           To write a reply, we send the customer's message, the recent conversation and the relevant
-          parts of the business's information to a third-party AI provider: OpenAI, Google (Gemini)
-          or DeepSeek, depending on the AI model the business chooses. They process this data only
-          to generate the reply.
+          parts of the business's information to a third-party AI provider: OpenAI or Google
+          (Gemini), depending on the AI model the business chooses. They process this data only to
+          generate the reply.
         </p>
         <p>
           We do not use your data, or your customers' data, to train AI models, including public
@@ -122,7 +122,7 @@ export default function PrivacyPage() {
             received through Meta's platform, under Meta's terms.
           </li>
           <li>
-            <strong>AI providers:</strong> OpenAI, Google (Gemini) and DeepSeek, as described above.
+            <strong>AI providers:</strong> OpenAI and Google (Gemini), as described above.
           </li>
           <li>
             <strong>Hosting and database providers:</strong> Vercel (website hosting), Google Cloud
@@ -139,8 +139,8 @@ export default function PrivacyPage() {
       <SiteSection title="Storage, location and retention">
         <p>
           Data is stored with the providers listed above, on servers that may be in India or in
-          other countries, including the United States, and China for DeepSeek when a business
-          chooses a DeepSeek model. We transfer data outside India only as the DPDP Act allows.
+          other countries, including the United States. We transfer data outside India only as the
+          DPDP Act allows.
         </p>
         <ul>
           <li>
@@ -214,7 +214,7 @@ export default function PrivacyPage() {
 
       <SiteSection title="Grievance Officer">
         <p>
-          Grievance Officer, {BUSINESS.name}
+          {BUSINESS.grievanceOfficer}, Grievance Officer, {BUSINESS.name}
           <br />
           Email: {mail}
           <br />

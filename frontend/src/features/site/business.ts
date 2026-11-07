@@ -3,11 +3,11 @@
 export const BUSINESS = {
   name: "LiftOffSol",
   type: "Sole proprietorship, registered in India (MSME/Udyam registered)",
-  address:
-    "262, Corner Green Building, 13th A Main Road, AECS Layout, Bangalore, Karnataka 560068, India",
+  address: "AECS Layout - A Block, Kudlu Road, Singasandra, Bengaluru 560068, India",
   phone: "+91 7976469859",
   phoneHref: "tel:+917976469859",
   email: "contact@liftoffsol.com",
+  grievanceOfficer: "Nishant K",
   hours: "Mon–Sat, 10am–7pm IST",
 } as const;
 
@@ -15,7 +15,7 @@ export const BUSINESS = {
 export const SITE_URL = "https://www.liftoffsol.com";
 
 // When the Privacy Policy, Terms of Service and Data Deletion pages last changed.
-export const POLICIES_UPDATED = "6 November 2026";
+export const POLICIES_UPDATED = "7 November 2026";
 
 // The public pages. Each is also written as static HTML at build time (scripts/prerender.mjs), so it reads
 // the same without JavaScript, and is listed in public/sitemap.xml.
