@@ -1,4 +1,4 @@
-import { BUSINESS } from "./business.ts";
+import { BUSINESS, OWNERSHIP } from "./business.ts";
 import ContactDetails from "./ContactDetails.tsx";
 import { SitePage, SiteSection } from "./SitePage.tsx";
 
@@ -10,9 +10,8 @@ export default function AboutPage() {
     >
       <SiteSection title="Who we are">
         <p>
-          {BUSINESS.name} is a sole proprietorship registered in India (MSME/Udyam registered),
-          based in Bengaluru. We build software that helps small and medium businesses answer their
-          customers on WhatsApp.
+          {OWNERSHIP} We're based in Bengaluru, and we build software that helps small and medium
+          businesses answer their customers on WhatsApp.
         </p>
       </SiteSection>
       <SiteSection title="What we do">

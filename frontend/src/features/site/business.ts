@@ -1,15 +1,28 @@
 /* The business details, written exactly as registered: Meta's business verification compares them with our
    registration, so every page takes them from here. */
+
+// The registered address in parts, for the homepage's structured data; BUSINESS.address joins them.
+export const ADDRESS = {
+  street: "262/1, Corner Green Building, 12th Main Road, AECS Layout - A Block, Bommanahalli",
+  city: "Bengaluru",
+  state: "Karnataka",
+  postalCode: "560068",
+  country: "India",
+} as const;
+
 export const BUSINESS = {
   name: "LiftOffSol",
-  type: "Sole proprietorship, registered in India (MSME/Udyam registered)",
-  address: "AECS Layout - A Block, Kudlu Road, Singasandra, Bengaluru 560068, India",
+  // Also the Grievance Officer.
+  proprietor: "Nishant Kumar",
+  address: `${ADDRESS.street}, ${ADDRESS.city}, ${ADDRESS.state} ${ADDRESS.postalCode}, ${ADDRESS.country}`,
   phone: "+91 7976469859",
   phoneHref: "tel:+917976469859",
   email: "contact@liftoffsol.com",
-  grievanceOfficer: "Nishant K",
   hours: "Mon–Sat, 10am–7pm IST",
 } as const;
+
+// Said word for word on the About and Privacy pages.
+export const OWNERSHIP = `${BUSINESS.name} is a sole proprietorship owned by ${BUSINESS.proprietor}, registered in India (MSME/Udyam registered).`;
 
 // The site's address; liftoffsol.com redirects here.
 export const SITE_URL = "https://www.liftoffsol.com";

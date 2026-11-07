@@ -111,9 +111,17 @@ their countries (DeepSeek stores data in China).
 
 - **Frontend:** the agent studio no longer offers DeepSeek models (`features/assistants/presets.ts`). The Privacy
   Policy lists only OpenAI and Google (Gemini), and no longer mentions China.
-- **Address:** now matches the Meta Business details, which you confirmed are correct: "AECS Layout - A Block,
-  Kudlu Road, Singasandra, Bengaluru 560068, India" (`business.ts`, so every page and the footer change).
-- **Grievance Officer:** "Nishant K, Grievance Officer, LiftOffSol", from `business.ts`. The policies' effective
+- **Address:** one official address, "262/1, Corner Green Building, 12th Main Road, AECS Layout - A Block,
+  Bommanahalli, Bengaluru, Karnataka 560068, India". `business.ts` builds it from its parts (`ADDRESS`), so the
+  footer, About, Contact, Privacy, Terms and the homepage's structured data can't drift apart. The earlier variants
+  are gone from the code.
+- **Owner and Grievance Officer:** About and Privacy say "LiftOffSol is a sole proprietorship owned by Nishant
+  Kumar, registered in India (MSME/Udyam registered)." The Privacy Policy's Grievance Officer is "Nishant Kumar,
+  LiftOffSol".
+- **Domain verification:** `index.html` now has Meta's `facebook-domain-verification` code, so it's in the static
+  `<head>` of every page.
+- **Structured data:** the homepage's `<head>` has schema.org `Organization` JSON-LD (name, URL, email, phone, logo,
+  postal address), added by `scripts/prerender.mjs`. The policies' effective
   date is now 7 November 2026, and the sitemap's `/privacy` date matches.
 - **For later:** platform-api still accepts `deepseek-v4-flash` and `deepseek-v4-pro` (`ASSISTANT_MODELS`), and
   `firestore/provision.ts` still creates a "DeepSeek chat" flow config for each new organization. Remove them, or

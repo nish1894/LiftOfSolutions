@@ -10,7 +10,7 @@ import { AuthContext, type AuthValue } from "@/features/auth/AuthContext.ts";
 import Home from "@/features/home/Home.tsx";
 
 import AboutPage from "./AboutPage.tsx";
-import { PAGES, SITE_URL, type SitePath } from "./business.ts";
+import { ADDRESS, BUSINESS, PAGES, SITE_URL, type SitePath } from "./business.ts";
 import ContactPage from "./ContactPage.tsx";
 import DataDeletionPage from "./DataDeletionPage.tsx";
 import PrivacyPage from "./PrivacyPage.tsx";
@@ -38,5 +38,24 @@ export function render(path: SitePath) {
     </AuthContext.Provider>,
   );
 }
+
+// schema.org structured data for search engines; the homepage carries it in <head>.
+export const ORGANIZATION = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: BUSINESS.name,
+  url: SITE_URL,
+  email: BUSINESS.email,
+  telephone: BUSINESS.phone,
+  logo: `${SITE_URL}/icon.png`,
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: ADDRESS.street,
+    addressLocality: ADDRESS.city,
+    addressRegion: ADDRESS.state,
+    postalCode: ADDRESS.postalCode,
+    addressCountry: "IN",
+  },
+};
 
 export { PAGES, SITE_URL };

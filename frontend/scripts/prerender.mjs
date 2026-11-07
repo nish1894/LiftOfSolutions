@@ -5,7 +5,7 @@
 import { readFile, rm, writeFile } from "node:fs/promises";
 
 const BUNDLE = "dist-prerender";
-const { PAGES, SITE_URL, render } = await import(`../${BUNDLE}/prerender.js`);
+const { ORGANIZATION, PAGES, SITE_URL, render } = await import(`../${BUNDLE}/prerender.js`);
 
 const template = await readFile("dist/index.html", "utf8");
 await writeFile("dist/shell.html", template);
@@ -33,6 +33,15 @@ for (const page of PAGES) {
       new RegExp(`<meta\\s+${attribute}\\s+content="[^"]*"\\s*/>`),
       `<meta ${attribute} content="${escape(value)}" />`,
     );
+  if (page.path === "/") {
+    // "<" escaped so the JSON can never close the script tag early.
+    const json = JSON.stringify(ORGANIZATION).replaceAll("<", "\\u003c");
+    html = replaceOnce(
+      html,
+      /<\/head>/,
+      `  <script type="application/ld+json">${json}</script>\n  </head>`,
+    );
+  }
   html = replaceOnce(html, /<div id="root"><\/div>/, `<div id="root">${render(page.path)}</div>`);
   await writeFile(`dist/${page.file}`, html);
 }

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-import { BUSINESS } from "./business.ts";
+import { BUSINESS, OWNERSHIP } from "./business.ts";
 import { SitePage, SiteSection } from "./SitePage.tsx";
 
 // How long message content and metadata are kept before they are deleted or anonymised.
@@ -14,8 +14,7 @@ export default function PrivacyPage() {
       <SiteSection title="Who we are">
         <p>
           {BUSINESS.name} (“we”, “us”) provides AI-powered customer support for businesses on the
-          WhatsApp Business Platform. {BUSINESS.name} is a sole proprietorship registered in India
-          (MSME/Udyam registered).
+          WhatsApp Business Platform. {OWNERSHIP}
         </p>
         <p>
           Address: {BUSINESS.address}
@@ -214,7 +213,7 @@ export default function PrivacyPage() {
 
       <SiteSection title="Grievance Officer">
         <p>
-          {BUSINESS.grievanceOfficer}, Grievance Officer, {BUSINESS.name}
+          Grievance Officer: {BUSINESS.proprietor}, {BUSINESS.name}
           <br />
           Email: {mail}
           <br />
